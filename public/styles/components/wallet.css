@@ -1,0 +1,127 @@
+.wallet {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--surface-color);
+}
+
+.wallet h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.wallet-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+}
+
+.wallet-balance {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    text-align: center;
+}
+
+.wallet-balance h3 {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: var(--spacing-md);
+}
+
+.balance {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.transaction-history {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+}
+
+.transaction-history h3 {
+    margin-bottom: var(--spacing-lg);
+}
+
+.transactions-list {
+    margin-top: var(--spacing-xl);
+}
+
+.transaction-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--surface-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+}
+
+.transaction-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.transaction-type {
+    font-weight: 500;
+}
+
+.transaction-date {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.transaction-amount {
+    font-weight: 600;
+}
+
+.transaction-status {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+}
+
+.status-completed {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: var(--success-color);
+}
+
+.status-pending {
+    background-color: rgba(234, 179, 8, 0.2);
+    color: var(--warning-color);
+}
+
+@media (max-width: 768px) {
+    .balance {
+        font-size: 2.5rem;
+    }
+
+    .transaction-item {
+        grid-template-columns: 1fr auto;
+        gap: var(--spacing-sm);
+    }
+
+    .transaction-icon {
+        grid-row: span 2;
+    }
+
+    .transaction-details {
+        grid-column: 2;
+    }
+
+    .transaction-amount,
+    .transaction-status {
+        grid-column: span 2;
+        justify-self: start;
+    }
+} 

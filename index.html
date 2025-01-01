@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto-Impact | Platformă de Tranzacționare Criptografică</title>
+    <link rel="stylesheet" href="public/styles/main.css">
+    <link rel="stylesheet" href="public/styles/components/navbar.css">
+    <link rel="stylesheet" href="public/styles/components/hero.css">
+    <link rel="stylesheet" href="public/styles/components/about.css">
+    <link rel="stylesheet" href="public/styles/components/compare.css">
+    <link rel="stylesheet" href="public/styles/components/news.css">
+    <link rel="stylesheet" href="public/styles/components/prices.css">
+    <link rel="stylesheet" href="public/styles/components/wallet.css">
+    <link rel="stylesheet" href="public/styles/components/trade.css">
+    <link rel="stylesheet" href="public/styles/components/footer.css">
+    <!-- Font Awesome pentru iconițe -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <h1 class="logo">Crypto-Impact</h1>
+        </div>
+        <div class="nav-center">
+            <a href="public/pages/news.html" class="nav-btn">News</a>
+            <a href="public/pages/prices.html" class="nav-btn">Prices</a>
+            <a href="public/pages/wallet.html" class="nav-btn">Wallet</a>
+            <a href="public/pages/trade.html" class="nav-btn">Trade</a>
+        </div>
+        <div class="nav-right">
+            <div class="notification-bell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count">0</span>
+            </div>
+            <button class="auth-btn login">Login</button>
+            <button class="auth-btn signup">Sign Up</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Crypto Trading Platform</h1>
+        <p class="subtitle">Buy Bitcoin, Ethereum, and 350+ cryptocurrencies</p>
+        
+        <div class="crypto-cards">
+            <div class="crypto-card bitcoin">
+                <h3>Bitcoin</h3>
+                <div class="crypto-data">
+                    <p class="price">Loading...</p>
+                    <p class="volume">Volume: Loading...</p>
+                    <p class="change">Change: Loading...</p>
+                </div>
+            </div>
+            
+            <div class="crypto-card orionix featured">
+                <h3>Orionix</h3>
+                <div class="crypto-data">
+                    <p class="price">Loading...</p>
+                    <p class="volume">Volume: Loading...</p>
+                    <p class="change">Change: Loading...</p>
+                </div>
+            </div>
+            
+            <div class="crypto-card ethereum">
+                <h3>Ethereum</h3>
+                <div class="crypto-data">
+                    <p class="price">Loading...</p>
+                    <p class="volume">Volume: Loading...</p>
+                    <p class="change">Change: Loading...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <h2>Despre Orionix</h2>
+        <div class="about-content">
+            <div class="about-text">
+                <!-- Conținutul va fi populat dinamic -->
+            </div>
+            <div class="chart-container">
+                <canvas id="orionixChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compare Section -->
+    <section class="compare" id="compare">
+        <h2>Compară Criptomonede</h2>
+        <div class="compare-container">
+            <div class="compare-card">
+                <h3>Orionix</h3>
+                <div class="crypto-data">
+                    <!-- Date Orionix -->
+                </div>
+                <canvas class="compare-chart"></canvas>
+            </div>
+            
+            <div class="vs">VS</div>
+            
+            <div class="compare-card">
+                <select id="cryptoSelect">
+                    <option value="">Selectează o criptomonedă</option>
+                </select>
+                <div class="crypto-data">
+                    <!-- Date pentru criptomoneda selectată -->
+                </div>
+                <canvas class="compare-chart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- News Section -->
+    <section class="news" id="news">
+        <h2>Știri Crypto</h2>
+        <div class="news-container">
+            <!-- Știrile vor fi populate dinamic -->
+        </div>
+        <div class="pagination">
+            <!-- Paginarea va fi adăugată dinamic -->
+        </div>
+    </section>
+
+    <!-- Prices Section -->
+    <section class="prices" id="prices">
+        <h2>Prețuri Criptomonede</h2>
+        <div class="sort-controls">
+            <button data-sort="name">Nume</button>
+            <button data-sort="volume">Volum</button>
+            <button data-sort="price">Preț</button>
+            <button data-sort="change">Modificare</button>
+        </div>
+        <div class="prices-container">
+            <!-- Lista de prețuri va fi populată dinamic -->
+        </div>
+        <div class="pagination">
+            <!-- Paginarea va fi adăugată dinamic -->
+        </div>
+    </section>
+
+    <!-- Wallet Section -->
+    <section class="wallet" id="wallet">
+        <h2>Portofelul Meu</h2>
+        <div class="wallet-balance">
+            <h3>Sold Total</h3>
+            <p class="balance">0.00 USD</p>
+        </div>
+        <div class="transaction-history">
+            <h3>Istoric Tranzacții</h3>
+            <canvas id="transactionChart"></canvas>
+            <div class="transactions-list">
+                <!-- Lista de tranzacții va fi populată dinamic -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Trade Section -->
+    <section class="trade" id="trade">
+        <h2>Tranzacționează</h2>
+        <div class="trade-container">
+            <form id="tradeForm">
+                <select name="cryptocurrency" required>
+                    <option value="">Selectează criptomoneda</option>
+                </select>
+                <input type="number" name="amount" placeholder="Suma" required>
+                <div class="payment-methods">
+                    <button type="button" class="payment-method card">
+                        <i class="fas fa-credit-card"></i> Card
+                    </button>
+                    <button type="button" class="payment-method paypal">
+                        <i class="fab fa-paypal"></i> PayPal
+                    </button>
+                </div>
+                <button type="submit" class="trade-submit">Confirmă Tranzacția</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <h3>Crypto-Impact</h3>
+            </div>
+            <div class="footer-links">
+                <a href="#about">Despre</a>
+                <a href="#news">Știri</a>
+                <a href="#prices">Prețuri</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="footer-social">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Crypto-Impact. Toate drepturile rezervate.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="public/js/main.js"></script>
+    <script src="public/js/websocket.js"></script>
+</body>
+</html>

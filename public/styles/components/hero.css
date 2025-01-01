@@ -1,0 +1,122 @@
+.hero {
+    padding: calc(var(--spacing-xl) * 3) var(--spacing-lg) var(--spacing-xl);
+    text-align: center;
+    background: linear-gradient(to bottom, var(--background-color), var(--surface-color));
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: var(--spacing-md);
+    animation: fadeIn 1s ease-out;
+}
+
+.hero .subtitle {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xl);
+    animation: fadeIn 1s ease-out 0.3s backwards;
+}
+
+.crypto-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+    width: 100%;
+    max-width: 1200px;
+    margin-top: var(--spacing-xl);
+    animation: slideUp 1s ease-out 0.6s backwards;
+}
+
+.crypto-card {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    transition: transform var(--transition-speed) ease;
+    backdrop-filter: blur(10px);
+}
+
+.crypto-card:hover {
+    transform: translateY(-5px);
+}
+
+.crypto-card.featured {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: none;
+    transform: scale(1.05);
+}
+
+.crypto-card.featured:hover {
+    transform: scale(1.05) translateY(-5px);
+}
+
+.crypto-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.crypto-data {
+    text-align: left;
+}
+
+.crypto-data .price {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+}
+
+.crypto-data .volume,
+.crypto-data .change {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.crypto-data .change.positive {
+    color: var(--success-color);
+}
+
+.crypto-data .change.negative {
+    color: var(--error-color);
+}
+
+@media (max-width: 968px) {
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero .subtitle {
+        font-size: 1.125rem;
+    }
+
+    .crypto-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .crypto-card.featured {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero {
+        padding: calc(var(--spacing-xl) * 2) var(--spacing-md) var(--spacing-lg);
+    }
+
+    .crypto-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .crypto-card.featured {
+        grid-column: auto;
+    }
+
+    .crypto-card {
+        padding: var(--spacing-md);
+    }
+} 

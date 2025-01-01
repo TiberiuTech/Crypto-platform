@@ -1,0 +1,299 @@
+.prices {
+    padding: 1rem 0;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+    min-height: 100vh;
+}
+
+.prices h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, var(--primary-color), #60a5fa);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.prices-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.crypto-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+}
+
+.crypto-table tr {
+    display: grid;
+    grid-template-columns: 50px 200px 120px 100px 120px 120px 100px 80px;
+    align-items: center;
+    padding: 0.5rem;
+    background: rgba(30, 41, 59, 0.95);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    margin-bottom: 0.35rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.crypto-table tr:hover {
+    background: rgba(44, 55, 75, 0.98);
+    transform: translateX(5px);
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.crypto-table td {
+    padding: 0.4rem;
+}
+
+.crypto-table td:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.crypto-table td:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.crypto-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.crypto-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+}
+
+.crypto-name {
+    display: flex;
+    flex-direction: column;
+}
+
+.crypto-name h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.crypto-name span {
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
+
+.price-value {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #f8fafc;
+}
+
+.price-change {
+    display: inline-flex;
+    justify-content: flex-end;
+    align-items: center;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.price-change.positive {
+    color: #22c55e;
+}
+
+.price-change.negative {
+    color: #ef4444;
+}
+
+.volume-24h, .market-cap {
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
+
+.chart-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 !important;
+}
+
+.chart-cell canvas {
+    width: 90px !important;
+    height: 25px !important;
+}
+
+.chart-preview {
+    width: 100%;
+    height: 40px;
+}
+
+.trade-btn {
+    padding: 0.35rem 0.75rem;
+    border: none;
+    border-radius: 4px;
+    background: var(--primary-color);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.trade-btn:hover {
+    background: var(--primary-color-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 50px 200px 120px 100px 120px 120px 100px 80px;
+    align-items: center;
+    margin-bottom: 0.35rem;
+    padding: 0.5rem;
+    background: rgba(30, 41, 59, 0.95);
+    border-radius: 6px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.table-header span {
+    color: #94a3b8;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.table-header span:hover {
+    color: #f8fafc;
+}
+
+.table-header span[data-sort]::after {
+    content: "↕️";
+    font-size: 0.75rem;
+    opacity: 0.5;
+    margin-left: 0.5rem;
+}
+
+.table-header span[data-sort]:hover::after {
+    opacity: 1;
+}
+
+/* Aliniere text pentru fiecare coloană */
+.table-header > span,
+.crypto-table td {
+    display: flex;
+    align-items: center;
+}
+
+.table-header > span:nth-child(1),
+.crypto-table td:nth-child(1) {
+    justify-content: center;
+}
+
+.table-header > span:nth-child(2),
+.crypto-table td:nth-child(2) {
+    justify-content: flex-start;
+}
+
+.table-header > span:nth-child(3),
+.crypto-table td:nth-child(3),
+.table-header > span:nth-child(4),
+.crypto-table td:nth-child(4),
+.table-header > span:nth-child(5),
+.crypto-table td:nth-child(5),
+.table-header > span:nth-child(6),
+.crypto-table td:nth-child(6) {
+    justify-content: flex-end;
+}
+
+.table-header > span:nth-child(7),
+.crypto-table td:nth-child(7) {
+    justify-content: center;
+}
+
+.table-header > span:nth-child(8),
+.crypto-table td:nth-child(8) {
+    justify-content: center;
+}
+
+.price-value,
+.volume-24h,
+.market-cap {
+    text-align: right;
+}
+
+.price-change {
+    display: inline-flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: auto;
+    padding: 0.25rem 0.5rem;
+}
+
+@media (max-width: 1024px) {
+    .chart-cell {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .market-cap {
+        display: none;
+    }
+    
+    .crypto-table td {
+        padding: 0.75rem;
+    }
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-xl);
+}
+
+.pagination-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--surface-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+}
+
+.pagination-btn:hover:not([disabled]) {
+    background-color: var(--primary-color);
+}
+
+.pagination-btn.active {
+    background-color: var(--primary-color);
+}
+
+.pagination-btn[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.pagination-ellipsis {
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--text-secondary);
+}
+
+.page-info {
+    padding: 0.5rem 1rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+} 

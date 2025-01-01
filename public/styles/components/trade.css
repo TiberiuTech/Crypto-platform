@@ -1,0 +1,103 @@
+.trade {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--background-color);
+}
+
+.trade h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.trade-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+}
+
+#tradeForm {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+#tradeForm select,
+#tradeForm input {
+    width: 100%;
+    padding: var(--spacing-md);
+    background-color: var(--surface-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+#tradeForm input::placeholder {
+    color: var(--text-secondary);
+}
+
+.payment-methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+.payment-method {
+    padding: var(--spacing-lg);
+    background-color: var(--surface-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.payment-method:hover {
+    background-color: var(--primary-color);
+}
+
+.payment-method.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.payment-method i {
+    font-size: 1.25rem;
+}
+
+.trade-submit {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--text-primary);
+    border: none;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform var(--transition-speed) ease;
+}
+
+.trade-submit:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 576px) {
+    .trade-container {
+        padding: 0 var(--spacing-md);
+    }
+
+    #tradeForm {
+        padding: var(--spacing-lg);
+    }
+
+    .payment-methods {
+        grid-template-columns: 1fr;
+    }
+} 

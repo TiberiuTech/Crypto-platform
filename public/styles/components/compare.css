@@ -1,0 +1,71 @@
+.compare {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--background-color);
+}
+
+.compare h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.compare-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xl);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+}
+
+.compare-card {
+    flex: 1;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    min-width: 300px;
+}
+
+.compare-card h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+#cryptoSelect {
+    width: 100%;
+    padding: var(--spacing-sm);
+    background-color: var(--surface-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    cursor: pointer;
+}
+
+.vs {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+}
+
+.compare-chart {
+    margin-top: var(--spacing-lg);
+    height: 200px;
+}
+
+@media (max-width: 768px) {
+    .compare-container {
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .compare-card {
+        width: 100%;
+    }
+
+    .vs {
+        transform: rotate(90deg);
+    }
+} 
