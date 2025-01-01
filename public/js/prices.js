@@ -69,7 +69,6 @@ const updatePagination = (currentPage, totalPages) => {
             if (!button.disabled) {
                 const newPage = parseInt(button.dataset.page);
                 changePage(newPage);
-                document.querySelector('.prices').scrollIntoView({ behavior: 'smooth' });
             }
         });
     });
@@ -79,6 +78,10 @@ const updatePagination = (currentPage, totalPages) => {
 const changePage = async (newPage) => {
     if (newPage >= 1 && newPage <= Math.ceil(CURRENCIES.length / ITEMS_PER_PAGE)) {
         currentPage = newPage;
+        document.documentElement.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
         await updatePrices();
     }
 };
@@ -220,6 +223,11 @@ const updatePrices = async () => {
         const paginatedCurrencies = paginate(availableCurrencies, currentPage);
         
         const pricesContainer = document.querySelector('.prices-container');
+        if (!pricesContainer) {
+            console.error('Nu s-a găsit containerul pentru prețuri');
+            return;
+        }
+
         pricesContainer.innerHTML = `
             <div class="table-header">
                 <span data-sort="rank">#</span>
@@ -236,6 +244,8 @@ const updatePrices = async () => {
                     ${paginatedCurrencies.map((crypto, index) => {
                         const cryptoData = data.DISPLAY[crypto][CURRENCY];
                         const rawData = data.RAW[crypto][CURRENCY];
+                        if (!cryptoData || !rawData) return '';
+                        
                         const priceChange = ((rawData.PRICE - rawData.OPENDAY) / rawData.OPENDAY) * 100;
                         const isPositive = priceChange >= 0;
                         const globalIndex = (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
@@ -248,14 +258,14 @@ const updatePrices = async () => {
                                         <img src="https://cryptocompare.com${cryptoData.IMAGEURL}" alt="${crypto}" class="crypto-icon">
                                         <div class="crypto-name">
                                             <h3>${crypto}</h3>
-                                            <span>${cryptoData.FROMSYMBOL}/${CURRENCY}</span>
+                                            <span>${crypto}/${CURRENCY}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="price-value">${formatPrice(rawData.PRICE)}</td>
                                 <td>
                                     <div class="price-change ${isPositive ? 'positive' : 'negative'}">
-                                        ${isPositive ? '+' : '-'}${Math.abs(priceChange).toFixed(1)}%
+                                        ${isPositive ? '+' : ''}${Math.abs(priceChange).toFixed(1)}%
                                     </div>
                                 </td>
                                 <td class="volume-24h">${formatNumber(rawData.VOLUME24HOUR)}</td>
@@ -271,15 +281,20 @@ const updatePrices = async () => {
                     }).join('')}
                 </tbody>
             </table>
-            ${updatePagination(currentPage, Math.ceil(availableCurrencies.length / ITEMS_PER_PAGE))}
         `;
 
         // Adăugăm graficele pentru monedele din pagina curentă
         for (const crypto of paginatedCurrencies) {
             const historicalData = await fetchHistoricalData(crypto);
-            const priceChange = ((data.RAW[crypto][CURRENCY].PRICE - data.RAW[crypto][CURRENCY].OPENDAY) / data.RAW[crypto][CURRENCY].OPENDAY) * 100;
-            createSparkline(`chart-${crypto}`, historicalData, priceChange >= 0);
+            if (historicalData && historicalData.length > 0) {
+                const priceChange = ((data.RAW[crypto][CURRENCY].PRICE - data.RAW[crypto][CURRENCY].OPENDAY) / data.RAW[crypto][CURRENCY].OPENDAY) * 100;
+                createSparkline(`chart-${crypto}`, historicalData, priceChange >= 0);
+            }
         }
+
+        // Actualizare paginare
+        const totalPages = Math.ceil(availableCurrencies.length / ITEMS_PER_PAGE);
+        updatePagination(currentPage, totalPages);
 
         // Adăugăm event listeners pentru sortare
         document.querySelectorAll('.table-header span[data-sort]').forEach(header => {
@@ -327,13 +342,15 @@ const updatePrices = async () => {
     } catch (error) {
         console.error('Eroare la actualizarea prețurilor:', error);
         const pricesContainer = document.querySelector('.prices-container');
-        pricesContainer.innerHTML = `
-            <div class="error-message">
-                <i class="fas fa-exclamation-circle"></i>
-                <p>Ne pare rău, a apărut o eroare la încărcarea prețurilor.</p>
-                <button onclick="updatePrices()" class="retry-btn">Reîncarcă</button>
-            </div>
-        `;
+        if (pricesContainer) {
+            pricesContainer.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Ne pare rău, a apărut o eroare la încărcarea prețurilor.</p>
+                    <button onclick="updatePrices()" class="retry-btn">Reîncarcă</button>
+                </div>
+            `;
+        }
     }
 };
 

@@ -1,7 +1,8 @@
 .prices {
-    padding: 1rem 0;
+    padding: var(--spacing-xl) 0;
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
     min-height: 100vh;
+    margin-top: 60px;
 }
 
 .prices h2 {
@@ -16,24 +17,24 @@
 }
 
 .prices-container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 2rem;
 }
 
 .crypto-table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 0.5rem;
+    border-spacing: 0 0.75rem;
 }
 
 .crypto-table tr {
     display: grid;
-    grid-template-columns: 50px 200px 120px 100px 120px 120px 100px 80px;
+    grid-template-columns: 50px 220px 140px 120px 140px 140px 120px 100px;
     align-items: center;
-    padding: 0.5rem;
+    padding: 1rem;
     background: rgba(30, 41, 59, 0.95);
-    border-radius: 6px;
+    border-radius: 8px;
     transition: all 0.3s ease;
     margin-bottom: 0.35rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -80,19 +81,21 @@
 
 .crypto-name h3 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #f8fafc;
+    letter-spacing: 0.5px;
 }
 
 .crypto-name span {
     color: #94a3b8;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
 }
 
 .price-value {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #f8fafc;
 }
 
@@ -114,7 +117,7 @@
 
 .volume-24h, .market-cap {
     color: #94a3b8;
-    font-size: 0.875rem;
+    font-size: 0.95rem;
 }
 
 .chart-cell {
@@ -125,8 +128,8 @@
 }
 
 .chart-cell canvas {
-    width: 90px !important;
-    height: 25px !important;
+    width: 110px !important;
+    height: 35px !important;
 }
 
 .chart-preview {
@@ -135,12 +138,12 @@
 }
 
 .trade-btn {
-    padding: 0.35rem 0.75rem;
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     background: var(--primary-color);
     color: white;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -154,23 +157,24 @@
 
 .table-header {
     display: grid;
-    grid-template-columns: 50px 200px 120px 100px 120px 120px 100px 80px;
+    grid-template-columns: 50px 220px 140px 120px 140px 140px 120px 100px;
     align-items: center;
-    margin-bottom: 0.35rem;
-    padding: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
     background: rgba(30, 41, 59, 0.95);
-    border-radius: 6px;
+    border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 .table-header span {
     color: #94a3b8;
-    font-size: 0.875rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
+    letter-spacing: 0.5px;
 }
 
 .table-header span:hover {
@@ -261,17 +265,20 @@
     display: flex;
     justify-content: center;
     gap: var(--spacing-sm);
-    margin-top: var(--spacing-xl);
+    margin-top: 1rem;
+    padding: 0.5rem 0;
 }
 
 .pagination-btn {
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: 0.6rem 1.2rem;
     background-color: var(--surface-color);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--border-radius-md);
     color: var(--text-primary);
     cursor: pointer;
     transition: all var(--transition-speed) ease;
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
 .pagination-btn:hover:not([disabled]) {

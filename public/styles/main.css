@@ -174,4 +174,14 @@ h3 {
 .nav-btn.active {
     background-color: var(--primary-color);
     color: var(--text-primary);
-} 
+}
+
+/* Importuri componente */
+@import 'components/navbar.css';
+@import 'components/hero.css';
+@import 'components/about.css';
+@import 'components/compare.css';
+@import 'components/news.css';
+@import 'components/prices.css';
+@import 'components/trade.css';
+@import 'components/wallet.css'; 

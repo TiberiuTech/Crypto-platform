@@ -1,6 +1,9 @@
 .news {
-    padding: var(--spacing-xl) 0;
-    background-color: var(--surface-color);
+    padding: var(--spacing-md) 0;
+    background-color: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    min-height: 100vh;
+    margin-top: 60px;
 }
 
 .news h2 {
@@ -18,8 +21,8 @@
 }
 
 .news-card {
-    background: rgba(15, 23, 42, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid rgba(99, 102, 241, 0.1);
     border-radius: var(--border-radius-lg);
     overflow: hidden;
     transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
@@ -29,8 +32,10 @@
 }
 
 .news-card:hover {
+    background: rgba(44, 55, 75, 0.98);
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border-color: rgba(99, 102, 241, 0.3);
 }
 
 .news-card:active {
