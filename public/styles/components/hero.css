@@ -155,7 +155,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 2.5rem;
     width: 100%;
-    max-width: 1600px;
+    max-width: 1200px;
     margin-top: var(--spacing-xl);
     padding: 0 20px;
 }
@@ -164,14 +164,17 @@
     background: rgba(17, 25, 40, 0.75);
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.125);
-    padding: 2rem;
+    padding: 1.25rem;
     position: relative;
     transition: all 0.4s ease;
     backdrop-filter: blur(10px);
-    min-height: 600px;
+    min-height: 400px;
+    max-width: 350px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: 0 auto;
 }
 
 .crypto-card:hover {
@@ -186,16 +189,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 250px;
-    margin-bottom: 2rem;
-    margin-top: 6rem;
+    height: 150px;
+    margin-bottom: 1rem;
+    margin-top: 3.5rem;
 }
 
 .crypto-icon img {
-    width: 160px;
-    height: 160px;
+    width: 80px;
+    height: 80px;
     object-fit: contain;
-    filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.25));
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -206,54 +209,79 @@
 
 .crypto-data {
     margin-top: auto;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 1.5rem;
-    border-radius: 16px;
-    transition: all 0.4s ease;
+    background: rgba(17, 25, 40, 0.95);
+    padding: 1rem;
+    border-radius: 12px;
+    width: 90%;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .crypto-data h3 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: rgba(255, 255, 255, 0.95);
-    letter-spacing: 1px;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 0.5px;
     text-align: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .crypto-stats {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.35rem;
 }
 
 .stat {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    transition: all 0.3s ease;
+    padding: 0.35rem 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    background: transparent;
+    gap: 0.5rem;
 }
 
 .stat:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateX(3px);
+    background: rgba(255, 255, 255, 0.03);
+    transform: translateX(2px);
 }
 
 .stat .label {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 1rem;
-    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 60px;
 }
 
 .stat .price,
 .stat .volume,
 .stat .change {
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'JetBrains Mono', monospace;
+    text-align: right;
+    flex: 1;
+}
+
+.stat .change.positive {
+    color: #10B981;
+}
+
+.stat .change.negative {
+    color: #EF4444;
+}
+
+.crypto-card:hover .crypto-data {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .featured {
@@ -288,38 +316,37 @@
 
 @media (max-width: 1600px) {
     .crypto-icon {
-        height: 220px;
-        margin-top: 5rem;
+        height: 140px;
+        margin-top: 3rem;
     }
     .crypto-icon img {
-        width: 140px;
-        height: 140px;
+        width: 75px;
+        height: 75px;
     }
 }
 
 @media (max-width: 1200px) {
     .crypto-icon {
-        height: 200px;
-        margin-top: 4rem;
+        height: 130px;
+        margin-top: 2.5rem;
     }
     .crypto-icon img {
-        width: 120px;
-        height: 120px;
+        width: 65px;
+        height: 65px;
     }
 }
 
 @media (max-width: 968px) {
     .crypto-cards {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 2rem;
+        gap: 1.5rem;
     }
     .crypto-icon {
-        padding-right: 1.5rem;
-        margin-top: 3rem;
+        height: 110px;
+        margin-top: 2rem;
     }
     .crypto-icon img {
-        width: 100px;
-        height: 100px;
+        width: 55px;
+        height: 55px;
     }
 }
 
@@ -328,10 +355,10 @@
         grid-template-columns: 1fr;
     }
     .crypto-icon {
-        height: 160px;
+        height: 130px;
     }
     .crypto-icon img {
-        width: 140px;
-        height: 140px;
+        width: 100px;
+        height: 100px;
     }
 } 

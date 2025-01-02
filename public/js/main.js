@@ -55,7 +55,7 @@ const updateCard = (cryptoId, data) => {
     const changeElement = card.querySelector('.change');
 
     if (priceElement) priceElement.textContent = formatPrice(data.usd);
-    if (volumeElement) volumeElement.textContent = formatPrice(data.usd_24h_vol);
+    if (volumeElement) volumeElement.textContent = formatVolume(data.usd_24h_vol);
     if (changeElement) {
         changeElement.textContent = formatPercent(data.usd_24h_change);
         changeElement.classList.toggle('positive', data.usd_24h_change > 0);
@@ -75,6 +75,32 @@ const formatPrice = (price) => {
 
 const formatPercent = (percent) => {
     return `${percent > 0 ? '+' : ''}${percent.toFixed(2)}%`;
+};
+
+function formatNumber(num) {
+    if (num >= 1e9) {
+        return (num / 1e9).toFixed(2) + 'B';
+    }
+    if (num >= 1e6) {
+        return (num / 1e6).toFixed(2) + 'M';
+    }
+    if (num >= 1e3) {
+        return (num / 1e3).toFixed(2) + 'K';
+    }
+    return num.toFixed(2);
+}
+
+const formatVolume = (volume) => {
+    if (volume >= 1e9) {
+        return `${(volume / 1e9).toFixed(1)}B`;
+    }
+    if (volume >= 1e6) {
+        return `${(volume / 1e6).toFixed(1)}M`;
+    }
+    if (volume >= 1e3) {
+        return `${(volume / 1e3).toFixed(1)}K`;
+    }
+    return volume.toFixed(1);
 };
 
 // Event Listeners
