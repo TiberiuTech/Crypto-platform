@@ -57,6 +57,7 @@ const loadNews = async (page, searchTerm = '') => {
             }
 
             if (newsData.length === 0) {
+                newsContainer.classList.add('empty');
                 newsContainer.innerHTML = `
                     <div class="no-results">
                         <i class="fas fa-search"></i>
@@ -67,6 +68,8 @@ const loadNews = async (page, searchTerm = '') => {
                 return;
             }
 
+            newsContainer.classList.remove('empty');
+
             // Paginare
             const startIndex = (page - 1) * NEWS_PER_PAGE;
             const endIndex = startIndex + NEWS_PER_PAGE;
@@ -74,20 +77,24 @@ const loadNews = async (page, searchTerm = '') => {
 
             newsContainer.innerHTML = paginatedNews.map(item => `
                 <div class="news-card" onclick="window.open('${item.url}', '_blank')">
-                    <img src="${item.imageurl}" 
-                         alt="${item.title}" 
-                         class="news-image"
-                         onerror="this.src='https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=500'">
+                    <div class="news-image-container">
+                        <img src="${item.imageurl}" 
+                             alt="${item.title}" 
+                             class="news-image"
+                             onerror="this.src='https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=500'">
+                    </div>
                     <div class="news-content">
-                        <h3 class="news-title">${item.title}</h3>
-                        <p class="news-excerpt">${item.body.slice(0, 200)}...</p>
+                        <div>
+                            <h3 class="news-title">${item.title}</h3>
+                            <p class="news-excerpt">${item.body.slice(0, 150)}...</p>
+                        </div>
                         <div class="news-meta">
                             <div class="source-date">
                                 <span class="news-source">${item.source_info.name}</span>
                                 <span class="news-date">${formatDate(item.published_on * 1000)}</span>
                             </div>
                             <div class="news-stats">
-                                <span class="categories">${item.categories}</span>
+                                <span class="categories">${item.categories.split('|')[0]}</span>
                             </div>
                         </div>
                     </div>
@@ -139,7 +146,7 @@ const updatePagination = (currentPage, totalPages) => {
                 const newPage = parseInt(button.dataset.page);
                 loadNews(newPage);
                 currentPage = newPage;
-                document.querySelector('.news').scrollIntoView({ behavior: 'smooth' });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         });
     });
@@ -177,30 +184,8 @@ const generatePageNumbers = (current, total) => {
 
 // Adaugă funcționalitate de căutare
 const setupSearch = () => {
-    const searchContainer = document.createElement('div');
-    searchContainer.className = 'search-container';
-    
-    // Adăugăm iconița explicit
-    const searchIcon = document.createElement('i');
-    searchIcon.className = 'fas fa-search search-icon';
-    
-    const searchInput = document.createElement('input');
-    searchInput.type = 'text';
-    searchInput.placeholder = 'Caută știri crypto...';
-    searchInput.className = 'news-search';
-    
-    searchContainer.appendChild(searchIcon);
-    searchContainer.appendChild(searchInput);
-    
-    // Inserăm containerul de căutare în poziția corectă
-    const newsSection = document.querySelector('.news');
-    const newsTitle = newsSection.querySelector('h2');
-    
-    if (newsTitle) {
-        newsSection.insertBefore(searchContainer, newsTitle.nextSibling);
-    } else {
-        newsSection.insertBefore(searchContainer, newsSection.firstChild);
-    }
+    const searchInput = document.querySelector('.news-search');
+    if (!searchInput) return;
 
     let searchTimeout;
     searchInput.addEventListener('input', (e) => {
@@ -214,25 +199,13 @@ const setupSearch = () => {
 
 // Funcție pentru setarea filtrelor
 const setupFilters = () => {
-    const filterContainer = document.createElement('div');
-    filterContainer.className = 'filter-buttons';
-    
-    filterContainer.innerHTML = FILTER_CATEGORIES.map(category => `
-        <button class="filter-btn ${category.id === 'all' ? 'active' : ''}" data-filter="${category.id}">
-            <i class="${category.icon}"></i>
-            ${category.label}
-        </button>
-    `).join('');
-    
-    // Inserăm containerul de filtre după search
-    const searchContainer = document.querySelector('.search-container');
-    searchContainer.after(filterContainer);
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    if (!filterButtons.length) return;
 
-    // Adăugăm event listeners pentru filtre
-    filterContainer.querySelectorAll('.filter-btn').forEach(btn => {
+    filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             // Actualizăm stilurile butoanelor
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            filterButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
             // Actualizăm filtrul activ și reîncărcăm știrile
@@ -243,8 +216,53 @@ const setupFilters = () => {
     });
 };
 
+// Funcție pentru inițializarea structurii HTML
+const initializeNewsSection = () => {
+    const newsSection = document.querySelector('.news');
+    if (!newsSection) return;
+
+    // Verificăm dacă elementele necesare există, dacă nu, le creăm
+    if (!newsSection.querySelector('.news-container')) {
+        const newsContainer = document.createElement('div');
+        newsContainer.className = 'news-container';
+        newsSection.appendChild(newsContainer);
+    }
+
+    if (!newsSection.querySelector('.search-container')) {
+        const searchContainer = document.createElement('div');
+        searchContainer.className = 'search-container';
+        searchContainer.innerHTML = `
+            <div class="search-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <input type="text" class="news-search" placeholder="Caută știri crypto...">
+        `;
+        newsSection.insertBefore(searchContainer, newsSection.firstChild);
+    }
+
+    if (!newsSection.querySelector('.filter-buttons')) {
+        const filterContainer = document.createElement('div');
+        filterContainer.className = 'filter-buttons';
+        filterContainer.innerHTML = FILTER_CATEGORIES.map(category => `
+            <button class="filter-btn ${category.id === 'all' ? 'active' : ''}" data-filter="${category.id}">
+                <i class="${category.icon}"></i>
+                ${category.label}
+            </button>
+        `).join('');
+        const searchContainer = newsSection.querySelector('.search-container');
+        searchContainer.after(filterContainer);
+    }
+
+    if (!newsSection.querySelector('.pagination')) {
+        const pagination = document.createElement('div');
+        pagination.className = 'pagination';
+        newsSection.appendChild(pagination);
+    }
+};
+
 // Inițializare la încărcarea paginii
 document.addEventListener('DOMContentLoaded', () => {
+    initializeNewsSection();
     loadNews(currentPage);
     setupSearch();
     setupFilters();
