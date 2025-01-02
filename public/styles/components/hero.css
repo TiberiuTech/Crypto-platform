@@ -7,116 +7,331 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 }
 
 .hero h1 {
-    font-size: 3.5rem;
+    font-size: 4rem;
     margin-bottom: var(--spacing-md);
-    animation: fadeIn 1s ease-out;
+    background: linear-gradient(
+        to right,
+        #fff 20%,
+        #a5b4fc 30%,
+        #3b82f6 70%,
+        #fff 80%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: textShine 4s ease-in-out infinite alternate;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+    letter-spacing: 2px;
+    font-weight: 800;
 }
 
 .hero .subtitle {
-    font-size: 1.25rem;
-    color: var(--text-secondary);
+    font-size: 1.35rem;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.8) 25%,
+        rgba(165, 180, 252, 0.8) 50%,
+        rgba(59, 130, 246, 0.8) 75%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: subtitleGradient 8s ease infinite;
+    letter-spacing: 1.5px;
+    font-weight: 500;
     margin-bottom: var(--spacing-xl);
-    animation: fadeIn 1s ease-out 0.3s backwards;
+    padding: 0.5rem 1rem;
+    position: relative;
+    display: inline-block;
+}
+
+.hero .subtitle::before,
+.hero .subtitle::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.hero .subtitle::before {
+    top: 0;
+    left: 0;
+    border-top: 2px solid #3b82f6;
+    border-left: 2px solid #3b82f6;
+    animation: cornerAnimateTopLeft 4s ease-in-out infinite;
+}
+
+.hero .subtitle::after {
+    bottom: 0;
+    right: 0;
+    border-bottom: 2px solid #8b5cf6;
+    border-right: 2px solid #8b5cf6;
+    animation: cornerAnimateBottomRight 4s ease-in-out infinite;
+}
+
+@keyframes subtitleGradient {
+    0% {
+        background-position: 0% 50%;
+        transform: scale(1);
+    }
+    50% {
+        background-position: 100% 50%;
+        transform: scale(1.02);
+    }
+    100% {
+        background-position: 0% 50%;
+        transform: scale(1);
+    }
+}
+
+@keyframes cornerAnimateTopLeft {
+    0%, 100% {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-5px, -5px);
+        opacity: 0.5;
+    }
+}
+
+@keyframes cornerAnimateBottomRight {
+    0%, 100% {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(5px, 5px);
+        opacity: 0.5;
+    }
+}
+
+@keyframes textShine {
+    0% {
+        background-position: 0% 50%;
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        background-position: 200% 50%;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes expandLine {
+    0% {
+        width: 0;
+        opacity: 0;
+    }
+    100% {
+        width: 200px;
+        opacity: 1;
+    }
 }
 
 .crypto-cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-lg);
+    gap: 2.5rem;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1600px;
     margin-top: var(--spacing-xl);
-    animation: slideUp 1s ease-out 0.6s backwards;
+    padding: 0 20px;
 }
 
 .crypto-card {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-lg);
-    transition: transform var(--transition-speed) ease;
+    background: rgba(17, 25, 40, 0.75);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.125);
+    padding: 2rem;
+    position: relative;
+    transition: all 0.4s ease;
     backdrop-filter: blur(10px);
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .crypto-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(17, 25, 40, 0.85);
 }
 
-.crypto-card.featured {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    border: none;
-    transform: scale(1.05);
+.crypto-icon {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 250px;
+    margin-bottom: 2rem;
+    margin-top: 6rem;
 }
 
-.crypto-card.featured:hover {
-    transform: scale(1.05) translateY(-5px);
+.crypto-icon img {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.25));
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.crypto-card h3 {
-    font-size: 1.5rem;
-    margin-bottom: var(--spacing-md);
+.crypto-card:hover .crypto-icon img {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.4));
 }
 
 .crypto-data {
-    text-align: left;
+    margin-top: auto;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1.5rem;
+    border-radius: 16px;
+    transition: all 0.4s ease;
 }
 
-.crypto-data .price {
-    font-size: 1.75rem;
+.crypto-data h3 {
+    font-size: 2rem;
     font-weight: 700;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 1px;
+    text-align: center;
 }
 
-.crypto-data .volume,
-.crypto-data .change {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    margin-bottom: var(--spacing-xs);
+.crypto-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
-.crypto-data .change.positive {
-    color: var(--success-color);
+.stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.3s ease;
 }
 
-.crypto-data .change.negative {
-    color: var(--error-color);
+.stat:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(3px);
+}
+
+.stat .label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.stat .price,
+.stat .volume,
+.stat .change {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.featured {
+    position: relative;
+    overflow: hidden;
+}
+
+.featured::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+    animation: gradient 3s linear infinite;
+    background-size: 200% 100%;
+    z-index: 1;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@media (max-width: 1600px) {
+    .crypto-icon {
+        height: 220px;
+        margin-top: 5rem;
+    }
+    .crypto-icon img {
+        width: 140px;
+        height: 140px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .crypto-icon {
+        height: 200px;
+        margin-top: 4rem;
+    }
+    .crypto-icon img {
+        width: 120px;
+        height: 120px;
+    }
 }
 
 @media (max-width: 968px) {
-    .hero h1 {
-        font-size: 2.5rem;
-    }
-
-    .hero .subtitle {
-        font-size: 1.125rem;
-    }
-
     .crypto-cards {
         grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
     }
-
-    .crypto-card.featured {
-        grid-column: span 2;
+    .crypto-icon {
+        padding-right: 1.5rem;
+        margin-top: 3rem;
+    }
+    .crypto-icon img {
+        width: 100px;
+        height: 100px;
     }
 }
 
 @media (max-width: 576px) {
-    .hero {
-        padding: calc(var(--spacing-xl) * 2) var(--spacing-md) var(--spacing-lg);
-    }
-
     .crypto-cards {
         grid-template-columns: 1fr;
     }
-
-    .crypto-card.featured {
-        grid-column: auto;
+    .crypto-icon {
+        height: 160px;
     }
-
-    .crypto-card {
-        padding: var(--spacing-md);
+    .crypto-icon img {
+        width: 140px;
+        height: 140px;
     }
 } 
