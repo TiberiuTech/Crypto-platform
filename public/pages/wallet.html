@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/components/navbar.css">
     <link rel="stylesheet" href="../styles/components/wallet.css">
-    <link rel="stylesheet" href="../styles/components/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -39,55 +38,135 @@
             <div class="wallet-balance">
                 <h3>Sold Total</h3>
                 <p class="balance">0.00 USD</p>
+                <div class="balance-change">
+                    <span class="change positive">+5.23%</span>
+                    <span class="period">ultimele 24h</span>
+                </div>
+                <div class="wallet-actions">
+                    <button class="action-btn deposit" id="depositBtn">
+                        <i class="fas fa-arrow-down"></i> Depunere
+                    </button>
+                    <button class="action-btn withdraw" id="withdrawBtn">
+                        <i class="fas fa-arrow-up"></i> Retragere
+                    </button>
+                </div>
                 <div class="balance-chart">
                     <canvas id="balanceChart"></canvas>
                 </div>
             </div>
             
             <div class="wallet-assets">
-                <h3>Active</h3>
+                <div class="section-header">
+                    <h3>Active <span class="asset-count">(0)</span></h3>
+                    <div class="asset-filters">
+                        <button class="filter-btn active">Toate</button>
+                        <button class="filter-btn">Crypto</button>
+                        <button class="filter-btn">Tokens</button>
+                    </div>
+                </div>
                 <div class="assets-list">
                     <!-- Lista de active va fi populată dinamic -->
                 </div>
             </div>
 
             <div class="transaction-history">
-                <h3>Istoric Tranzacții</h3>
+                <div class="section-header">
+                    <h3>Istoric Tranzacții</h3>
+                    <div class="transaction-filters">
+                        <button class="filter-btn active">Toate</button>
+                        <button class="filter-btn">Depuneri</button>
+                        <button class="filter-btn">Retrageri</button>
+                    </div>
+                </div>
                 <div class="transactions-list">
                     <!-- Lista de tranzacții va fi populată dinamic -->
-                </div>
-                <div class="transaction-chart">
-                    <canvas id="transactionChart"></canvas>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-logo">
-                <h3>Crypto-Impact</h3>
+    <!-- Modal Depunere -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Depunere Crypto</h3>
+                <button class="close-btn" id="closeDepositModal">&times;</button>
             </div>
-            <div class="footer-links">
-                <a href="../../index.html#about">Despre</a>
-                <a href="news.html">Știri</a>
-                <a href="prices.html">Prețuri</a>
-                <a href="#contact">Contact</a>
-            </div>
-            <div class="footer-social">
-                <a href="#"><i class="fab fa-facebook"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-linkedin"></i></a>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="depositCrypto">Selectează Criptomoneda</label>
+                    <select id="depositCrypto">
+                        <option value="bitcoin">Bitcoin (BTC)</option>
+                        <option value="ethereum">Ethereum (ETH)</option>
+                        <option value="orionix">Orionix (ORX)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="depositAddress">Adresa de Depunere</label>
+                    <div class="address-input">
+                        <input type="text" id="depositAddress" readonly>
+                        <button id="copyAddressBtn">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="qr-code" id="qrCode"></div>
+                <div class="deposit-info">
+                    <p>Trimite doar <span id="selectedCrypto">Bitcoin</span> la această adresă.</p>
+                    <p>Depunerea va fi procesată după 6 confirmări în rețea.</p>
+                </div>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 Crypto-Impact. Toate drepturile rezervate.</p>
-        </div>
-    </footer>
+    </div>
 
+    <!-- Modal Retragere -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Retragere Crypto</h3>
+                <button class="close-btn" id="closeWithdrawModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="withdrawForm">
+                    <div class="form-group">
+                        <label for="withdrawCrypto">Selectează Criptomoneda</label>
+                        <select id="withdrawCrypto" required>
+                            <option value="bitcoin">Bitcoin (BTC)</option>
+                            <option value="ethereum">Ethereum (ETH)</option>
+                            <option value="orionix">Orionix (ORX)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="withdrawAmount">Sumă</label>
+                        <div class="amount-input">
+                            <input type="number" id="withdrawAmount" required step="0.00000001">
+                            <button type="button" class="max-btn">MAX</button>
+                        </div>
+                        <p class="available-balance">Disponibil: <span id="availableBalance">0.00</span></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="withdrawAddress">Adresă</label>
+                        <input type="text" id="withdrawAddress" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="withdrawNetwork">Rețea</label>
+                        <select id="withdrawNetwork" required>
+                            <option value="native">Native</option>
+                            <option value="erc20">ERC20</option>
+                            <option value="bep20">BEP20</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="submit-btn">Confirmă Retragerea</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="../js/wallet.js"></script>
-    <script src="../js/websocket.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script type="module" src="../js/services/apiService.js"></script>
+    <script type="module" src="../js/services/walletService.js"></script>
+    <script type="module" src="../js/wallet.js"></script>
 </body>
 </html> 
