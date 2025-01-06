@@ -522,46 +522,72 @@ function initializeCarousel() {
     const container = document.querySelector('.movers-container');
     if (!container) return;
     
-    const scrollAmount = 300;
-    let autoScrollInterval;
-    let isHovered = false;
-    
-    // Funcție pentru scroll automat
-    const startAutoScroll = () => {
-        autoScrollInterval = setInterval(() => {
-            if (!isHovered) {
-                const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth;
-                if (isAtEnd) {
-                    container.scrollTo({
-                        left: 0,
-                        behavior: 'smooth'
-                    });
-                } else {
-                    container.scrollBy({
-                        left: scrollAmount,
-                        behavior: 'smooth'
-                    });
-                }
-            }
-        }, 3000); // Scroll la fiecare 3 secunde
+    // Duplicăm elementele pentru scroll infinit
+    const cloneItems = () => {
+        const items = container.children;
+        const originalLength = items.length;
+        
+        // Adăugăm clone la început și la sfârșit
+        for (let i = 0; i < originalLength; i++) {
+            const cloneEnd = items[i].cloneNode(true);
+            container.appendChild(cloneEnd);
+            const cloneStart = items[i].cloneNode(true);
+            container.insertBefore(cloneStart, items[0]);
+        }
     };
 
-    // Oprim scroll-ul automat când mouse-ul este deasupra caruselului
+    cloneItems();
+    
+    let isScrolling = false;
+    let startX = container.scrollLeft;
+    const cardWidth = 316; // width + gap
+    const originalItems = container.children.length / 3;
+    
+    const scrollNext = () => {
+        if (isScrolling) return;
+        isScrolling = true;
+        
+        const currentScroll = container.scrollLeft;
+        const targetScroll = currentScroll + cardWidth;
+        
+        container.scrollTo({
+            left: targetScroll,
+            behavior: 'smooth'
+        });
+        
+        setTimeout(() => {
+            isScrolling = false;
+        }, 500);
+    };
+    
+    // Verificăm și resetăm poziția pentru scroll infinit
+    const checkScroll = () => {
+        const totalWidth = cardWidth * originalItems;
+        if (container.scrollLeft >= totalWidth * 2) {
+            container.scrollLeft = totalWidth;
+        } else if (container.scrollLeft <= 0) {
+            container.scrollLeft = totalWidth;
+        }
+    };
+    
+    container.addEventListener('scroll', () => {
+        requestAnimationFrame(checkScroll);
+    });
+    
+    // Scroll automat
+    let autoScrollInterval = setInterval(scrollNext, 3000);
+    
+    // Oprim scroll-ul automat când mouse-ul este deasupra
     container.addEventListener('mouseenter', () => {
-        isHovered = true;
-    });
-
-    container.addEventListener('mouseleave', () => {
-        isHovered = false;
-    });
-
-    // Pornim scroll-ul automat
-    startAutoScroll();
-
-    // Curățăm intervalul când pagina este închisă sau schimbată
-    window.addEventListener('beforeunload', () => {
         clearInterval(autoScrollInterval);
     });
+    
+    container.addEventListener('mouseleave', () => {
+        autoScrollInterval = setInterval(scrollNext, 3000);
+    });
+    
+    // Setăm poziția inițială
+    container.scrollLeft = cardWidth * originalItems;
 }
 
 async function updateTopMovers() {
