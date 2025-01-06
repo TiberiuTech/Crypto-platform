@@ -12,6 +12,7 @@ const CURRENCY = 'USD';
 const ITEMS_PER_PAGE = 15;
 let currentPage = 1;
 let charts = {};
+let moverCharts = {};
 
 // Funcție pentru paginare
 const paginate = (items, page = 1) => {
@@ -118,6 +119,7 @@ const createSparkline = (containerId, data, isPositive) => {
     // Distruge graficul existent dacă există
     if (charts[containerId]) {
         charts[containerId].destroy();
+        delete charts[containerId];
     }
     
     // Calculăm dacă trendul general este pozitiv sau negativ
@@ -130,7 +132,7 @@ const createSparkline = (containerId, data, isPositive) => {
     gradient.addColorStop(0, trendIsPositive ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)');
     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
-    charts[containerId] = new Chart(ctx, {
+    const newChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: Array(data.length).fill(''),
@@ -184,6 +186,9 @@ const createSparkline = (containerId, data, isPositive) => {
             }
         }
     });
+
+    // Salvăm noul grafic în obiectul charts
+    charts[containerId] = newChart;
 };
 
 // Funcție pentru formatarea numerelor mari
@@ -219,6 +224,15 @@ const formatPrice = (price) => {
 // Funcție pentru actualizarea prețurilor
 const updatePrices = async () => {
     try {
+        // Mai întâi, distrugem toate graficele existente
+        for (const chartId in charts) {
+            if (charts[chartId]) {
+                charts[chartId].destroy();
+                delete charts[chartId];
+            }
+        }
+        charts = {};
+
         const response = await fetch(`${CRYPTO_REST_URL}?fsyms=${CURRENCIES.join(',')}&tsyms=${CURRENCY}`);
         const data = await response.json();
         
@@ -279,7 +293,7 @@ const updatePrices = async () => {
                                 <td class="volume-24h">${formatNumber(rawData.VOLUME24HOUR)}</td>
                                 <td class="market-cap">${formatNumber(rawData.MKTCAP)}</td>
                                 <td class="chart-cell">
-                                    <canvas id="chart-${crypto}" height="40"></canvas>
+                                    <canvas id="chart-${crypto}-sparkline" height="40"></canvas>
                                 </td>
                                 <td>
                                     <button class="trade-btn">Trade</button>
@@ -299,7 +313,7 @@ const updatePrices = async () => {
             const historicalData = await fetchHistoricalData(crypto);
             if (historicalData && historicalData.length > 0) {
                 const priceChange = ((data.RAW[crypto][CURRENCY].PRICE - data.RAW[crypto][CURRENCY].OPENDAY) / data.RAW[crypto][CURRENCY].OPENDAY) * 100;
-                createSparkline(`chart-${crypto}`, historicalData, priceChange >= 0);
+                createSparkline(`chart-${crypto}-sparkline`, historicalData, priceChange >= 0);
             }
         }
 
@@ -368,8 +382,234 @@ const updatePrices = async () => {
 // Expunem funcția changePage global pentru a putea fi folosită de butoanele de paginare
 window.changePage = changePage;
 
+// Top Movers functionality
+async function fetchTopMovers() {
+    try {
+        const response = await fetch('https://min-api.cryptocompare.com/data/top/totalvolfull?limit=10&tsym=USD');
+        const data = await response.json();
+        
+        // Obținem datele istorice pentru fiecare monedă
+        const moversWithHistory = await Promise.all(
+            data.Data.map(async item => {
+                const historyResponse = await fetch(
+                    `https://min-api.cryptocompare.com/data/v2/histohour?fsym=${item.CoinInfo.Name}&tsym=USD&limit=24`
+                );
+                const historyData = await historyResponse.json();
+                const priceHistory = historyData.Data?.Data?.map(point => point.close) || [];
+                
+                return {
+                    name: item.CoinInfo.FullName,
+                    symbol: item.CoinInfo.Name,
+                    price: item.RAW?.USD?.PRICE || 0,
+                    change24h: item.RAW?.USD?.CHANGEPCT24HOUR || 0,
+                    imageUrl: `https://www.cryptocompare.com${item.CoinInfo.ImageUrl}`,
+                    priceHistory
+                };
+            })
+        );
+        
+        return moversWithHistory;
+    } catch (error) {
+        console.error('Error fetching top movers:', error);
+        return [];
+    }
+}
+
+function createMoverCard(coin) {
+    const card = document.createElement('div');
+    card.className = 'mover-card';
+    
+    const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
+    const changeSign = coin.change24h >= 0 ? '+' : '';
+    
+    card.innerHTML = `
+        <div class="mover-info-container">
+            <div class="mover-header">
+                <img src="${coin.imageUrl}" alt="${coin.name}" class="mover-icon">
+                <div class="mover-info">
+                    <h4 class="mover-name">${coin.name}</h4>
+                    <span class="mover-symbol">${coin.symbol}</span>
+                </div>
+            </div>
+            <div class="mover-price-container">
+                <div class="mover-price">$${coin.price.toFixed(coin.price < 1 ? 6 : 2)}</div>
+                <div class="mover-change ${changeClass}">
+                    ${changeSign}${coin.change24h.toFixed(2)}%
+                </div>
+            </div>
+        </div>
+        <div class="mover-chart">
+            <canvas id="chart-${coin.symbol}"></canvas>
+        </div>
+    `;
+    
+    return card;
+}
+
+function createMoverChart(symbol, priceHistory, isPositive) {
+    const chartId = `chart-${symbol}`;
+    // Distrugem graficul existent dacă există
+    if (moverCharts[chartId]) {
+        moverCharts[chartId].destroy();
+    }
+
+    const ctx = document.getElementById(chartId).getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 80);
+    
+    const color = isPositive ? 'rgb(22, 199, 132)' : 'rgb(234, 57, 67)';
+    gradient.addColorStop(0, isPositive ? 'rgba(22, 199, 132, 0.2)' : 'rgba(234, 57, 67, 0.2)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array(priceHistory.length).fill(''),
+            datasets: [{
+                data: priceHistory,
+                borderColor: color,
+                borderWidth: 1.5,
+                fill: true,
+                backgroundColor: gradient,
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            },
+            scales: {
+                x: { 
+                    display: false,
+                    grid: {
+                        display: false
+                    }
+                },
+                y: { 
+                    display: false,
+                    grid: {
+                        display: false
+                    },
+                    min: Math.min(...priceHistory) * 0.999,
+                    max: Math.max(...priceHistory) * 1.001
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+
+    // Salvăm instanța graficului
+    moverCharts[chartId] = chart;
+    return chart;
+}
+
+function initializeCarousel() {
+    const container = document.querySelector('.movers-container');
+    if (!container) return;
+    
+    const scrollAmount = 300;
+    let autoScrollInterval;
+    let isHovered = false;
+    
+    // Funcție pentru scroll automat
+    const startAutoScroll = () => {
+        autoScrollInterval = setInterval(() => {
+            if (!isHovered) {
+                const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth;
+                if (isAtEnd) {
+                    container.scrollTo({
+                        left: 0,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    container.scrollBy({
+                        left: scrollAmount,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }, 3000); // Scroll la fiecare 3 secunde
+    };
+
+    // Oprim scroll-ul automat când mouse-ul este deasupra caruselului
+    container.addEventListener('mouseenter', () => {
+        isHovered = true;
+    });
+
+    container.addEventListener('mouseleave', () => {
+        isHovered = false;
+    });
+
+    // Pornim scroll-ul automat
+    startAutoScroll();
+
+    // Curățăm intervalul când pagina este închisă sau schimbată
+    window.addEventListener('beforeunload', () => {
+        clearInterval(autoScrollInterval);
+    });
+}
+
+async function updateTopMovers() {
+    const container = document.querySelector('.movers-container');
+    if (!container) return;
+    
+    // Distrugem toate graficele existente
+    Object.values(moverCharts).forEach(chart => chart.destroy());
+    moverCharts = {};
+    
+    const movers = await fetchTopMovers();
+    container.innerHTML = '';
+    
+    movers.forEach(coin => {
+        const card = createMoverCard(coin);
+        container.appendChild(card);
+        
+        // Creăm graficul după ce cardul este adăugat în DOM
+        if (coin.priceHistory && coin.priceHistory.length > 0) {
+            createMoverChart(coin.symbol, coin.priceHistory, coin.change24h >= 0);
+        }
+    });
+}
+
+// Initialize Top Movers
+document.addEventListener('DOMContentLoaded', () => {
+    initializeCarousel();
+    updateTopMovers();
+    // Update every 30 seconds
+    setInterval(updateTopMovers, 30000);
+});
+
 // Inițializare
 document.addEventListener('DOMContentLoaded', () => {
     updatePrices();
     setInterval(updatePrices, 30000);
+});
+
+// Curățăm graficele când pagina este închisă
+window.addEventListener('beforeunload', () => {
+    Object.values(charts).forEach(chart => {
+        if (chart && typeof chart.destroy === 'function') {
+            chart.destroy();
+        }
+    });
+    Object.values(moverCharts).forEach(chart => {
+        if (chart && typeof chart.destroy === 'function') {
+            chart.destroy();
+        }
+    });
 }); 
