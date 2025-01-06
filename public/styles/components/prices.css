@@ -494,18 +494,8 @@ body {
     padding: 0;
     margin: 0;
     width: 100%;
-    clip-path: inset(0 0 0 0);
-}
-
-.movers-carousel::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 30px;
-    height: 100%;
-    background: rgb(13, 17, 28);
-    z-index: 10;
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 30px), transparent calc(100% - 30px));
+    mask-image: linear-gradient(to right, black calc(100% - 30px), transparent calc(100% - 30px));
 }
 
 .movers-container {
