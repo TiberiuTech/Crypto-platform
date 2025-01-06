@@ -1,370 +1,427 @@
-import { apiService } from './services/apiService.js';
-import { tradeService } from './services/tradeService.js';
-import { walletService } from './services/walletService.js';
+import { ApiService } from './services/apiService.js';
+import { WalletService } from './services/walletService.js';
 
-class TradePage {
+class TradingPage {
     constructor() {
-        this.currentPair = 'BTC/USD';
-        this.orderType = 'market';
-        this.tradeType = 'buy';
+        this.apiService = new ApiService();
+        this.walletService = new WalletService();
+        
+        // Elemente DOM
+        this.pairSelector = document.querySelector('.pair-selector');
+        this.currentPrice = document.querySelector('.current-price');
+        this.priceChange = document.querySelector('.price-change');
+        this.timeframeButtons = document.querySelectorAll('.timeframe-btn');
+        this.orderTypeButtons = document.querySelectorAll('.order-type-btn');
+        this.tradeTypeButtons = document.querySelectorAll('.trade-type-btn');
+        this.priceInput = document.getElementById('priceInput');
+        this.amountInput = document.getElementById('amountInput');
+        this.totalInput = document.getElementById('totalInput');
+        this.availableBalance = document.getElementById('availableBalance');
+        this.submitButton = document.getElementById('submitTrade');
+        this.quickAmountButtons = document.querySelectorAll('.quick-amount-btn');
+        
+        // State
+        this.selectedPair = this.getInitialPair();
+        this.selectedTimeframe = '1H';
+        this.selectedOrderType = 'market';
+        this.selectedTradeType = 'buy';
+        this.currentPriceValue = 0;
         this.chart = null;
-        this.depthChart = null;
-        this.candleSeries = null;
-        this.orderbook = {
-            asks: [],
-            bids: []
-        };
-        this.trades = [];
-        this.initializeElements();
+        
         this.initializeEventListeners();
-        this.initializeCharts();
-        this.startDataStream();
+        this.initializeChart();
+        this.startPriceUpdates();
     }
-
-    initializeElements() {
-        // Selectoare pentru elemente UI
-        this.elements = {
-            tradingPair: document.getElementById('tradingPair'),
-            currentPrice: document.querySelector('.current-price'),
-            priceChange: document.querySelector('.price-change'),
-            timeframeButtons: document.querySelectorAll('.timeframe-btn'),
-            chartTypeButtons: document.querySelectorAll('.chart-type-btn'),
-            tradingChart: document.getElementById('tradingChart'),
-            orderbook: document.querySelector('.orderbook-content'),
-            tradesList: document.querySelector('.trades-list'),
-            tabButtons: document.querySelectorAll('.tab-btn'),
-            tradeTypeButtons: document.querySelectorAll('.toggle-btn'),
-            priceInput: document.getElementById('price'),
-            amountInput: document.getElementById('amount'),
-            amountButtons: document.querySelectorAll('.amount-buttons button'),
-            totalValue: document.querySelector('.total-value'),
-            balanceAmount: document.querySelector('.balance-amount'),
-            tradeSubmit: document.querySelector('.trade-submit'),
-            ordersList: document.querySelector('.orders-list')
-        };
+    
+    getInitialPair() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const coin = urlParams.get('coin');
+        if (coin) {
+            // Verificăm dacă perechea există în selector
+            const pair = `${coin}/USD`;
+            const exists = Array.from(this.pairSelector.options).some(option => option.value === pair);
+            if (exists) {
+                this.pairSelector.value = pair;
+                return pair;
+            }
+        }
+        return 'BTC/USD';
     }
-
+    
     initializeEventListeners() {
-        // Event listeners pentru controale
-        this.elements.tradingPair.addEventListener('change', () => this.handlePairChange());
-        this.elements.timeframeButtons.forEach(btn => {
-            btn.addEventListener('click', () => this.handleTimeframeChange(btn));
+        // Pair selection
+        this.pairSelector.addEventListener('change', (e) => {
+            this.selectedPair = e.target.value;
+            this.updatePrice();
+            this.updateChart();
+            
+            // Actualizăm URL-ul
+            const url = new URL(window.location);
+            url.searchParams.set('coin', this.selectedPair.split('/')[0]);
+            window.history.pushState({}, '', url);
         });
-        this.elements.chartTypeButtons.forEach(btn => {
-            btn.addEventListener('click', () => this.handleChartTypeChange(btn));
+        
+        // Timeframe selection
+        this.timeframeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                this.timeframeButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                this.selectedTimeframe = button.dataset.timeframe;
+                this.updateChart();
+            });
         });
-        this.elements.tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => this.handleTabChange(btn));
+        
+        // Order type selection
+        this.orderTypeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                this.orderTypeButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                this.selectedOrderType = button.dataset.type;
+                this.updateForm();
+            });
         });
-        this.elements.tradeTypeButtons.forEach(btn => {
-            btn.addEventListener('click', () => this.handleTradeTypeChange(btn));
+        
+        // Trade type selection
+        this.tradeTypeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                this.tradeTypeButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                this.selectedTradeType = button.dataset.type;
+                this.updateSubmitButton();
+            });
         });
-        this.elements.amountButtons.forEach(btn => {
-            btn.addEventListener('click', () => this.handleAmountButtonClick(btn));
+        
+        // Quick amount buttons
+        this.quickAmountButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const percentage = parseInt(button.dataset.percentage);
+                const maxAmount = this.calculateMaxAmount();
+                this.amountInput.value = (maxAmount * percentage / 100).toFixed(8);
+                this.updateTotal();
+            });
         });
-        this.elements.priceInput.addEventListener('input', () => this.updateTotalValue());
-        this.elements.amountInput.addEventListener('input', () => this.updateTotalValue());
-        this.elements.tradeSubmit.addEventListener('click', (e) => this.handleTradeSubmit(e));
+        
+        // Input handlers
+        this.priceInput.addEventListener('input', () => this.updateTotal());
+        this.amountInput.addEventListener('input', () => this.updateTotal());
+        
+        // Submit handler
+        this.submitButton.addEventListener('click', () => this.submitTrade());
     }
+    
+    async initializeChart() {
+        const ctx = document.getElementById('tradingChart').getContext('2d');
+        
+        // Setăm culori pentru lumânări
+        const candleColor = {
+            up: {
+                border: '#26a69a',
+                fill: '#26a69a'
+            },
+            down: {
+                border: '#ef5350',
+                fill: '#ef5350'
+            }
+        };
 
-    initializeCharts() {
-        // Inițializare grafic principal
-        this.chart = LightweightCharts.createChart(this.elements.tradingChart, {
-            layout: {
-                background: { type: 'solid', color: 'var(--surface-color)' },
-                textColor: 'var(--text-primary)'
+        this.chart = new Chart(ctx, {
+            type: 'candlestick',
+            data: {
+                datasets: [{
+                    label: this.selectedPair,
+                    data: [],
+                    color: {
+                        up: candleColor.up.border,
+                        down: candleColor.down.border,
+                    },
+                    borderColor: {
+                        up: candleColor.up.border,
+                        down: candleColor.down.border,
+                    },
+                    backgroundColor: {
+                        up: candleColor.up.fill,
+                        down: candleColor.down.fill,
+                    }
+                }]
             },
-            grid: {
-                vertLines: { color: 'var(--border-color)' },
-                horzLines: { color: 'var(--border-color)' }
-            },
-            crosshair: {
-                mode: LightweightCharts.CrosshairMode.Normal,
-                vertLine: {
-                    color: 'var(--text-secondary)',
-                    width: 1,
-                    style: 2,
-                    labelBackgroundColor: 'var(--primary-color)'
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 0,
+                        right: 30,
+                        top: 20,
+                        bottom: 0
+                    }
                 },
-                horzLine: {
-                    color: 'var(--text-secondary)',
-                    width: 1,
-                    style: 2,
-                    labelBackgroundColor: 'var(--primary-color)'
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'hour',
+                            displayFormats: {
+                                minute: 'HH:mm',
+                                hour: 'DD MMM, HH:mm',
+                                day: 'DD MMM',
+                                week: 'DD MMM'
+                            }
+                        },
+                        adapters: {
+                            date: {
+                                locale: 'ro'
+                            }
+                        },
+                        ticks: {
+                            source: 'auto',
+                            maxRotation: 0,
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    y: {
+                        position: 'right',
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            callback: function(value) {
+                                return '$' + value.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                const ohlc = context.raw;
+                                return [
+                                    'Open: $' + ohlc.o.toFixed(2),
+                                    'High: $' + ohlc.h.toFixed(2),
+                                    'Low: $' + ohlc.l.toFixed(2),
+                                    'Close: $' + ohlc.c.toFixed(2)
+                                ];
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
                 }
-            },
-            rightPriceScale: {
-                borderColor: 'var(--border-color)',
-                textColor: 'var(--text-primary)'
-            },
-            timeScale: {
-                borderColor: 'var(--border-color)',
-                textColor: 'var(--text-primary)',
-                timeVisible: true,
-                secondsVisible: false
-            },
-            handleScroll: {
-                mouseWheel: true,
-                pressedMouseMove: true,
-                horzTouchDrag: true,
-                vertTouchDrag: true
-            },
-            handleScale: {
-                axisPressedMouseMove: true,
-                mouseWheel: true,
-                pinch: true
             }
         });
-
-        this.candleSeries = this.chart.addCandlestickSeries({
-            upColor: 'var(--success-color)',
-            downColor: 'var(--error-color)',
-            borderUpColor: 'var(--success-color)',
-            borderDownColor: 'var(--error-color)',
-            wickUpColor: 'var(--success-color)',
-            wickDownColor: 'var(--error-color)'
-        });
-
-        // Adăugare volum
-        this.volumeSeries = this.chart.addHistogramSeries({
-            color: 'var(--primary-color)',
-            priceFormat: {
-                type: 'volume',
-            },
-            priceScaleId: '',
-            scaleMargins: {
-                top: 0.8,
-                bottom: 0
-            },
-        });
-
-        // Resize handler
-        window.addEventListener('resize', () => {
-            this.chart.applyOptions({
-                width: this.elements.tradingChart.clientWidth,
-                height: this.elements.tradingChart.clientHeight
-            });
-        });
-
-        // Trigger resize inițial
-        setTimeout(() => {
-            this.chart.applyOptions({
-                width: this.elements.tradingChart.clientWidth,
-                height: this.elements.tradingChart.clientHeight
-            });
-        }, 0);
-    }
-
-    async startDataStream() {
-        // Inițializare stream de date
-        await this.updateMarketData();
-        await this.updateOrderbook();
-        await this.updateTrades();
-
-        // Actualizare periodică
-        setInterval(() => this.updateMarketData(), 1000);
-        setInterval(() => this.updateOrderbook(), 1000);
-        setInterval(() => this.updateTrades(), 1000);
-    }
-
-    async updateMarketData() {
-        try {
-            const [fromCoin, toCoin] = this.currentPair.split('/');
-            const marketInfo = await tradeService.getMarketInfo(fromCoin.toLowerCase(), toCoin.toLowerCase());
-            
-            // Actualizare preț și schimbare
-            this.elements.currentPrice.textContent = apiService.formatPrice(marketInfo.lastPrice);
-            this.elements.priceChange.textContent = apiService.formatPercentage(marketInfo.change24h);
-            this.elements.priceChange.className = `price-change ${marketInfo.change24h >= 0 ? 'positive' : 'negative'}`;
-
-        // Actualizare grafic
-            const historicalData = await apiService.getHistoricalData(fromCoin);
-            this.candleSeries.setData(this.formatCandleData(historicalData));
-        } catch (error) {
-            console.error('Eroare la actualizarea datelor de piață:', error);
-        }
-    }
-
-    async updateOrderbook() {
-        try {
-            const [fromCoin, toCoin] = this.currentPair.split('/');
-            this.orderbook = await tradeService.getOrderBook(fromCoin.toLowerCase(), toCoin.toLowerCase());
-            this.renderOrderbook();
-        } catch (error) {
-            console.error('Eroare la actualizarea orderbook:', error);
-        }
-    }
-
-    async updateTrades() {
-        try {
-            const [fromCoin, toCoin] = this.currentPair.split('/');
-            this.trades = await tradeService.getRecentTrades(fromCoin.toLowerCase(), toCoin.toLowerCase());
-            this.renderTrades();
-    } catch (error) {
-            console.error('Eroare la actualizarea tranzacțiilor:', error);
-        }
-    }
-
-    renderOrderbook() {
-        // Render pentru asks (vânzări)
-        const asksHtml = this.orderbook.asks
-            .map(ask => `
-                <div class="orderbook-row ask">
-                    <span class="price">${apiService.formatPrice(ask.price)}</span>
-                    <span class="amount">${ask.amount.toFixed(8)}</span>
-                    <div class="depth-visualization" style="width: ${this.calculateDepthWidth(ask.amount)}%"></div>
-                </div>
-            `)
-            .join('');
-
-        // Render pentru bids (cumpărări)
-        const bidsHtml = this.orderbook.bids
-            .map(bid => `
-                <div class="orderbook-row bid">
-                    <span class="price">${apiService.formatPrice(bid.price)}</span>
-                    <span class="amount">${bid.amount.toFixed(8)}</span>
-                    <div class="depth-visualization" style="width: ${this.calculateDepthWidth(bid.amount)}%"></div>
-                </div>
-            `)
-            .join('');
-
-        this.elements.orderbook.querySelector('.asks').innerHTML = asksHtml;
-        this.elements.orderbook.querySelector('.bids').innerHTML = bidsHtml;
-    }
-
-    renderTrades() {
-        const tradesHtml = this.trades
-            .map(trade => `
-                <div class="trade-row ${trade.side}">
-                    <span class="price">${apiService.formatPrice(trade.price)}</span>
-                    <span class="amount">${trade.amount.toFixed(8)}</span>
-                    <span class="time">${this.formatTradeTime(trade.timestamp)}</span>
-                </div>
-            `)
-            .join('');
-
-        this.elements.tradesList.innerHTML = tradesHtml;
-    }
-
-    calculateDepthWidth(amount) {
-        const maxAmount = Math.max(
-            ...this.orderbook.asks.map(a => a.amount),
-            ...this.orderbook.bids.map(b => b.amount)
-        );
-        return (amount / maxAmount) * 100;
-    }
-
-    formatTradeTime(timestamp) {
-        return new Date(timestamp).toLocaleTimeString('ro-RO', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-    }
-
-    formatCandleData(data) {
-        return data.map(candle => ({
-            time: candle[0] / 1000,
-            open: candle[1],
-            high: candle[2],
-            low: candle[3],
-            close: candle[4]
-        }));
-    }
-
-    handlePairChange() {
-        this.currentPair = this.elements.tradingPair.value;
-        this.updateMarketData();
-        this.updateOrderbook();
-        this.updateTrades();
-    }
-
-    handleTimeframeChange(button) {
-        this.elements.timeframeButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        this.updateMarketData();
-    }
-
-    handleChartTypeChange(button) {
-        this.elements.chartTypeButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        // Implementare pentru schimbarea tipului de grafic
-    }
-
-    handleTabChange(button) {
-        this.elements.tabButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        this.orderType = button.dataset.type;
-        this.updateForm();
-    }
-
-    handleTradeTypeChange(button) {
-        this.elements.tradeTypeButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        this.tradeType = button.dataset.type;
-        this.updateForm();
-    }
-
-    handleAmountButtonClick(button) {
-        const percent = parseInt(button.dataset.percent);
-        const [fromCoin] = this.currentPair.split('/');
-        const balance = this.tradeType === 'buy' 
-            ? walletService.getBalance('USD')
-            : walletService.getBalance(fromCoin.toLowerCase());
         
-        const amount = (balance * percent) / 100;
-        this.elements.amountInput.value = amount.toFixed(8);
-        this.updateTotalValue();
+        await this.updateChart();
     }
+    
+    async updateChart() {
+        try {
+            const data = await this.apiService.getHistoricalData(
+                this.selectedPair.split('/')[0],
+                this.selectedTimeframe
+            );
+            
+            // Formatăm datele pentru graficul candlestick
+            const formattedData = data.map(candle => ({
+                x: candle.timestamp,
+                o: candle.open,
+                h: candle.high,
+                l: candle.low,
+                c: candle.close
+            }));
 
+            this.chart.data.datasets[0].data = formattedData;
+            this.chart.update();
+        } catch (error) {
+            console.error('Error updating chart:', error);
+            this.showNotification('Eroare la actualizarea graficului', 'error');
+        }
+    }
+    
+    startPriceUpdates() {
+        this.updatePrice();
+        setInterval(() => this.updatePrice(), 5000);
+    }
+    
+    async updatePrice() {
+        try {
+            const price = await this.apiService.getPrice(this.selectedPair.split('/')[0]);
+            const priceChange = await this.apiService.getPriceChange(this.selectedPair.split('/')[0]);
+            
+            this.currentPriceValue = price;
+            this.currentPrice.textContent = `$${price.toFixed(2)}`;
+            
+            this.priceChange.textContent = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}%`;
+            this.priceChange.className = `price-change ${priceChange >= 0 ? 'positive' : 'negative'}`;
+            
+            if (this.selectedOrderType === 'market') {
+                this.priceInput.value = price.toFixed(2);
+                this.updateTotal();
+            }
+        } catch (error) {
+            console.error('Error updating price:', error);
+            this.showNotification('Eroare la actualizarea prețului', 'error');
+        }
+    }
+    
     updateForm() {
-        // Actualizare formular în funcție de tipul de ordin și tranzacție
-        const [fromCoin, toCoin] = this.currentPair.split('/');
-        const submitText = `${this.tradeType === 'buy' ? 'Cumpără' : 'Vinde'} ${fromCoin}`;
-        this.elements.tradeSubmit.textContent = submitText;
-        this.elements.tradeSubmit.className = `trade-submit ${this.tradeType}`;
-
-        // Actualizare balanță disponibilă
-        const balance = this.tradeType === 'buy'
-            ? walletService.getBalance(toCoin.toLowerCase())
-            : walletService.getBalance(fromCoin.toLowerCase());
-        this.elements.balanceAmount.textContent = `${balance.toFixed(8)} ${this.tradeType === 'buy' ? toCoin : fromCoin}`;
-    }
-
-    updateTotalValue() {
-        const price = parseFloat(this.elements.priceInput.value) || 0;
-        const amount = parseFloat(this.elements.amountInput.value) || 0;
-        const total = price * amount;
-        this.elements.totalValue.textContent = apiService.formatPrice(total);
-    }
-
-    async handleTradeSubmit(e) {
-        e.preventDefault();
-        
-        try {
-            const [fromCoin, toCoin] = this.currentPair.split('/');
-            const amount = parseFloat(this.elements.amountInput.value);
-            
-            if (this.tradeType === 'buy') {
-                await tradeService.executeTrade(toCoin.toLowerCase(), fromCoin.toLowerCase(), amount);
-            } else {
-                await tradeService.executeTrade(fromCoin.toLowerCase(), toCoin.toLowerCase(), amount);
-            }
-
-            // Reset form și actualizare date
-            this.elements.amountInput.value = '';
-            this.updateForm();
-            this.updateMarketData();
-            this.updateOrderbook();
-            this.updateTrades();
-        } catch (error) {
-            console.error('Eroare la executarea tranzacției:', error);
-            // Implementare pentru afișarea erorilor către utilizator
+        this.priceInput.disabled = this.selectedOrderType === 'market';
+        if (this.selectedOrderType === 'market') {
+            this.priceInput.value = this.currentPriceValue.toFixed(2);
         }
+        this.updateTotal();
+    }
+    
+    updateSubmitButton() {
+        this.submitButton.className = `submit-btn ${this.selectedTradeType}`;
+        this.submitButton.textContent = `${this.selectedTradeType === 'buy' ? 'Cumpără' : 'Vinde'} ${this.selectedPair.split('/')[0]}`;
+    }
+    
+    calculateMaxAmount() {
+        const balance = this.walletService.getBalance(
+            this.selectedTradeType === 'buy' ? this.selectedPair.split('/')[1] : this.selectedPair.split('/')[0]
+        );
+        
+        if (this.selectedTradeType === 'buy') {
+            return balance / this.currentPriceValue;
+        }
+        return balance;
+    }
+    
+    updateTotal() {
+        const price = parseFloat(this.priceInput.value) || 0;
+        const amount = parseFloat(this.amountInput.value) || 0;
+        this.totalInput.value = (price * amount).toFixed(2);
+    }
+    
+    async submitTrade() {
+        try {
+            const price = parseFloat(this.priceInput.value);
+            const amount = parseFloat(this.amountInput.value);
+            
+            if (!price || !amount) {
+                this.showNotification('Introduceți prețul și cantitatea', 'error');
+                return;
+            }
+            
+            const order = {
+                pair: this.selectedPair,
+                type: this.selectedOrderType,
+                side: this.selectedTradeType,
+                price: price,
+                amount: amount
+            };
+            
+            // Simulăm executarea ordinului
+            if (this.selectedOrderType === 'market') {
+                await this.executeMarketOrder(order);
+            } else {
+                await this.placeLimitOrder(order);
+            }
+            
+        } catch (error) {
+            console.error('Error submitting trade:', error);
+            this.showNotification('Eroare la executarea tranzacției', 'error');
+        }
+    }
+    
+    async executeMarketOrder(order) {
+        try {
+            const baseCurrency = order.pair.split('/')[0];
+            const quoteCurrency = order.pair.split('/')[1];
+            const total = order.price * order.amount;
+            
+            if (order.side === 'buy') {
+                const balance = this.walletService.getBalance(quoteCurrency);
+                if (balance < total) {
+                    this.showNotification('Fonduri insuficiente', 'error');
+                    return;
+                }
+                
+                await this.walletService.updateBalance(quoteCurrency, -total);
+                await this.walletService.updateBalance(baseCurrency, order.amount);
+                
+            } else {
+                const balance = this.walletService.getBalance(baseCurrency);
+                if (balance < order.amount) {
+                    this.showNotification('Fonduri insuficiente', 'error');
+                    return;
+                }
+                
+                await this.walletService.updateBalance(baseCurrency, -order.amount);
+                await this.walletService.updateBalance(quoteCurrency, total);
+            }
+            
+            this.showNotification('Tranzacție executată cu succes', 'success');
+            this.resetForm();
+            
+        } catch (error) {
+            console.error('Error executing market order:', error);
+            this.showNotification('Eroare la executarea ordinului', 'error');
+        }
+    }
+    
+    async placeLimitOrder(order) {
+        try {
+            // În mod normal, aici am trimite ordinul către backend
+            // Pentru demo, simulăm plasarea ordinului
+            this.showNotification('Ordin plasat cu succes', 'success');
+            this.resetForm();
+        } catch (error) {
+            console.error('Error placing limit order:', error);
+            this.showNotification('Eroare la plasarea ordinului', 'error');
+        }
+    }
+    
+    resetForm() {
+        this.amountInput.value = '';
+        this.updateTotal();
+    }
+    
+    showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        const content = document.createElement('div');
+        content.className = 'notification-content';
+        
+        const icon = document.createElement('i');
+        icon.className = `fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`;
+        
+        const text = document.createElement('span');
+        text.textContent = message;
+        
+        content.appendChild(icon);
+        content.appendChild(text);
+        notification.appendChild(content);
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
     }
 }
 
-// Inițializare pagină la încărcarea documentului
+// Inițializare
 document.addEventListener('DOMContentLoaded', () => {
-    new TradePage();
+    new TradingPage();
 }); 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +7,17 @@
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/components/navbar.css">
     <link rel="stylesheet" href="../styles/components/prices.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-left">
-            <h1 class="logo">Crypto-Impact</h1>
+            <a href="../../index.html" class="logo">Crypto-Impact</a>
         </div>
         <div class="nav-center">
             <a href="news.html" class="nav-btn">News</a>
-            <a href="prices.html" class="nav-btn">Prices</a>
+            <a href="prices.html" class="nav-btn active">Prices</a>
             <a href="wallet.html" class="nav-btn">Wallet</a>
             <a href="trade.html" class="nav-btn">Trade</a>
         </div>
@@ -30,16 +31,15 @@
         </div>
     </nav>
 
-    <section class="prices">
+    <div class="prices-section">
         <div class="prices-container">
-            <!-- Conținutul va fi populat dinamic prin JavaScript -->
+            <!-- Table will be populated by JavaScript -->
         </div>
         <div class="pagination">
-            <!-- Paginarea va fi populată dinamic prin JavaScript -->
+            <!-- Pagination will be populated by JavaScript -->
         </div>
-    </section>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../js/prices.js"></script>
 </body>
 </html> 

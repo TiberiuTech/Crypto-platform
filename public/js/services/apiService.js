@@ -1,187 +1,202 @@
 export class ApiService {
     constructor() {
         this.baseUrl = 'https://min-api.cryptocompare.com/data';
-        this.apiKey = '8a3a6a789d2742c4bc2a35b38a5b8fd77712c3d40b8b4f8f9c0bf7d26f5c0aa6';
         this.symbolMap = {
             'bitcoin': 'BTC',
             'ethereum': 'ETH',
             'orionix': 'ORX'
         };
-        // Lista de monede care nu sunt pe exchange și folosesc date mock
-        this.mockCoins = ['orionix'];
-        // Cache pentru prețuri
-        this.priceCache = new Map();
-        this.cacheDuration = 30000; // 30 secunde
+        this.mockData = {
+            'ORX': {
+                USD: {
+                    PRICE: 0.5,
+                    CHANGEPCT24HOUR: 2.5,
+                    MKTCAP: 1000000,
+                    VOLUME24HOUR: 50000
+                }
+            }
+        };
     }
 
-    // Obține prețul pentru o criptomonedă
-    async getPrice(crypto, currency = 'usd') {
-        const cryptoLower = crypto.toLowerCase();
-        
-        // Verifică dacă moneda folosește date mock
-        if (this.mockCoins.includes(cryptoLower)) {
-            return this.getMockPrice(cryptoLower);
-        }
+    getSymbol(coin) {
+        return this.symbolMap[coin.toLowerCase()] || coin.toUpperCase();
+    }
 
-        // Verifică cache-ul
-        const cacheKey = `${cryptoLower}-${currency}`;
-        const cachedData = this.priceCache.get(cacheKey);
-        if (cachedData && Date.now() - cachedData.timestamp < this.cacheDuration) {
-            return cachedData.price;
-        }
+    isMockCoin(coin) {
+        const symbol = this.getSymbol(coin);
+        return symbol === 'ORX';
+    }
 
+    async getPrice(coin) {
         try {
-            const symbol = this.symbolMap[cryptoLower] || crypto.toUpperCase();
-            const url = `${this.baseUrl}/price?fsym=${symbol}&tsyms=${currency.toUpperCase()}&api_key=${this.apiKey}`;
-            
-            const response = await fetch(url, {
-                cache: 'no-store'
-            });
-            
-            if (!response.ok) {
-                throw new Error(`API request failed: ${response.status}`);
+            if (this.isMockCoin(coin)) {
+                return this.mockData['ORX'].USD.PRICE;
             }
-            
+
+            const symbol = this.getSymbol(coin);
+            const response = await fetch(`${this.baseUrl}/price?fsym=${symbol}&tsyms=USD`);
             const data = await response.json();
             
-            if (data[currency.toUpperCase()]) {
-                const price = data[currency.toUpperCase()];
-                // Salvează în cache
-                this.priceCache.set(cacheKey, {
-                    price,
-                    timestamp: Date.now()
-                });
-                return price;
-            } else {
-                console.error('Invalid response format:', data);
-                return this.getMockPrice(cryptoLower);
+            if (data.Response === 'Error') {
+                throw new Error(data.Message);
             }
+            
+            return data.USD || 0;
         } catch (error) {
-            console.error('Eroare la obținerea prețului pentru', crypto, ':', error);
-            return this.getMockPrice(cryptoLower);
+            console.error('Error fetching price:', error);
+            return 0;
         }
     }
 
-    // Obține variația de preț pentru o perioadă
-    async getPriceChange(crypto, period = '24h') {
-        const cryptoLower = crypto.toLowerCase();
-        
-        // Folosește date mock pentru monedele nelisted
-        if (this.mockCoins.includes(cryptoLower)) {
-            return this.getMockPriceChange();
-        }
-
+    async getPriceChange(coin) {
         try {
-            const symbol = this.symbolMap[cryptoLower] || crypto.toUpperCase();
-            const response = await fetch(`${this.baseUrl}/v2/histohour?fsym=${symbol}&tsym=USD&limit=24&api_key=${this.apiKey}`, {
-                cache: 'no-store'
-            });
-            if (!response.ok) {
-                throw new Error(`API request failed: ${response.status}`);
+            if (this.isMockCoin(coin)) {
+                return this.mockData['ORX'].USD.CHANGEPCT24HOUR;
             }
+
+            const symbol = this.getSymbol(coin);
+            const response = await fetch(`${this.baseUrl}/v2/histohour?fsym=${symbol}&tsym=USD&limit=24`);
             const data = await response.json();
+            
+            if (data.Response === 'Error') {
+                throw new Error(data.Message);
+            }
+
+            const prices = data.Data.Data;
+            const oldPrice = prices[0].close;
+            const newPrice = prices[prices.length - 1].close;
+            const change = ((newPrice - oldPrice) / oldPrice) * 100;
+            
+            return change;
+        } catch (error) {
+            console.error('Error fetching price change:', error);
+            return 0;
+        }
+    }
+
+    async getMarketCap(coin) {
+        try {
+            if (this.isMockCoin(coin)) {
+                return this.mockData['ORX'].USD.MKTCAP;
+            }
+
+            const symbol = this.getSymbol(coin);
+            const response = await fetch(`${this.baseUrl}/pricemultifull?fsyms=${symbol}&tsyms=USD`);
+            const data = await response.json();
+            
+            if (data.Response === 'Error') {
+                throw new Error(data.Message);
+            }
+            
+            return data.RAW[symbol].USD.MKTCAP || 0;
+        } catch (error) {
+            console.error('Error fetching market cap:', error);
+            return 0;
+        }
+    }
+
+    async getVolume(coin) {
+        try {
+            if (this.isMockCoin(coin)) {
+                return this.mockData['ORX'].USD.VOLUME24HOUR;
+            }
+
+            const symbol = this.getSymbol(coin);
+            const response = await fetch(`${this.baseUrl}/pricemultifull?fsyms=${symbol}&tsyms=USD`);
+            const data = await response.json();
+            
+            if (data.Response === 'Error') {
+                throw new Error(data.Message);
+            }
+            
+            return data.RAW[symbol].USD.VOLUME24HOUR || 0;
+        } catch (error) {
+            console.error('Error fetching volume:', error);
+            return 0;
+        }
+    }
+
+    async getHistoricalData(coin, timeframe = '1H') {
+        try {
+            if (this.isMockCoin(coin)) {
+                return this.generateMockHistoricalData(timeframe);
+            }
+
+            const symbol = this.getSymbol(coin);
+            let limit = 24; // Default pentru 1H
+            let aggregate = 1;
+
+            switch (timeframe) {
+                case '4H':
+                    limit = 96;
+                    aggregate = 4;
+                    break;
+                case '1D':
+                    limit = 24;
+                    aggregate = 24;
+                    break;
+                case '1W':
+                    limit = 168;
+                    aggregate = 24;
+                    break;
+            }
+
+            const response = await fetch(
+                `${this.baseUrl}/v2/histohour?fsym=${symbol}&tsym=USD&limit=${limit}&aggregate=${aggregate}`
+            );
+            const data = await response.json();
+
             if (data.Response === 'Success') {
-                const priceData = data.Data.Data;
-                const startPrice = priceData[0].close;
-                const endPrice = priceData[priceData.length - 1].close;
-                return ((endPrice - startPrice) / startPrice) * 100;
-            }
-            return this.getMockPriceChange();
-        } catch (error) {
-            console.error('Eroare la obținerea variației de preț:', error);
-            return this.getMockPriceChange();
-        }
-    }
-
-    // Obține informații despre o monedă
-    async getCoinInfo(crypto) {
-        try {
-            const response = await fetch(`${this.baseUrl}/coin/generalinfo?fsyms=${crypto.toUpperCase()}&tsym=USD&api_key=${this.apiKey}`, {
-                cache: 'no-store'
-            });
-            if (!response.ok) {
-                throw new Error(`API request failed: ${response.status}`);
-            }
-            const data = await response.json();
-            if (data.Response === 'Success' && data.Data.length > 0) {
-                const coinData = data.Data[0].CoinInfo;
-                return {
-                    id: coinData.Name,
-                    name: coinData.FullName,
-                    symbol: coinData.Name,
-                    description: coinData.Description || 'No description available',
-                    marketCap: coinData.MaxSupply || 0,
-                    circulatingSupply: coinData.TotalCoinsMined || 0
-                };
-            }
-            return this.getMockCoinInfo(crypto);
-        } catch (error) {
-            console.error('Eroare la obținerea informațiilor despre monedă:', error);
-            return this.getMockCoinInfo(crypto);
-        }
-    }
-
-    // Obține date istorice pentru grafic
-    async getHistoricalData(crypto, timeframe = '1d', limit = 30) {
-        try {
-            const response = await fetch(`${this.baseUrl}/v2/histoday?fsym=${crypto.toUpperCase()}&tsym=USD&limit=${limit}&api_key=${this.apiKey}`, {
-                cache: 'no-store'
-            });
-            if (!response.ok) {
-                throw new Error(`API request failed: ${response.status}`);
-            }
-            const data = await response.json();
-            if (data.Response === 'Success') {
-                return data.Data.Data.map(item => ({
-                    timestamp: item.time * 1000,
-                    price: item.close
+                return data.Data.Data.map(point => ({
+                    timestamp: new Date(point.time * 1000),
+                    open: point.open,
+                    high: point.high,
+                    low: point.low,
+                    close: point.close
                 }));
             }
-            return this.getMockHistoricalData();
+            return [];
         } catch (error) {
-            console.error('Eroare la obținerea datelor istorice:', error);
-            return this.getMockHistoricalData();
+            console.error('Error fetching historical data:', error);
+            return [];
         }
     }
 
-    // Mock data pentru dezvoltare
-    getMockPrice(crypto) {
-        const prices = {
-            'bitcoin': 45000,
-            'ethereum': 3000,
-            'orionix': 0.5
-        };
-        return prices[crypto] || 0;
-    }
-
-    getMockPriceChange() {
-        return (Math.random() * 10 - 5).toFixed(2);
-    }
-
-    getMockCoinInfo(crypto) {
-        return {
-            id: crypto,
-            name: crypto.charAt(0).toUpperCase() + crypto.slice(1),
-            symbol: crypto.toUpperCase(),
-            description: 'Descriere mock pentru ' + crypto,
-            marketCap: 1000000000,
-            volume24h: 50000000,
-            circulatingSupply: 1000000
-        };
-    }
-
-    getMockHistoricalData() {
-        const data = [];
+    generateMockHistoricalData(timeframe) {
+        const points = [];
         const now = Date.now();
-        const dayMs = 86400000;
+        const basePrice = this.mockData['ORX'].USD.PRICE;
+        let numPoints = 24;
 
-        for (let i = 30; i > 0; i--) {
-            data.push({
-                timestamp: now - (i * dayMs),
-                price: 45000 + (Math.random() * 1000 - 500)
+        switch (timeframe) {
+            case '4H':
+                numPoints = 96;
+                break;
+            case '1D':
+                numPoints = 24;
+                break;
+            case '1W':
+                numPoints = 168;
+                break;
+        }
+
+        for (let i = numPoints; i > 0; i--) {
+            const timestamp = new Date(now - (i * 3600000)); // 1 hour in milliseconds
+            const variation = (Math.random() * 0.1 - 0.05) * basePrice; // ±5% variație
+            const open = basePrice + variation;
+            const close = open + (Math.random() * 0.02 - 0.01) * basePrice; // ±1% variație
+            const high = Math.max(open, close) + (Math.random() * 0.01) * basePrice; // +1% max
+            const low = Math.min(open, close) - (Math.random() * 0.01) * basePrice; // -1% min
+
+            points.push({
+                timestamp,
+                open,
+                high,
+                low,
+                close
             });
         }
 
-        return data;
+        return points;
     }
 } 

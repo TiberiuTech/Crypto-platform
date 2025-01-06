@@ -5,16 +5,21 @@ class WalletPage {
         this.walletService = new WalletService();
         this.initializeElements();
         this.attachEventListeners();
-        this.initializeCharts();
         this.loadWalletData();
+        this.initializeCharts();
     }
 
     initializeElements() {
-        // Butoane principale
+        // Elemente principale
+        this.totalBalance = document.querySelector('.balance');
+        this.balanceChange = document.querySelector('.balance-change .change');
+        this.assetsList = document.querySelector('.assets-list');
+        this.transactionsList = document.querySelector('.transactions-list');
+        this.assetCount = document.querySelector('.asset-count');
+
+        // Butoane și modale
         this.depositBtn = document.getElementById('depositBtn');
         this.withdrawBtn = document.getElementById('withdrawBtn');
-
-        // Modale
         this.depositModal = document.getElementById('depositModal');
         this.withdrawModal = document.getElementById('withdrawModal');
         this.closeDepositBtn = document.getElementById('closeDepositModal');
@@ -25,7 +30,6 @@ class WalletPage {
         this.depositAddress = document.getElementById('depositAddress');
         this.copyAddressBtn = document.getElementById('copyAddressBtn');
         this.qrCode = document.getElementById('qrCode');
-        this.selectedCryptoSpan = document.getElementById('selectedCrypto');
 
         // Elemente pentru retragere
         this.withdrawForm = document.getElementById('withdrawForm');
@@ -34,19 +38,12 @@ class WalletPage {
         this.withdrawAddress = document.getElementById('withdrawAddress');
         this.withdrawNetwork = document.getElementById('withdrawNetwork');
         this.availableBalance = document.getElementById('availableBalance');
-
-        // Elemente pentru afișarea soldului
-        this.totalBalance = document.querySelector('.balance');
-        this.assetsList = document.querySelector('.assets-list');
-        this.transactionsList = document.querySelector('.transactions-list');
     }
 
     attachEventListeners() {
         // Event listeners pentru butoanele principale
         this.depositBtn.addEventListener('click', () => this.showModal(this.depositModal));
         this.withdrawBtn.addEventListener('click', () => this.showModal(this.withdrawModal));
-
-        // Event listeners pentru închiderea modalelor
         this.closeDepositBtn.addEventListener('click', () => this.hideModal(this.depositModal));
         this.closeWithdrawBtn.addEventListener('click', () => this.hideModal(this.withdrawModal));
 
@@ -69,15 +66,141 @@ class WalletPage {
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.handleFilter(e));
         });
+    }
 
-        // Adăugăm simularea depunerii pentru demo
-        const simulateDepositBtn = document.createElement('button');
-        simulateDepositBtn.className = 'simulate-deposit';
-        simulateDepositBtn.textContent = 'Simulează Depunere (Demo)';
-        simulateDepositBtn.addEventListener('click', () => this.simulateDeposit());
-        
-        const modalBody = this.depositModal.querySelector('.modal-body');
-        modalBody.appendChild(simulateDepositBtn);
+    async loadWalletData() {
+        try {
+            // Încarcă soldul total
+            const totalBalance = await this.walletService.getTotalBalance();
+            this.totalBalance.textContent = totalBalance ? `${totalBalance.toFixed(2)} USD` : '0.00 USD';
+
+            // Încarcă lista de active
+            const assets = await this.walletService.getAssets();
+            this.renderAssets(assets);
+            this.assetCount.textContent = `(${assets.length})`;
+
+            // Încarcă istoricul tranzacțiilor
+            const transactions = this.walletService.getTransactions();
+            this.renderTransactions(transactions);
+
+            // Actualizează graficul
+            this.updateBalanceChart();
+
+            // Actualizează procentul de schimbare
+            const change = assets.reduce((acc, asset) => acc + asset.change, 0) / assets.length;
+            this.balanceChange.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+            this.balanceChange.className = `change ${change >= 0 ? 'positive' : 'negative'}`;
+
+        } catch (err) {
+            console.error('Eroare la încărcarea datelor portofelului:', err);
+            this.showNotification('Eroare la încărcarea datelor portofelului', 'error');
+        }
+    }
+
+    renderAssets(assets) {
+        if (assets.length === 0) {
+            this.assetsList.innerHTML = '<div class="no-assets">Nu există active în portofel</div>';
+            return;
+        }
+
+        this.assetsList.innerHTML = assets.map(asset => `
+            <div class="asset-item">
+                <div class="asset-info">
+                    <div class="asset-details">
+                        <h4>${asset.name}</h4>
+                        <p>${asset.balance.toFixed(8)} ${asset.symbol}</p>
+                    </div>
+                </div>
+                <div class="asset-value">
+                    <h4>$${asset.value.toFixed(2)}</h4>
+                    <p class="${asset.change >= 0 ? 'positive' : 'negative'}">
+                        ${asset.change >= 0 ? '+' : ''}${asset.change.toFixed(2)}%
+                    </p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    renderTransactions(transactions) {
+        if (transactions.length === 0) {
+            this.transactionsList.innerHTML = '<div class="no-transactions">Nu există tranzacții</div>';
+            return;
+        }
+
+        this.transactionsList.innerHTML = transactions.map(tx => `
+            <div class="transaction-item">
+                <div class="transaction-info">
+                    <i class="fas fa-${tx.type === 'deposit' ? 'arrow-down' : 'arrow-up'}"></i>
+                    <div class="transaction-details">
+                        <h4>${tx.type === 'deposit' ? 'Depunere' : 'Retragere'} ${tx.crypto}</h4>
+                        <p>${new Date(tx.timestamp).toLocaleString()}</p>
+                    </div>
+                </div>
+                <div class="transaction-amount">
+                    <h4>${tx.amount} ${tx.crypto}</h4>
+                    <p class="status ${tx.status.toLowerCase()}">${tx.status}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    initializeCharts() {
+        const ctx = document.getElementById('balanceChart').getContext('2d');
+        this.balanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Sold Total (USD)',
+                    data: [],
+                    borderColor: '#4CAF50',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async updateBalanceChart() {
+        try {
+            const historicalData = await this.walletService.getHistoricalBalance();
+            this.balanceChart.data.labels = historicalData.map(d => 
+                new Date(d.timestamp).toLocaleDateString()
+            );
+            this.balanceChart.data.datasets[0].data = historicalData.map(d => d.balance);
+            this.balanceChart.update();
+        } catch (err) {
+            console.error('Eroare la actualizarea graficului:', err);
+        }
     }
 
     showModal(modal) {
@@ -95,9 +218,10 @@ class WalletPage {
 
     async updateDepositInfo() {
         const selectedCrypto = this.depositCryptoSelect.value;
-        const address = await this.walletService.getDepositAddress(selectedCrypto);
+        const address = this.walletService.getDepositAddress(selectedCrypto);
         this.depositAddress.value = address;
-        this.selectedCryptoSpan.textContent = selectedCrypto.charAt(0).toUpperCase() + selectedCrypto.slice(1);
+        document.getElementById('selectedCrypto').textContent = 
+            selectedCrypto.charAt(0).toUpperCase() + selectedCrypto.slice(1);
         
         // Generare cod QR
         QRCode.toCanvas(this.qrCode, address, {
@@ -123,7 +247,7 @@ class WalletPage {
         e.preventDefault();
         const withdrawData = {
             crypto: this.withdrawCryptoSelect.value,
-            amount: this.withdrawAmount.value,
+            amount: parseFloat(this.withdrawAmount.value),
             address: this.withdrawAddress.value,
             network: this.withdrawNetwork.value
         };
@@ -132,7 +256,7 @@ class WalletPage {
             await this.walletService.processWithdraw(withdrawData);
             this.showNotification('Retragere inițiată cu succes!');
             this.hideModal(this.withdrawModal);
-            this.loadWalletData(); // Reîncarcă datele portofelului
+            this.loadWalletData();
         } catch (err) {
             this.showNotification(err.message, 'error');
         }
@@ -140,12 +264,12 @@ class WalletPage {
 
     async updateWithdrawInfo() {
         const selectedCrypto = this.withdrawCryptoSelect.value;
-        const balance = await this.walletService.getCoinBalance(selectedCrypto);
+        const balance = this.walletService.getCoinBalance(selectedCrypto);
         this.availableBalance.textContent = `${balance} ${selectedCrypto.toUpperCase()}`;
     }
 
     setMaxAmount() {
-        const balance = this.availableBalance.textContent.split(' ')[0];
+        const balance = parseFloat(this.availableBalance.textContent.split(' ')[0]);
         this.withdrawAmount.value = balance;
     }
 
@@ -154,118 +278,23 @@ class WalletPage {
         filterButtons.forEach(btn => btn.classList.remove('active'));
         e.target.classList.add('active');
         
-        // Implementează logica de filtrare aici
         const filterType = e.target.textContent.toLowerCase();
         this.loadFilteredData(filterType);
     }
 
-    async loadWalletData() {
+    async loadFilteredData(filterType) {
         try {
-            // Încarcă soldul total
-            const totalBalance = await this.walletService.getTotalBalance();
-            this.totalBalance.textContent = totalBalance ? `${totalBalance.toFixed(2)} USD` : '0.00 USD';
-
-            // Încarcă lista de active
-            const assets = await this.walletService.getAssets();
-            this.renderAssets(assets);
-
-            // Încarcă istoricul tranzacțiilor
-            const transactions = await this.walletService.getTransactions();
-            this.renderTransactions(transactions);
-
-            // Actualizează graficul
-            this.updateBalanceChart();
-        } catch (err) {
-            console.error('Eroare la încărcarea datelor portofelului:', err);
-            this.showNotification('Eroare la încărcarea datelor portofelului', 'error');
-        }
-    }
-
-    renderAssets(assets) {
-        this.assetsList.innerHTML = assets.map(asset => `
-            <div class="asset-item">
-                <div class="asset-info">
-                    <div class="asset-details">
-                        <h4>${asset.name}</h4>
-                        <p>${asset.balance} ${asset.symbol}</p>
-                    </div>
-                </div>
-                <div class="asset-value">
-                    <h4>$${asset.value ? asset.value.toFixed(2) : '0.00'}</h4>
-                    <p class="${asset.change >= 0 ? 'positive' : 'negative'}">
-                        ${asset.change ? (asset.change >= 0 ? '+' : '') + asset.change.toFixed(2) : '0.00'}%
-                    </p>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    renderTransactions(transactions) {
-        this.transactionsList.innerHTML = transactions.map(tx => `
-            <div class="transaction-item">
-                <div class="transaction-info">
-                    <i class="fas fa-${tx.type === 'deposit' ? 'arrow-down' : 'arrow-up'}"></i>
-                    <div class="transaction-details">
-                        <h4>${tx.type === 'deposit' ? 'Depunere' : 'Retragere'} ${tx.crypto}</h4>
-                        <p>${new Date(tx.timestamp).toLocaleString()}</p>
-                    </div>
-                </div>
-                <div class="transaction-amount">
-                    <h4>${tx.amount} ${tx.crypto}</h4>
-                    <p class="status ${tx.status.toLowerCase()}">${tx.status}</p>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    initializeCharts() {
-        const ctx = document.getElementById('balanceChart').getContext('2d');
-        this.balanceChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-                labels: [],
-            datasets: [{
-                    label: 'Sold Total (USD)',
-                    data: [],
-                    borderColor: '#4CAF50',
-                tension: 0.4,
-                fill: true,
-                    backgroundColor: 'rgba(76, 175, 80, 0.1)'
-            }]
-        },
-        options: {
-            responsive: true,
-                maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
+            if (filterType === 'toate') {
+                await this.loadWalletData();
+            } else {
+                const filteredAssets = await this.walletService.getFilteredAssets(filterType);
+                this.renderAssets(filteredAssets);
+                
+                const filteredTransactions = this.walletService.getFilteredTransactions(filterType);
+                this.renderTransactions(filteredTransactions);
             }
-        });
-    }
-
-    async updateBalanceChart() {
-        try {
-            const historicalData = await this.walletService.getHistoricalBalance();
-            this.balanceChart.data.labels = historicalData.map(d => new Date(d.timestamp).toLocaleDateString());
-            this.balanceChart.data.datasets[0].data = historicalData.map(d => d.balance);
-            this.balanceChart.update();
         } catch (err) {
-            console.error('Eroare la actualizarea graficului:', err);
+            this.showNotification('Eroare la filtrarea datelor', 'error');
         }
     }
 
@@ -280,50 +309,15 @@ class WalletPage {
         `;
         
         document.body.appendChild(notification);
-        
-        // Animație de intrare
         setTimeout(() => notification.classList.add('show'), 100);
-        
-        // Eliminare automată după 3 secunde
         setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => notification.remove(), 300);
         }, 3000);
     }
-
-    async loadFilteredData(filterType) {
-        try {
-            if (filterType === 'toate') {
-                await this.loadWalletData();
-            } else {
-                const filteredAssets = await this.walletService.getFilteredAssets(filterType);
-                this.renderAssets(filteredAssets);
-                
-                const filteredTransactions = await this.walletService.getFilteredTransactions(filterType);
-                this.renderTransactions(filteredTransactions);
-            }
-        } catch (err) {
-            this.showNotification('Eroare la filtrarea datelor', 'error');
-        }
-    }
-
-    async simulateDeposit() {
-        const crypto = this.depositCryptoSelect.value;
-        const mockAmount = Math.random() * (crypto === 'bitcoin' ? 0.1 : crypto === 'ethereum' ? 1 : 100);
-        const txHash = this.walletService.generateTxHash();
-
-        try {
-            await this.walletService.processDeposit(crypto, mockAmount, txHash);
-            this.showNotification(`Depunere de ${mockAmount.toFixed(8)} ${crypto.toUpperCase()} procesată cu succes!`);
-            this.hideModal(this.depositModal);
-            this.loadWalletData();
-        } catch (err) {
-            this.showNotification(err.message, 'error');
-        }
-    }
 }
 
 // Inițializează pagina de wallet când documentul este încărcat
 document.addEventListener('DOMContentLoaded', () => {
-    const walletPage = new WalletPage();
+    new WalletPage();
 }); 

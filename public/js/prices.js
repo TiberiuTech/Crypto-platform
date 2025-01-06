@@ -103,7 +103,17 @@ const fetchHistoricalData = async (crypto) => {
 
 // Funcție pentru crearea mini-graficului
 const createSparkline = (containerId, data, isPositive) => {
-    const ctx = document.getElementById(containerId).getContext('2d');
+    const canvas = document.getElementById(containerId);
+    if (!canvas) {
+        console.warn(`Canvas element with id ${containerId} not found`);
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.warn(`Could not get 2d context for canvas ${containerId}`);
+        return;
+    }
     
     // Distruge graficul existent dacă există
     if (charts[containerId]) {
@@ -191,7 +201,6 @@ const formatNumber = (number) => {
 // Funcție pentru formatarea prețului
 const formatPrice = (price) => {
     if (price < 1) {
-        // Pentru prețuri sub 1$, păstrăm mai multe zecimale
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
@@ -199,7 +208,6 @@ const formatPrice = (price) => {
             maximumFractionDigits: 4
         }).format(price);
     }
-    // Pentru prețuri peste 1$, doar 2 zecimale
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -218,7 +226,6 @@ const updatePrices = async () => {
             throw new Error('Nu s-au putut încărca datele pentru monede');
         }
 
-        // Filtrăm monedele care au date disponibile
         const availableCurrencies = CURRENCIES.filter(crypto => data.DISPLAY[crypto] && data.DISPLAY[crypto][CURRENCY]);
         const paginatedCurrencies = paginate(availableCurrencies, currentPage);
         
@@ -228,7 +235,8 @@ const updatePrices = async () => {
             return;
         }
 
-        pricesContainer.innerHTML = `
+        // Generăm HTML-ul pentru tabel
+        const tableHTML = `
             <div class="table-header">
                 <span data-sort="rank">#</span>
                 <span data-sort="name">Name</span>
@@ -283,7 +291,10 @@ const updatePrices = async () => {
             </table>
         `;
 
-        // Adăugăm graficele pentru monedele din pagina curentă
+        // Actualizăm DOM-ul o singură dată
+        pricesContainer.innerHTML = tableHTML;
+
+        // După ce DOM-ul este actualizat, adăugăm graficele
         for (const crypto of paginatedCurrencies) {
             const historicalData = await fetchHistoricalData(crypto);
             if (historicalData && historicalData.length > 0) {
