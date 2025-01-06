@@ -251,6 +251,13 @@ const updatePrices = async () => {
 
         // Generăm HTML-ul pentru tabel
         const tableHTML = `
+            <div class="top-movers">
+                <div class="movers-carousel">
+                    <div class="movers-container">
+                    </div>
+                </div>
+            </div>
+            <h2 class="prices-title">Today's Cryptocurrency Prices</h2>
             <div class="table-header">
                 <span data-sort="rank">#</span>
                 <span data-sort="name">Name</span>

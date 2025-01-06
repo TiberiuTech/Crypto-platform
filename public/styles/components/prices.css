@@ -641,4 +641,11 @@ body {
     background: rgb(13, 17, 28);
     min-height: 100vh;
     margin-top: 60px;
+}
+
+.prices-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 24px 0;
 } 
