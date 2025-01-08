@@ -532,22 +532,23 @@ select:focus {
 
 .max-btn {
     position: absolute;
-    right: 0.75rem;
+    right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    padding: 0.25rem 0.75rem;
-    background: var(--primary-color);
+    padding: 4px 8px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
     border: none;
-    border-radius: var(--border-radius-sm);
+    border-radius: 8px;
     color: white;
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    z-index: 2;
 }
 
 .max-btn:hover {
-    background: var(--primary-color-dark);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
     transform: translateY(-50%) scale(1.05);
 }
 
@@ -1140,4 +1141,512 @@ select:focus {
 .status.în.așteptare {
     background: rgba(234, 179, 8, 0.1);
     color: var(--warning-color);
+}
+
+/* Stiluri pentru Swap */
+.swap-input {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.swap-input select {
+    flex: 1;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.swap-input input {
+    flex: 2;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.switch-btn {
+    display: block;
+    width: 40px;
+    height: 40px;
+    margin: 10px auto;
+    border-radius: 50%;
+    background: #007bff;
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.switch-btn:hover {
+    transform: rotate(180deg);
+}
+
+.swap-info {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    margin: 15px 0;
+}
+
+.swap-info p {
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Stiluri pentru Whitelist */
+.whitelist-actions {
+    margin-bottom: 20px;
+}
+
+.whitelist-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.whitelist-list th,
+.whitelist-list td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.whitelist-list th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.whitelist-list tr:hover {
+    background-color: #f5f5f5;
+}
+
+.whitelist-list .action-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.whitelist-list .edit-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.whitelist-list .delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Stiluri comune pentru modals */
+.modal-content {
+    max-width: 500px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.submit-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Animații */
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Stiluri pentru Swap Modal */
+.swap-modal {
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(9, 14, 52, 0.97));
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+}
+
+.swap-section {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.swap-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.swap-input-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.crypto-select {
+    flex: 1;
+    position: relative;
+}
+
+.crypto-select select {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    appearance: none;
+}
+
+.crypto-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+}
+
+/* Iconițe specifice pentru fiecare criptomonedă */
+.crypto-select select[value="bitcoin"] + .crypto-icon::before {
+    content: "\f379"; /* fa-bitcoin */
+    color: #f7931a;
+}
+
+.crypto-select select[value="ethereum"] + .crypto-icon::before {
+    content: "\f42e"; /* fa-ethereum */
+    color: #627eea;
+}
+
+.crypto-select select[value="orionix"] + .crypto-icon::before {
+    content: "\f3d1"; /* fa-gem */
+    color: #00ff88;
+}
+
+.option-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+}
+
+.option-content img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.amount-input-wrapper {
+    position: relative;
+    flex: 2;
+}
+
+.amount-input-wrapper input {
+    width: 100%;
+    padding: 12px;
+    padding-right: 65px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.amount-input-wrapper input:focus {
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+/* Eliminăm săgețile din input-uri */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-calendar-picker-indicator {
+    -webkit-appearance: none;
+    display: none;
+}
+
+input[type="number"],
+input[type="text"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none !important;
+}
+
+/* Eliminăm pseudo-elementele care creează săgeți */
+.amount-input-wrapper::before,
+.amount-input-wrapper::after {
+    display: none;
+}
+
+/* Stiluri pentru input */
+.amount-input-wrapper input {
+    width: 100%;
+    padding: 12px;
+    padding-right: 65px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.amount-input-wrapper input:focus {
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.max-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 4px 8px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.max-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.balance-info {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 4px;
+    font-size: 0.85rem;
+}
+
+.balance-info .label {
+    color: var(--text-secondary);
+}
+
+.balance-info .value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.switch-btn {
+    width: 40px;
+    height: 40px;
+    margin: -10px auto;
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: 4px solid rgba(17, 24, 39, 0.95);
+    border-radius: 50%;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.switch-btn:hover {
+    transform: rotate(180deg);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.swap-details {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 24px 0;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.detail-row:not(:last-child) {
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.detail-row .label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.detail-row .value {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.detail-row .fee {
+    color: #ef4444;
+}
+
+.detail-row .receive-amount {
+    color: #10b981;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.submit-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+.submit-btn i {
+    font-size: 1.1rem;
+}
+
+/* Animații pentru modal */
+.modal-content {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+    .swap-input-container {
+        flex-direction: column;
+    }
+
+    .amount-input-wrapper {
+        width: 100%;
+    }
+
+    .swap-details {
+        padding: 16px;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+}
+
+.crypto-select select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Eliminăm săgețile din input-uri */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-calendar-picker-indicator {
+    -webkit-appearance: none;
+    display: none;
+}
+
+input[type="number"],
+input[type="text"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Eliminăm săgețile din select */
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none !important;
+}
+
+.amount-input-wrapper input {
+    width: 100%;
+    padding: 12px;
+    padding-right: 65px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
 } 

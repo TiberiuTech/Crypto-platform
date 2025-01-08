@@ -26,8 +26,8 @@ const server = http.createServer((req, res) => {
         filePath = '/index.html';
     }
 
-    // Adăugăm prefixul pentru directorul public
-    filePath = path.join(__dirname, filePath.startsWith('/public') ? filePath : '/public' + filePath);
+    // Construim calea completă către fișier
+    filePath = path.join(__dirname, filePath);
 
     // Obținem extensia fișierului
     const extname = path.extname(filePath);

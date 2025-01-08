@@ -51,6 +51,9 @@
                     <button class="action-btn withdraw" id="withdrawBtn">
                         <i class="fas fa-arrow-up"></i> Retragere
                     </button>
+                    <button class="action-btn swap" id="swapBtn">
+                        <i class="fas fa-exchange-alt"></i> Swap
+                    </button>
                 </div>
                 <div class="balance-chart">
                     <canvas id="balanceChart"></canvas>
@@ -143,7 +146,7 @@
                     <div class="form-group">
                         <label for="withdrawAmount">Sumă</label>
                         <div class="amount-input">
-                            <input type="number" id="withdrawAmount" required step="0.00000001">
+                            <input type="text" id="withdrawAmount" required step="0.00000001">
                             <button type="button" class="max-btn">MAX</button>
                         </div>
                         <p class="available-balance">Disponibil: <span id="availableBalance">0.00</span></p>
@@ -161,6 +164,145 @@
                         </select>
                     </div>
                     <button type="submit" class="submit-btn">Confirmă Retragerea</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Swap -->
+    <div id="swapModal" class="modal swap-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Swap Criptomonede</h3>
+                <button id="closeSwapModal" class="close-btn">&times;</button>
+            </div>
+            <form id="swapForm">
+                <div class="swap-section">
+                    <label for="fromCrypto">Din</label>
+                    <div class="swap-input-container">
+                        <div class="crypto-select">
+                            <select id="fromCrypto" name="fromCrypto">
+                                <option value="bitcoin">Bitcoin (BTC)</option>
+                                <option value="ethereum">Ethereum (ETH)</option>
+                                <option value="orionix">Orionix (ORX)</option>
+                            </select>
+                            <i class="crypto-icon"></i>
+                        </div>
+                        <div class="amount-input-wrapper">
+                            <label for="fromAmount" class="sr-only">Sumă</label>
+                            <input type="text" id="fromAmount" name="fromAmount" placeholder="0.00">
+                            <button type="button" class="max-btn">MAX</button>
+                        </div>
+                    </div>
+                    <div class="balance-info">
+                        <span>Disponibil:</span>
+                        <span id="fromAvailableBalance">0.00000000</span>
+                    </div>
+                </div>
+
+                <button type="button" id="switchPair" class="switch-btn">
+                    <i class="fas fa-exchange-alt"></i>
+                </button>
+
+                <div class="swap-section">
+                    <label for="toCrypto">În</label>
+                    <div class="swap-input-container">
+                        <div class="crypto-select">
+                            <select id="toCrypto" name="toCrypto">
+                                <option value="ethereum">Ethereum (ETH)</option>
+                                <option value="bitcoin">Bitcoin (BTC)</option>
+                                <option value="orionix">Orionix (ORX)</option>
+                            </select>
+                            <i class="crypto-icon"></i>
+                        </div>
+                        <div class="amount-input-wrapper">
+                            <label for="toAmount" class="sr-only">Sumă primită</label>
+                            <input type="text" id="toAmount" name="toAmount" readonly placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="swap-details">
+                    <div class="detail-row">
+                        <span class="label">Rata de schimb</span>
+                        <span id="exchangeRate" class="value">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Comision de tranzacție</span>
+                        <span id="swapFee" class="value fee">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Vei primi minim</span>
+                        <span id="minReceived" class="value receive-amount">-</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-check-circle"></i>
+                    Confirmă Swap
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Whitelist -->
+    <div class="modal" id="whitelistModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Adrese de Încredere</h3>
+                <button class="close-btn" id="closeWhitelistModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="whitelist-actions">
+                    <button class="action-btn" id="addWhitelistBtn">
+                        <i class="fas fa-plus"></i> Adaugă Adresă
+                    </button>
+                </div>
+                <div class="whitelist-list">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nume</th>
+                                <th>Adresă</th>
+                                <th>Rețea</th>
+                                <th>Acțiuni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="whitelistTable">
+                            <!-- Se va popula dinamic -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Adaugă Adresă Whitelist -->
+    <div class="modal" id="addWhitelistAddressModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Adaugă Adresă de Încredere</h3>
+                <button class="close-btn" id="closeAddWhitelistModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addWhitelistForm">
+                    <div class="form-group">
+                        <label for="whitelistName">Nume (Alias)</label>
+                        <input type="text" id="whitelistName" required placeholder="Ex: Portofel Personal">
+                    </div>
+                    <div class="form-group">
+                        <label for="whitelistAddress">Adresă</label>
+                        <input type="text" id="whitelistAddress" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="whitelistNetwork">Rețea</label>
+                        <select id="whitelistNetwork" required>
+                            <option value="native">Native</option>
+                            <option value="erc20">ERC20</option>
+                            <option value="bep20">BEP20</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="submit-btn">Adaugă în Whitelist</button>
                 </form>
             </div>
         </div>

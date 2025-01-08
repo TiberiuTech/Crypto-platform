@@ -4,10 +4,11 @@ export class WalletService {
     constructor() {
         this.apiService = new ApiService();
         this.initializeWallet();
+        this.initializeWhitelist();
     }
 
     initializeWallet() {
-        // Încarcă datele din localStorage sau folosește valori implicite
+        //Încarcă datele din localStorage sau folosește valori implicite
         const savedData = localStorage.getItem('wallet');
         if (savedData) {
             const data = JSON.parse(savedData);
@@ -23,6 +24,102 @@ export class WalletService {
             this.transactions = [];
             this.saveWalletData();
         }
+    }
+
+    initializeWhitelist() {
+        const savedWhitelist = localStorage.getItem('whitelist');
+        if (savedWhitelist) {
+            this.whitelist = JSON.parse(savedWhitelist);
+        } else {
+            this.whitelist = [];
+            this.saveWhitelist();
+        }
+    }
+
+    saveWhitelist() {
+        localStorage.setItem('whitelist', JSON.stringify(this.whitelist));
+    }
+
+    // Funcții pentru Whitelist
+    addToWhitelist(name, address, network) {
+        const whitelistEntry = {
+            id: Date.now(),
+            name,
+            address,
+            network,
+            dateAdded: new Date().toISOString()
+        };
+        this.whitelist.push(whitelistEntry);
+        this.saveWhitelist();
+        return whitelistEntry;
+    }
+
+    removeFromWhitelist(id) {
+        this.whitelist = this.whitelist.filter(entry => entry.id !== id);
+        this.saveWhitelist();
+    }
+
+    getWhitelistedAddresses() {
+        return this.whitelist;
+    }
+
+    isAddressWhitelisted(address) {
+        return this.whitelist.some(entry => entry.address.toLowerCase() === address.toLowerCase());
+    }
+
+    // Funcții pentru Swap
+    async getSwapRate(fromCrypto, toCrypto, amount) {
+        try {
+            const fromPrice = await this.apiService.getPrice(fromCrypto, 'usd');
+            const toPrice = await this.apiService.getPrice(toCrypto, 'usd');
+            
+            if (!fromPrice || !toPrice) throw new Error('Nu s-au putut obține prețurile');
+            
+            const rate = fromPrice / toPrice;
+            const estimatedAmount = amount * rate;
+            const fee = estimatedAmount * 0.005; // 0.5% comision
+            
+            return {
+                rate,
+                estimatedAmount: estimatedAmount - fee,
+                fee,
+                minReceived: (estimatedAmount - fee) * 0.995 // 0.5% slippage protection
+            };
+        } catch (error) {
+            console.error('Eroare la calculul ratei de swap:', error);
+            throw error;
+        }
+    }
+
+    async executeSwap(fromCrypto, toCrypto, fromAmount) {
+        const fromBalance = this.balances.get(fromCrypto) || 0;
+        if (fromBalance < fromAmount) {
+            throw new Error('Sold insuficient');
+        }
+
+        const swapDetails = await this.getSwapRate(fromCrypto, toCrypto, fromAmount);
+        
+        // Executăm swap-ul
+        this.balances.set(fromCrypto, fromBalance - fromAmount);
+        const currentToBalance = this.balances.get(toCrypto) || 0;
+        this.balances.set(toCrypto, currentToBalance + swapDetails.estimatedAmount);
+
+        // Înregistrăm tranzacția
+        const transaction = {
+            type: 'swap',
+            fromCrypto: fromCrypto.toUpperCase(),
+            toCrypto: toCrypto.toUpperCase(),
+            fromAmount: fromAmount,
+            toAmount: swapDetails.estimatedAmount,
+            timestamp: Date.now(),
+            status: 'Completat',
+            txHash: this.generateTxHash(),
+            fee: swapDetails.fee
+        };
+
+        this.transactions.unshift(transaction);
+        this.saveWalletData();
+        return transaction;
     }
 
     saveWalletData() {
