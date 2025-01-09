@@ -10,12 +10,15 @@ export class WalletService {
     initializeWallet() {
         //Încarcă datele din localStorage sau folosește valori implicite
         const savedData = localStorage.getItem('wallet');
+        console.log('Saved wallet data:', savedData);
         if (savedData) {
             const data = JSON.parse(savedData);
+            console.log('Parsed wallet data:', data);
             this.balances = new Map(Object.entries(data.balances));
             this.transactions = data.transactions;
         } else {
             // Date implicite pentru demo
+            console.log('Initializing default balances');
             this.balances = new Map([
                 ['bitcoin', 0.5],
                 ['ethereum', 2.0],
@@ -24,6 +27,7 @@ export class WalletService {
             this.transactions = [];
             this.saveWalletData();
         }
+        console.log('Final balances after initialization:', Object.fromEntries(this.balances));
     }
 
     initializeWhitelist() {
@@ -127,6 +131,7 @@ export class WalletService {
             balances: Object.fromEntries(this.balances),
             transactions: this.transactions
         };
+        console.log('Saving wallet data:', data);
         localStorage.setItem('wallet', JSON.stringify(data));
     }
 
@@ -192,7 +197,11 @@ export class WalletService {
     }
 
     getCoinBalance(crypto) {
-        return this.balances.get(crypto) || 0;
+        console.log('Getting balance for:', crypto);
+        console.log('Current balances:', Object.fromEntries(this.balances));
+        const balance = this.balances.get(crypto) || 0;
+        console.log('Retrieved balance:', balance);
+        return balance;
     }
 
     getDepositAddress(crypto) {

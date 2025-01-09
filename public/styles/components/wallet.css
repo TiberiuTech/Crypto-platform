@@ -209,180 +209,180 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
-    z-index: 1000;
     backdrop-filter: blur(8px);
+    z-index: 1000;
+    overflow-y: auto;
 }
 
 .modal-content {
-    position: absolute;
-    top: 50%;
+    position: relative;
+    top: 5%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 420px;
+    margin-bottom: 5%;
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(9, 14, 52, 0.97));
     border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 24px;
-    padding: 2rem;
-    width: 95%;
-    max-width: 580px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    padding: 0;
 }
 
 .modal-header {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.header-content {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.header-content i {
-    font-size: 1.5rem;
-    color: var(--primary-color);
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 .modal-header h3 {
-    font-size: 1.5rem;
+    color: #fff;
+    font-size: 1.25rem;
     font-weight: 600;
-    background: linear-gradient(to right, #fff, #94a3b8);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
     margin: 0;
 }
 
-.modal-close {
+.close-btn {
     background: none;
     border: none;
-    color: var(--text-secondary);
-    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 24px;
     cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
+    padding: 4px;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-.modal-close:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
+.close-btn:hover {
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: 16px;
+    max-height: calc(90vh - 80px);
+    overflow-y: auto;
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+    position: relative;
+    margin-bottom: 16px;
 }
 
 .form-group label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 12px;
+    color: white;
     font-size: 0.95rem;
-    margin-bottom: 0.5rem;
+    font-weight: 500;
 }
 
-.form-group label i {
-    color: var(--primary-color);
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
 }
 
-.select-wrapper {
+.address-input {
     position: relative;
-}
-
-.select-wrapper i {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    pointer-events: none;
-}
-
-select {
-    width: 100%;
-    padding: 1rem;
-    padding-right: 2.5rem;
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: var(--border-radius-md);
-    color: var(--text-primary);
-    font-size: 1rem;
-    appearance: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
-
-.option-content {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
 }
 
-.option-content img {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-}
-
-.address-container,
-.address-input-container {
-    position: relative;
-}
-
-.address-container input,
-.address-input-container input {
+.address-input input {
     width: 100%;
-    padding: 1rem;
-    padding-right: 3rem;
-    background: rgba(15, 23, 42, 0.8);
+    padding: 12px 16px;
+    padding-right: 48px;
+    background: rgba(15, 23, 42, 0.6);
     border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: var(--border-radius-md);
-    color: var(--text-primary);
-    font-size: 1rem;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.9rem;
+    font-family: monospace;
 }
 
-.copy-btn,
-.paste-btn {
+.address-input button {
     position: absolute;
-    right: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
+    right: 8px;
     background: none;
     border: none;
-    color: var(--primary-color);
-    padding: 0.5rem;
-    border-radius: var(--border-radius-sm);
+    color: rgba(99, 102, 241, 0.8);
+    padding: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.copy-btn:hover,
-.paste-btn:hover {
-    background: rgba(99, 102, 241, 0.1);
+.address-input button:hover {
+    color: rgba(99, 102, 241, 1);
+    transform: scale(1.1);
 }
 
-.qr-section {
+.qr-code {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    margin: 24px 0;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    gap: 1rem;
-    margin: 2rem 0;
+    position: relative;
+}
+
+.qr-code canvas {
+    max-width: 200px;
+    height: auto;
+}
+
+.deposit-info {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 24px;
+}
+
+.deposit-info p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+}
+
+.deposit-info p:before {
+    content: "•";
+    color: rgba(99, 102, 241, 0.8);
+    margin-right: 8px;
+    font-size: 1.2rem;
+}
+
+.deposit-info span {
+    color: white;
+    font-weight: 500;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
 }
 
 .qr-container {
@@ -418,19 +418,12 @@ select:focus {
 .info-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    margin: 2rem 0;
+    gap: 8px;
+    margin: 16px 0;
 }
 
 .info-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    padding: 1rem;
-    background: rgba(51, 65, 85, 0.4);
-    border: 1px solid rgba(99, 102, 241, 0.1);
-    border-radius: var(--border-radius-md);
-    transition: all 0.3s ease;
+    padding: 12px;
 }
 
 .info-card:hover {
@@ -471,9 +464,9 @@ select:focus {
 .warning-container {
     background: rgba(234, 179, 8, 0.1);
     border: 1px solid rgba(234, 179, 8, 0.2);
-    border-radius: var(--border-radius-md);
-    padding: 1.25rem;
-    margin-top: 2rem;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 16px 0;
 }
 
 .warning-header {
@@ -580,7 +573,7 @@ select:focus {
     border: 1px solid rgba(99, 102, 241, 0.1);
     border-radius: var(--border-radius-md);
     padding: 1.25rem;
-    margin: 2rem 0;
+    margin: 16px 0;
 }
 
 .withdrawal-summary h4 {
@@ -1242,102 +1235,77 @@ select:focus {
 
 /* Stiluri comune pentru modals */
 .modal-content {
-    max-width: 500px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-}
-
-.form-group input,
-.form-group select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-}
-
-.submit-btn {
-    width: 100%;
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.submit-btn:hover {
-    background-color: #0056b3;
-}
-
-/* Animații */
-@keyframes slideIn {
-    from {
-        transform: translateY(-20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-.modal-content {
-    animation: slideIn 0.3s ease-out;
-}
-
-/* Stiluri pentru Swap Modal */
-.swap-modal {
+    max-width: 480px;
     background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(9, 14, 52, 0.97));
     border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 20px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(20px);
+    overflow: hidden;
 }
 
-.swap-section {
-    background: rgba(30, 41, 59, 0.4);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.swap-label {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 12px;
-    display: block;
-}
-
-.swap-input-container {
+.modal-header {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    background: rgba(30, 41, 59, 0.4);
+}
+
+.modal-header h3 {
+    display: flex;
+    align-items: center;
     gap: 12px;
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-header h3 i {
+    color: #3b82f6;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+/* Stiluri pentru secțiunile de depunere și retragere */
+.deposit-section,
+.withdraw-section {
+    margin-bottom: 24px;
+}
+
+.deposit-section label,
+.withdraw-section label {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
     margin-bottom: 8px;
 }
 
-.crypto-select {
-    flex: 1;
+/* Stiluri pentru selectoare crypto */
+.crypto-select-container {
     position: relative;
 }
 
-.crypto-select select {
+.crypto-select-container select {
     width: 100%;
-    padding: 12px 12px 12px 40px;
+    padding: 12px 16px 12px 40px;
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid rgba(99, 102, 241, 0.2);
     border-radius: 12px;
     color: white;
     font-size: 1rem;
+    transition: all 0.3s ease;
     cursor: pointer;
     appearance: none;
+}
+
+.crypto-select-container select:focus {
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 .crypto-icon {
@@ -1346,206 +1314,217 @@ select:focus {
     top: 50%;
     transform: translateY(-50%);
     font-size: 1.2rem;
+    pointer-events: none;
 }
 
-/* Iconițe specifice pentru fiecare criptomonedă */
-.crypto-select select[value="bitcoin"] + .crypto-icon::before {
-    content: "\f379"; /* fa-bitcoin */
-    color: #f7931a;
+/* Stiluri pentru input-uri de adresă */
+.address-input {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.crypto-select select[value="ethereum"] + .crypto-icon::before {
-    content: "\f42e"; /* fa-ethereum */
-    color: #627eea;
+.address-input input {
+    width: 100%;
+    padding: 12px 16px;
+    padding-right: 48px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: 0.9rem;
+    font-family: monospace;
 }
 
-.crypto-select select[value="orionix"] + .crypto-icon::before {
-    content: "\f3d1"; /* fa-gem */
-    color: #00ff88;
+.icon-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: rgba(99, 102, 241, 0.8);
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.option-content {
+.icon-btn:hover {
+    color: rgba(99, 102, 241, 1);
+    transform: scale(1.1);
+}
+
+/* Stiluri pentru QR code */
+.qr-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin: 24px 0;
+}
+
+.qr-code {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.qr-info {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 4px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
 }
 
-.option-content img {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
+/* Stiluri pentru grid de informații */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 24px;
 }
 
-.amount-input-wrapper {
-    position: relative;
-    flex: 2;
-}
-
-.amount-input-wrapper input {
-    width: 100%;
-    padding: 12px;
-    padding-right: 65px;
-    background: rgba(15, 23, 42, 0.6);
+.info-card {
+    background: rgba(30, 41, 59, 0.4);
     border: 1px solid rgba(99, 102, 241, 0.2);
     border-radius: 12px;
-    color: white;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.amount-input-wrapper input:focus {
-    outline: none;
-    border-color: rgba(99, 102, 241, 0.5);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
-
-/* Eliminăm săgețile din input-uri */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-calendar-picker-indicator {
-    -webkit-appearance: none;
-    display: none;
-}
-
-input[type="number"],
-input[type="text"] {
-    -moz-appearance: textfield;
-    appearance: textfield;
-}
-
-select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: none !important;
-}
-
-/* Eliminăm pseudo-elementele care creează săgeți */
-.amount-input-wrapper::before,
-.amount-input-wrapper::after {
-    display: none;
-}
-
-/* Stiluri pentru input */
-.amount-input-wrapper input {
-    width: 100%;
-    padding: 12px;
-    padding-right: 65px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 12px;
-    color: white;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.amount-input-wrapper input:focus {
-    outline: none;
-    border-color: rgba(99, 102, 241, 0.5);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
-
-.max-btn {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 4px 8px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    border: none;
-    border-radius: 8px;
-    color: white;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 2;
-}
-
-.max-btn:hover {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    transform: translateY(-50%) scale(1.05);
-}
-
-.balance-info {
+    padding: 16px;
     display: flex;
-    justify-content: space-between;
-    padding: 8px 4px;
-    font-size: 0.85rem;
-}
-
-.balance-info .label {
-    color: var(--text-secondary);
-}
-
-.balance-info .value {
-    color: var(--text-primary);
-    font-weight: 500;
-}
-
-.switch-btn {
-    width: 40px;
-    height: 40px;
-    margin: -10px auto;
-    position: relative;
-    z-index: 2;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    border: 4px solid rgba(17, 24, 39, 0.95);
-    border-radius: 50%;
-    color: white;
-    font-size: 1rem;
-    cursor: pointer;
+    align-items: flex-start;
+    gap: 12px;
     transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    background: rgba(30, 41, 59, 0.6);
+    transform: translateY(-2px);
+}
+
+.info-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    color: #3b82f6;
 }
 
-.switch-btn:hover {
-    transform: rotate(180deg);
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+.info-content h4 {
+    color: white;
+    font-size: 0.9rem;
+    margin: 0 0 4px 0;
 }
 
-.swap-details {
+.info-content p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+/* Stiluri pentru sumar retragere */
+.withdrawal-summary {
     background: rgba(30, 41, 59, 0.4);
     border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 20px;
     margin: 24px 0;
 }
 
-.detail-row {
+.withdrawal-summary h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    font-size: 1rem;
+    margin: 0 0 16px 0;
+}
+
+.summary-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.summary-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 0;
-}
-
-.detail-row:not(:last-child) {
     border-bottom: 1px solid rgba(99, 102, 241, 0.1);
 }
 
-.detail-row .label {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+.summary-row:last-child {
+    border-bottom: none;
 }
 
-.detail-row .value {
-    color: var(--text-primary);
+.summary-row .label {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.summary-row .value {
+    color: white;
     font-weight: 500;
-    font-size: 0.9rem;
 }
 
-.detail-row .fee {
+.summary-row .fee {
     color: #ef4444;
 }
 
-.detail-row .receive-amount {
+.summary-row .receive-amount {
     color: #10b981;
+    font-weight: 600;
 }
 
+/* Stiluri pentru warning container */
+.warning-container {
+    background: rgba(234, 179, 8, 0.1);
+    border: 1px solid rgba(234, 179, 8, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 16px 0;
+}
+
+.warning-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.warning-header i {
+    color: #eab308;
+}
+
+.warning-header h4 {
+    color: #eab308;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.warning-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.warning-list li {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.warning-list li:before {
+    content: "•";
+    color: #eab308;
+    position: absolute;
+    left: 0;
+}
+
+/* Stiluri pentru butonul de submit */
 .submit-btn {
     width: 100%;
     padding: 16px;
@@ -1561,24 +1540,16 @@ select {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    margin-top: 24px;
 }
 
 .submit-btn:hover {
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-.submit-btn i {
-    font-size: 1.1rem;
-}
-
-/* Animații pentru modal */
-.modal-content {
-    animation: modalSlideIn 0.3s ease-out;
-}
-
+/* Animații */
 @keyframes modalSlideIn {
     from {
         opacity: 0;
@@ -1590,63 +1561,697 @@ select {
     }
 }
 
+.modal-content {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
 /* Responsive Design */
-@media (max-width: 640px) {
-    .swap-input-container {
-        flex-direction: column;
+@media (max-width: 480px) {
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
     }
 
-    .amount-input-wrapper {
-        width: 100%;
-    }
-
-    .swap-details {
-        padding: 16px;
-    }
-
-    .detail-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
+    .crypto-options {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
-.crypto-select select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
+/* Stiluri pentru pașii de depunere */
+.steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 16px 0;
+    padding: 20px;
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 16px;
 }
 
-/* Eliminăm săgețile din input-uri */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-calendar-picker-indicator {
-    -webkit-appearance: none;
-    display: none;
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(51, 65, 85, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: 12px;
+    transition: all 0.3s ease;
 }
 
-input[type="number"],
-input[type="text"] {
-    -moz-appearance: textfield;
-    appearance: textfield;
+.step-item:hover {
+    background: rgba(51, 65, 85, 0.6);
+    transform: translateX(8px);
 }
 
-/* Eliminăm săgețile din select */
-select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: none !important;
+.step-number {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content h4 {
+    color: white;
+    font-size: 1rem;
+    margin: 0 0 4px 0;
+}
+
+.step-content p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Stiluri pentru butonul de simulare */
+.simulate-deposit {
+    width: 100%;
+    padding: 14px;
+    margin-top: 24px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.simulate-deposit i {
+    font-size: 1.1rem;
+}
+
+.simulate-deposit:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Stiluri pentru modalul de retragere */
+.crypto-select-section {
+    margin-bottom: 16px;
+}
+
+.crypto-select-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.balance-badge {
+    padding: 6px 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 20px;
+    color: #3b82f6;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.crypto-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.crypto-option {
+    padding: 12px;
+    background: rgba(51, 65, 85, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.crypto-option:hover {
+    background: rgba(51, 65, 85, 0.6);
+    transform: translateY(-2px);
+}
+
+.crypto-option.active {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+}
+
+.crypto-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #3b82f6;
+}
+
+.crypto-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.crypto-name {
+    color: white;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.crypto-ticker {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+}
+
+/* Stiluri pentru secțiunea de sumă */
+.amount-section {
+    margin-bottom: 16px;
+}
+
+.amount-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.amount-input-wrapper {
+    position: relative;
+    width: 100%;
 }
 
 .amount-input-wrapper input {
     width: 100%;
-    padding: 12px;
-    padding-right: 65px;
+    padding: 14px 16px;
+    padding-right: 80px;
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid rgba(99, 102, 241, 0.2);
     border-radius: 12px;
     color: white;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.amount-input-wrapper input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.max-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.max-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.amount-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+
+.quick-amount {
+    flex: 1;
+    padding: 6px;
+    background: rgba(51, 65, 85, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
     transition: all 0.3s ease;
-} 
+}
+
+.quick-amount:hover {
+    background: rgba(51, 65, 85, 0.6);
+    border-color: #3b82f6;
+}
+
+/* Stiluri pentru secțiunea de adresă */
+.address-section {
+    margin-bottom: 16px;
+}
+
+.address-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.whitelist-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(59, 130, 246, 0.1);
+    border: none;
+    border-radius: 20px;
+    color: #3b82f6;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.whitelist-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+.address-input-group {
+    position: relative;
+}
+
+.address-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 1rem;
+}
+
+.address-input input {
+    width: 100%;
+    padding: 14px 16px 14px 48px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: 0.95rem;
+    font-family: monospace;
+}
+
+/* Stiluri pentru secțiunea de rețea */
+.network-section {
+    margin-bottom: 16px;
+}
+
+.network-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.network-option {
+    padding: 12px;
+    background: rgba(51, 65, 85, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.network-option:hover {
+    background: rgba(51, 65, 85, 0.6);
+    transform: translateY(-2px);
+}
+
+.network-option.active {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+}
+
+.network-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #3b82f6;
+}
+
+.network-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.network-name {
+    color: white;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.network-fee {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+}
+
+/* Scrollbar personalizat pentru modal */
+.modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.6);
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.4);
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.6);
+}
+
+/* Scrollbar personalizat pentru modal-body */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.4);
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.6);
+}
+
+/* Stiluri pentru Swap Modal */
+.swap-modal .modal-content {
+    max-width: 400px;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(12, 20, 36, 0.97));
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+}
+
+.swap-modal .modal-header {
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.6);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: 24px 24px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.swap-modal .modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.swap-modal .modal-header h3 i {
+    color: #3b82f6;
+    font-size: 1.2rem;
+}
+
+.swap-modal .modal-body {
+    padding: 24px;
+}
+
+.swap-input-container {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.swap-input-container:hover {
+    border-color: rgba(99, 102, 241, 0.25);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+}
+
+.crypto-select {
+    margin-bottom: 12px;
+}
+
+.crypto-select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.crypto-select-wrapper:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    background: rgba(15, 23, 42, 0.7);
+}
+
+.crypto-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
+    color: #3b82f6;
+    font-size: 1.1rem;
+}
+
+.crypto-info {
+    flex: 1;
+}
+
+.crypto-name {
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.crypto-ticker {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.amount-input-wrapper {
+    position: relative;
+    margin-top: 12px;
+}
+
+.amount-input-wrapper input {
+    width: 100%;
+    padding: 14px 16px;
+    padding-right: 76px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.amount-input-wrapper input:focus {
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.max-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 6px 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 8px;
+    color: #60a5fa;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.max-btn:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.25);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.switch-btn {
+    width: 44px;
+    height: 44px;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    border-radius: 50%;
+    color: #60a5fa;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.4s ease;
+}
+
+.switch-btn:hover {
+    transform: rotate(180deg);
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+}
+
+.swap-details {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 24px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    font-size: 0.95rem;
+}
+
+.detail-row:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.detail-row .label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.detail-row .value {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+.detail-row .fee {
+    color: #f87171;
+}
+
+.detail-row .receive-amount {
+    color: #34d399;
+    font-weight: 600;
+}
+
+.swap-modal .submit-btn {
+    width: 100%;
+    padding: 16px;
+    margin-top: 24px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+}
+
+.swap-modal .submit-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+}
+
+.swap-modal .submit-btn:active {
+    transform: translateY(0);
+}
+
+.balance-info {
+    display: flex;
+    justify-content: flex-end;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+/* Dezactivează săgețile pentru input-uri numerice */
+.amount-input-wrapper input::-webkit-outer-spin-button,
+.amount-input-wrapper input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.amount-input-wrapper input[type=number] {
+    appearance: textfield;
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+/* Stiluri pentru selectoare crypto */
+.crypto-select {
+    margin-bottom: 8px;
+}
+
+.crypto-select select {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 12px;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    appearance: none;
+}
