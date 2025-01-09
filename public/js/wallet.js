@@ -29,16 +29,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inițializare UI
     updateWalletUI();
 
+    // Event listeners pentru filtrele de tranzacții
+    document.querySelectorAll('.transaction-filters .filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Actualizăm starea activă a butoanelor
+            e.target.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+
+            const filter = e.target.textContent.toLowerCase();
+            const transactions = walletService.getFilteredTransactions(filter);
+            updateTransactionsList(transactions);
+        });
+    });
+
     // Event Listeners pentru Swap
     if (swapBtn) {
         swapBtn.addEventListener('click', () => {
             if (swapModal) {
-                console.log('Opening swap modal');
                 swapModal.style.display = 'block';
                 const fromCrypto = fromCryptoSelect.value;
-                console.log('Initial from crypto:', fromCrypto);
                 const balance = walletService.getCoinBalance(fromCrypto);
-                console.log('Initial balance:', balance);
                 if (fromAvailableBalance) {
                     fromAvailableBalance.textContent = formatNumber(balance);
                 }
@@ -72,9 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (fromCryptoSelect) {
         fromCryptoSelect.addEventListener('change', () => {
             const fromCrypto = fromCryptoSelect.value;
-            console.log('Selected from crypto:', fromCrypto);
             const availableBalance = walletService.getCoinBalance(fromCrypto);
-            console.log('Available balance:', availableBalance);
             if (fromAvailableBalance) {
                 fromAvailableBalance.textContent = formatNumber(availableBalance);
             }
@@ -211,27 +219,22 @@ document.addEventListener('DOMContentLoaded', () => {
 async function updateSwapInfo() {
     if (!fromCryptoSelect || !toCryptoSelect || !fromAmountInput || !fromAvailableBalance || 
         !exchangeRateSpan || !swapFeeSpan || !minReceivedSpan || !toAmountInput) {
-        console.error('Unul sau mai multe elemente DOM lipsesc');
         return;
     }
 
-    console.log('Începe actualizarea informațiilor de swap...');
     const fromCrypto = fromCryptoSelect.value;
     const toCrypto = toCryptoSelect.value;
     const fromAmount = parseFloat(fromAmountInput.value) || 0;
 
     // Actualizăm soldul disponibil
     const availableBalance = walletService.getCoinBalance(fromCrypto);
-    console.log(`Sold disponibil pentru ${fromCrypto}:`, availableBalance);
     if (fromAvailableBalance) {
         fromAvailableBalance.textContent = formatNumber(availableBalance);
     }
 
     if (fromAmount > 0) {
         try {
-            console.log('Calculăm rata de swap pentru:', fromAmount, fromCrypto, 'în', toCrypto);
             const swapDetails = await walletService.getSwapRate(fromCrypto, toCrypto, fromAmount);
-            console.log('Detalii swap:', swapDetails);
             
             // Actualizăm informațiile de swap
             exchangeRateSpan.textContent = `1 ${fromCrypto.toUpperCase()} = ${formatNumber(swapDetails.rate)} ${toCrypto.toUpperCase()}`;
@@ -239,7 +242,6 @@ async function updateSwapInfo() {
             minReceivedSpan.textContent = `${formatNumber(swapDetails.minReceived)} ${toCrypto.toUpperCase()}`;
             toAmountInput.value = formatNumber(swapDetails.estimatedAmount);
         } catch (error) {
-            console.error('Eroare la calculul ratei de swap:', error);
             showNotification('error', 'Nu s-a putut calcula rata de schimb');
         }
     } else {
@@ -276,21 +278,16 @@ function showNotification(type, message) {
 // Funcție pentru actualizarea UI-ului portofelului
 async function updateWalletUI() {
     try {
-        console.log('Începe actualizarea UI...');
-        
         // Actualizăm soldul total
         const totalBalance = await walletService.getTotalBalance();
-        console.log('Sold total:', totalBalance);
         document.querySelector('.balance').textContent = formatPrice(totalBalance);
         
         // Actualizăm lista de active
         const assets = await walletService.getAssets();
-        console.log('Active:', assets);
         const assetsList = document.querySelector('.assets-list');
         document.querySelector('.asset-count').textContent = `(${assets.length})`;
 
         if (assets.length === 0) {
-            console.log('Nu există active');
             assetsList.innerHTML = '<div class="no-assets">Nu există active în portofel</div>';
         } else {
             assetsList.innerHTML = assets.map(asset => `
@@ -317,9 +314,10 @@ async function updateWalletUI() {
         balanceChange.textContent = `${totalChange >= 0 ? '+' : ''}${totalChange.toFixed(2)}%`;
         balanceChange.className = `change ${totalChange >= 0 ? 'positive' : 'negative'}`;
 
-        console.log('UI actualizat cu succes');
+        // Actualizăm istoricul tranzacțiilor
+        const transactions = walletService.getTransactions();
+        updateTransactionsList(transactions);
     } catch (error) {
-        console.error('Eroare la actualizarea UI:', error);
         showNotification('error', 'Eroare la actualizarea datelor');
     }
 }
@@ -380,7 +378,7 @@ function updateAssetsList(assets) {
 function updateTransactionsList(transactions) {
     const transactionsList = document.querySelector('.transactions-list');
     
-    if (transactions.length === 0) {
+    if (!transactions || transactions.length === 0) {
         transactionsList.innerHTML = '<div class="no-transactions">Nu există tranzacții în această categorie</div>';
         return;
     }
@@ -418,12 +416,12 @@ function updateTransactionsList(transactions) {
                     <i class="fas fa-${icon}"></i>
                     <div class="transaction-details">
                         <h4>${title}</h4>
-                        <p>${new Date(tx.timestamp).toLocaleString()}</p>
+                        <p>${new Date(tx.timestamp).toLocaleString('ro-RO')}</p>
                     </div>
                 </div>
                 <div class="transaction-amount">
                     <h4>${details}</h4>
-                    <p class="status ${tx.status.toLowerCase()}">${tx.status}</p>
+                    <span class="status ${tx.status.toLowerCase()}">${tx.status}</span>
                 </div>
             </div>
         `;
@@ -432,7 +430,6 @@ function updateTransactionsList(transactions) {
 
 function updateCryptoIcons() {
     if (!fromCryptoSelect || !toCryptoSelect) {
-        console.error('Selectoarele crypto lipsesc');
         return;
     }
 

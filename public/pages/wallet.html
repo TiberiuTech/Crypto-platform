@@ -3,466 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto-Impact | Portofel</title>
-    <link rel="stylesheet" href="../styles/main.css">
-    <link rel="stylesheet" href="../styles/components/navbar.css">
+    <title>Portofel | CryptoVault</title>
     <link rel="stylesheet" href="../styles/components/wallet.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="../js/chart.js" defer></script>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="../../index.html" class="logo">Crypto-Impact</a>
-        </div>
-        <div class="nav-center">
-            <a href="news.html" class="nav-btn">News</a>
-            <a href="prices.html" class="nav-btn">Prices</a>
-            <a href="wallet.html" class="nav-btn active">Wallet</a>
-            <a href="trade.html" class="nav-btn">Trade</a>
-        </div>
-        <div class="nav-right">
-            <div class="notification-bell">
-                <i class="fas fa-bell"></i>
-                <span class="notification-count">0</span>
-            </div>
-            <button class="auth-btn login">Login</button>
-            <button class="auth-btn signup">Sign Up</button>
-        </div>
-    </nav>
-
-    <!-- Wallet Section -->
-    <section class="wallet" id="wallet">
-        <h2>Portofelul Meu</h2>
+    <div class="wallet">
         <div class="wallet-content">
+            <!-- Card Principal -->
             <div class="wallet-balance">
                 <h3>Sold Total</h3>
-                <p class="balance">Loading...</p>
+                <div class="balance">54.024,07 USD</div>
                 <div class="balance-change">
-                    <span class="change">Loading...</span>
+                    <span class="change negative">-0.05%</span>
                     <span class="period">ultimele 24h</span>
                 </div>
+                
+                <!-- Butoane de Acțiune -->
                 <div class="wallet-actions">
-                    <button id="depositBtn" class="action-btn">
+                    <button class="action-btn deposit">
                         <i class="fas fa-arrow-down"></i>
-                        DEPUNERE
+                        Depunere
                     </button>
-                    <button id="withdrawBtn" class="action-btn">
+                    <button class="action-btn withdraw">
                         <i class="fas fa-arrow-up"></i>
-                        RETRAGERE
+                        Retragere
                     </button>
-                    <button id="swapBtn" class="action-btn">
+                    <button class="action-btn swap">
                         <i class="fas fa-exchange-alt"></i>
-                        SWAP
+                        Swap
                     </button>
-                </div>
-                <div class="balance-chart">
-                    <canvas id="balanceChart"></canvas>
-                </div>
-            </div>
-            
-            <div class="wallet-assets">
-                <div class="section-header">
-                    <h3>Active <span class="asset-count">(0)</span></h3>
-                    <div class="asset-filters">
-                        <button class="filter-btn active">Toate</button>
-                        <button class="filter-btn">Crypto</button>
-                        <button class="filter-btn">Tokens</button>
-                    </div>
-                </div>
-                <div class="assets-list">
-                    <!-- Lista de active va fi populată dinamic -->
-                    <div class="loading-assets">Se încarcă activele...</div>
                 </div>
             </div>
 
+            <!-- Grafic Portofel -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Evoluție Portofel</h3>
+                    <div class="chart-period-selector">
+                        <button class="period-btn" data-period="7">7Z</button>
+                        <button class="period-btn active" data-period="30">30Z</button>
+                        <button class="period-btn" data-period="90">90Z</button>
+                        <button class="period-btn" data-period="365">1A</button>
+                    </div>
+                </div>
+                <canvas id="portfolioChart"></canvas>
+            </div>
+
+            <!-- Statistici -->
+            <div class="stats-grid">
+                <div class="stat-card" style="--animation-order: 1">
+                    <div class="stat-title">Profit Total</div>
+                    <div class="stat-value">+2.145,32 USD</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +4.12%
+                    </div>
+                </div>
+                <div class="stat-card" style="--animation-order: 2">
+                    <div class="stat-title">Valoare 24h</div>
+                    <div class="stat-value">-27,15 USD</div>
+                    <div class="stat-change negative">
+                        <i class="fas fa-arrow-down"></i>
+                        -0.05%
+                    </div>
+                </div>
+                <div class="stat-card" style="--animation-order: 3">
+                    <div class="stat-title">Active</div>
+                    <div class="stat-value">5</div>
+                    <div class="stat-change">
+                        Monede & Token-uri
+                    </div>
+                </div>
+                <div class="stat-card" style="--animation-order: 4">
+                    <div class="stat-title">Tranzacții</div>
+                    <div class="stat-value">27</div>
+                    <div class="stat-change">
+                        Luna aceasta
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Active -->
+            <div class="wallet-assets">
+                <div class="section-header">
+                    <h3>Active <span class="asset-count">(5)</span></h3>
+                    <div class="asset-filters">
+                        <button class="filter-btn active">Toate</button>
+                        <button class="filter-btn">Monede</button>
+                        <button class="filter-btn">Token-uri</button>
+                    </div>
+                </div>
+                <!-- Lista de active va fi populată dinamic -->
+            </div>
+
+            <!-- Istoric Tranzacții -->
             <div class="transaction-history">
                 <div class="section-header">
                     <h3>Istoric Tranzacții</h3>
-                    <div class="transaction-filters">
-                        <button class="filter-btn active">Toate</button>
-                        <button class="filter-btn">Depuneri</button>
-                        <button class="filter-btn">Retrageri</button>
-                    </div>
                 </div>
-                <div class="transactions-list">
-                    <!-- Lista de tranzacții va fi populată dinamic -->
-                    <div class="loading-transactions">Se încarcă tranzacțiile...</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Modal Depunere -->
-    <div id="depositModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-arrow-down"></i> Depunere Crypto</h3>
-                <button id="closeDepositModal" class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="deposit-section">
-                    <label for="depositCrypto">Selectează Criptomoneda</label>
-                    <div class="crypto-select-container">
-                        <select id="depositCrypto" name="depositCrypto">
-                            <option value="bitcoin">Bitcoin (BTC)</option>
-                            <option value="ethereum">Ethereum (ETH)</option>
-                            <option value="orionix">Orionix (ORX)</option>
-                        </select>
-                        <i class="crypto-icon"></i>
-                    </div>
-                </div>
-
-                <div class="deposit-section">
-                    <label for="depositAddress">Adresă Depunere</label>
-                    <div class="address-input">
-                        <input type="text" id="depositAddress" name="depositAddress" readonly>
-                        <button id="copyAddressBtn" class="icon-btn">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="steps-container">
-                    <div class="step-item">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <h4>Copiază Adresa</h4>
-                            <p>Folosește butonul de copiere pentru a prelua adresa de depunere</p>
-                        </div>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <h4>Trimite Fonduri</h4>
-                            <p>Transferă suma dorită din portofelul tău extern</p>
-                        </div>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-number">3</div>
-                        <div class="step-content">
-                            <h4>Așteptă Confirmarea</h4>
-                            <p>Fondurile vor apărea în cont după confirmarea tranzacției</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="info-grid">
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <i class="fas fa-info-circle"></i>
-                        </div>
-                        <div class="info-content">
-                            <h4>Trimite doar <span id="selectedCrypto">Bitcoin</span></h4>
-                            <p>Trimiterea altei criptomonede poate duce la pierderea fondurilor</p>
-                        </div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="info-content">
-                            <h4>Timp de Procesare</h4>
-                            <p>Depunerea va fi procesată după 6 confirmări în rețea</p>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="simulate-deposit">
-                    <i class="fas fa-bolt"></i>
-                    Simulează o Depunere (Demo)
-                </button>
+                <!-- Lista de tranzacții va fi populată dinamic -->
             </div>
         </div>
     </div>
 
-    <!-- Modal Retragere -->
-    <div id="withdrawModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-arrow-up"></i> Retragere Crypto</h3>
-                <button id="closeWithdrawModal" class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="withdrawForm">
-                    <!-- Selector Criptomonedă -->
-                    <div class="crypto-select-section">
-                        <div class="crypto-select-header">
-                            <label>Selectează Criptomoneda</label>
-                            <span class="balance-badge">Disponibil: <span id="availableBalance">0.00000000 BTC</span></span>
-                        </div>
-                        <div class="crypto-options">
-                            <div class="crypto-option active" data-value="bitcoin">
-                                <div class="crypto-icon-wrapper">
-                                    <i class="fab fa-bitcoin"></i>
-                                </div>
-                                <div class="crypto-details">
-                                    <span class="crypto-name">Bitcoin</span>
-                                    <span class="crypto-ticker">BTC</span>
-                                </div>
-                            </div>
-                            <div class="crypto-option" data-value="ethereum">
-                                <div class="crypto-icon-wrapper">
-                                    <i class="fab fa-ethereum"></i>
-                                </div>
-                                <div class="crypto-details">
-                                    <span class="crypto-name">Ethereum</span>
-                                    <span class="crypto-ticker">ETH</span>
-                                </div>
-                            </div>
-                            <div class="crypto-option" data-value="orionix">
-                                <div class="crypto-icon-wrapper">
-                                    <i class="fas fa-gem"></i>
-                                </div>
-                                <div class="crypto-details">
-                                    <span class="crypto-name">Orionix</span>
-                                    <span class="crypto-ticker">ORX</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Secțiune Sumă -->
-                    <div class="amount-section">
-                        <label for="withdrawAmount">Sumă Retragere</label>
-                        <div class="amount-input-group">
-                            <div class="amount-input-wrapper">
-                                <input type="text" id="withdrawAmount" name="withdrawAmount" required placeholder="0.00">
-                                <button type="button" class="max-btn">MAX</button>
-                            </div>
-                            <div class="amount-actions">
-                                <button type="button" class="quick-amount" data-amount="25">25%</button>
-                                <button type="button" class="quick-amount" data-amount="50">50%</button>
-                                <button type="button" class="quick-amount" data-amount="75">75%</button>
-                                <button type="button" class="quick-amount" data-amount="100">100%</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Secțiune Adresă -->
-                    <div class="address-section">
-                        <label for="withdrawAddress">Adresă Destinație</label>
-                        <div class="address-input-group">
-                            <div class="address-input">
-                                <i class="fas fa-wallet input-icon"></i>
-                                <input type="text" id="withdrawAddress" name="withdrawAddress" required placeholder="Introdu adresa de retragere">
-                                <button type="button" class="icon-btn paste-btn">
-                                    <i class="fas fa-paste"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Selector Rețea -->
-                    <div class="network-section">
-                        <label>Rețea Transfer</label>
-                        <div class="network-options">
-                            <div class="network-option active" data-value="native">
-                                <div class="network-icon">
-                                    <i class="fas fa-network-wired"></i>
-                                </div>
-                                <div class="network-details">
-                                    <span class="network-name">Native</span>
-                                    <span class="network-fee">Comision: 0.0001 BTC</span>
-                                </div>
-                            </div>
-                            <div class="network-option" data-value="erc20">
-                                <div class="network-icon">
-                                    <i class="fab fa-ethereum"></i>
-                                </div>
-                                <div class="network-details">
-                                    <span class="network-name">ERC20</span>
-                                    <span class="network-fee">Comision: 0.0003 BTC</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sumar Retragere -->
-                    <div class="withdrawal-summary">
-                        <h4><i class="fas fa-receipt"></i> Sumar Retragere</h4>
-                        <div class="summary-details">
-                            <div class="summary-row">
-                                <span class="label">Sumă Retragere</span>
-                                <span class="value" id="withdrawalAmount">0.00 BTC</span>
-                            </div>
-                            <div class="summary-row">
-                                <span class="label">Comision Rețea</span>
-                                <span class="value fee" id="networkFee">0.0001 BTC</span>
-                            </div>
-                            <div class="summary-row total">
-                                <span class="label">Vei Primi</span>
-                                <span class="value receive-amount" id="receiveAmount">0.00 BTC</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Avertismente -->
-                    <div class="warning-container">
-                        <div class="warning-header">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h4>Important</h4>
-                        </div>
-                        <ul class="warning-list">
-                            <li>Verifică cu atenție adresa de retragere</li>
-                            <li>Asigură-te că rețeaua selectată este corectă</li>
-                            <li>Retragerea nu poate fi anulată după procesare</li>
-                        </ul>
-                    </div>
-
-                    <!-- Buton Submit -->
-                    <button type="submit" class="submit-btn">
-                        <i class="fas fa-check-circle"></i>
-                        Confirmă Retragerea
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Swap -->
-    <div id="swapModal" class="modal swap-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Swap Criptomonede</h3>
-                <button id="closeSwapModal" class="close-btn">&times;</button>
-            </div>
-            <form id="swapForm">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="fromCrypto">Din</label>
-                        <div class="crypto-select-wrapper">
-                            <select id="fromCrypto" name="fromCrypto">
-                                <option value="bitcoin">Bitcoin (BTC)</option>
-                                <option value="ethereum">Ethereum (ETH)</option>
-                                <option value="orionix">Orionix (ORX)</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="fromAmount">Sumă</label>
-                        <div class="amount-input-wrapper">
-                            <input type="text" id="fromAmount" name="fromAmount" placeholder="0.00" inputmode="decimal">
-                            <button type="button" class="max-btn">MAX</button>
-                        </div>
-                        <div class="balance-info">Disponibil: <span id="fromAvailableBalance">0.00</span></div>
-                    </div>
-
-                    <button type="button" class="switch-btn" id="switchPair">
-                        <i class="fas fa-exchange-alt"></i>
-                    </button>
-
-                    <div class="form-group">
-                        <label for="toCrypto">În</label>
-                        <div class="crypto-select-wrapper">
-                            <select id="toCrypto" name="toCrypto">
-                                <option value="ethereum">Ethereum (ETH)</option>
-                                <option value="bitcoin">Bitcoin (BTC)</option>
-                                <option value="orionix">Orionix (ORX)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="toAmount">Sumă primită</label>
-                        <div class="amount-input-wrapper">
-                            <input type="text" id="toAmount" name="toAmount" placeholder="0.00" readonly>
-                        </div>
-                    </div>
-
-                    <div class="swap-details">
-                        <div class="detail-row">
-                            <span class="label">Rata de schimb</span>
-                            <span id="exchangeRate" class="value">-</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Comision de tranzacție</span>
-                            <span id="swapFee" class="fee">0.00 USD</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Vei primi minim</span>
-                            <span id="minReceived" class="receive-amount">0.000</span>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="submit-btn">
-                        <i class="fas fa-check-circle"></i>
-                        Confirmă Swap
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Whitelist -->
-    <div class="modal" id="whitelistModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Adrese de Încredere</h3>
-                <button class="close-btn" id="closeWhitelistModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="whitelist-actions">
-                    <button class="action-btn" id="addWhitelistBtn">
-                        <i class="fas fa-plus"></i> Adaugă Adresă
-                    </button>
-                </div>
-                <div class="whitelist-list">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nume</th>
-                                <th>Adresă</th>
-                                <th>Rețea</th>
-                                <th>Acțiuni</th>
-                            </tr>
-                        </thead>
-                        <tbody id="whitelistTable">
-                            <!-- Se va popula dinamic -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Adaugă Adresă Whitelist -->
-    <div class="modal" id="addWhitelistAddressModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Adaugă Adresă de Încredere</h3>
-                <button class="close-btn" id="closeAddWhitelistModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="addWhitelistForm">
-                    <div class="form-group">
-                        <label for="whitelistName">Nume (Alias)</label>
-                        <input type="text" id="whitelistName" required placeholder="Ex: Portofel Personal">
-                    </div>
-                    <div class="form-group">
-                        <label for="whitelistAddress">Adresă</label>
-                        <input type="text" id="whitelistAddress" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="whitelistNetwork">Rețea</label>
-                        <select id="whitelistNetwork" required>
-                            <option value="native">Native</option>
-                            <option value="erc20">ERC20</option>
-                            <option value="bep20">BEP20</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="submit-btn">Adaugă în Whitelist</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script type="module" src="../js/services/apiService.js"></script>
-    <script type="module" src="../js/services/walletService.js"></script>
-    <script type="module" src="../js/wallet.js"></script>
+    <script src="https://kit.fontawesome.com/your-kit-code.js"></script>
 </body>
+</html> 
 </html> 
