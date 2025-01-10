@@ -3,116 +3,430 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portofel | CryptoVault</title>
+    <title>Portofel | Crypto-Impact</title>
+    <!-- Stiluri CSS -->
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/components/navbar.css">
     <link rel="stylesheet" href="../styles/components/wallet.css">
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Chart.js CDN -->
+    <!-- Chart.js și plugin-uri -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <script src="../js/chart.js" defer></script>
+    <script src="../js/chart.js" type="module" defer></script>
+    <script src="../js/wallet.js" type="module" defer></script>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="../../index.html" class="logo">Crypto-Impact</a>
+        </div>
+        <div class="nav-center">
+            <a href="news.html" class="nav-btn">News</a>
+            <a href="prices.html" class="nav-btn">Prices</a>
+            <a href="wallet.html" class="nav-btn active">Wallet</a>
+            <a href="trade.html" class="nav-btn">Trade</a>
+        </div>
+        <div class="nav-right">
+            <div class="notification-bell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count">0</span>
+            </div>
+            <button class="auth-btn login">Login</button>
+            <button class="auth-btn signup">Sign Up</button>
+        </div>
+    </nav>
+
     <div class="wallet">
         <div class="wallet-content">
-            <!-- Card Principal -->
-            <div class="wallet-balance">
-                <h3>Sold Total</h3>
-                <div class="balance">54.024,07 USD</div>
-                <div class="balance-change">
-                    <span class="change negative">-0.05%</span>
-                    <span class="period">ultimele 24h</span>
+            <!-- Secțiunea Principală -->
+            <div class="main-section">
+                <!-- Card Sold -->
+                <div class="wallet-balance">
+                    <h3>Sold Total</h3>
+                    <div class="balance">54.024,07 USD</div>
+                    <div class="balance-change">
+                        <span class="change negative">-0.05%</span>
+                        <span class="period">ultimele 24h</span>
+                    </div>
+                    
+                    <!-- Butoane de Acțiune -->
+                    <div class="wallet-actions">
+                        <button class="action-btn deposit">
+                            <i class="fas fa-arrow-down"></i>
+                            Depunere
+                        </button>
+                        <button class="action-btn withdraw">
+                            <i class="fas fa-arrow-up"></i>
+                            Retragere
+                        </button>
+                        <button class="action-btn swap">
+                            <i class="fas fa-exchange-alt"></i>
+                            Swap
+                        </button>
+                    </div>
                 </div>
-                
-                <!-- Butoane de Acțiune -->
-                <div class="wallet-actions">
-                    <button class="action-btn deposit">
-                        <i class="fas fa-arrow-down"></i>
-                        Depunere
-                    </button>
-                    <button class="action-btn withdraw">
-                        <i class="fas fa-arrow-up"></i>
-                        Retragere
-                    </button>
-                    <button class="action-btn swap">
-                        <i class="fas fa-exchange-alt"></i>
-                        Swap
-                    </button>
-                </div>
-            </div>
 
-            <!-- Grafic Portofel -->
-            <div class="chart-container">
-                <div class="chart-header">
-                    <h3 class="chart-title">Evoluție Portofel</h3>
-                    <div class="chart-period-selector">
-                        <button class="period-btn" data-period="7">7Z</button>
-                        <button class="period-btn active" data-period="30">30Z</button>
-                        <button class="period-btn" data-period="90">90Z</button>
-                        <button class="period-btn" data-period="365">1A</button>
+                <!-- Grafic Portofoliu -->
+                <div class="portfolio-chart">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Evoluție Portofel</h3>
+                        <div class="chart-period">
+                            <button class="period-btn" data-period="7Z">7Z</button>
+                            <button class="period-btn active" data-period="30Z">30Z</button>
+                            <button class="period-btn" data-period="90Z">90Z</button>
+                            <button class="period-btn" data-period="1A">1A</button>
+                        </div>
                     </div>
-                </div>
-                <canvas id="portfolioChart"></canvas>
-            </div>
-
-            <!-- Statistici -->
-            <div class="stats-grid">
-                <div class="stat-card" style="--animation-order: 1">
-                    <div class="stat-title">Profit Total</div>
-                    <div class="stat-value">+2.145,32 USD</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i>
-                        +4.12%
-                    </div>
-                </div>
-                <div class="stat-card" style="--animation-order: 2">
-                    <div class="stat-title">Valoare 24h</div>
-                    <div class="stat-value">-27,15 USD</div>
-                    <div class="stat-change negative">
-                        <i class="fas fa-arrow-down"></i>
-                        -0.05%
-                    </div>
-                </div>
-                <div class="stat-card" style="--animation-order: 3">
-                    <div class="stat-title">Active</div>
-                    <div class="stat-value">5</div>
-                    <div class="stat-change">
-                        Monede & Token-uri
-                    </div>
-                </div>
-                <div class="stat-card" style="--animation-order: 4">
-                    <div class="stat-title">Tranzacții</div>
-                    <div class="stat-value">27</div>
-                    <div class="stat-change">
-                        Luna aceasta
-                    </div>
+                    <canvas id="portfolioChart"></canvas>
                 </div>
             </div>
 
             <!-- Lista de Active -->
-            <div class="wallet-assets">
-                <div class="section-header">
-                    <h3>Active <span class="asset-count">(5)</span></h3>
-                    <div class="asset-filters">
-                        <button class="filter-btn active">Toate</button>
-                        <button class="filter-btn">Monede</button>
-                        <button class="filter-btn">Token-uri</button>
+            <div class="assets-list">
+                <div class="assets-header">
+                    <h3 class="assets-title">Active (5)</h3>
+                </div>
+                
+                <!-- Bitcoin -->
+                <div class="asset-item">
+                    <div class="asset-icon">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
+                    <div class="asset-info">
+                        <div class="asset-name">Bitcoin</div>
+                        <div class="asset-balance">0.8942 BTC</div>
+                    </div>
+                    <div class="asset-price">
+                        <div class="asset-value">$32,420.65</div>
+                        <div class="asset-change positive">+2.4%</div>
                     </div>
                 </div>
-                <!-- Lista de active va fi populată dinamic -->
+
+                <!-- Ethereum -->
+                <div class="asset-item">
+                    <div class="asset-icon">
+                        <i class="fab fa-ethereum"></i>
+                    </div>
+                    <div class="asset-info">
+                        <div class="asset-name">Ethereum</div>
+                        <div class="asset-balance">4.2156 ETH</div>
+                    </div>
+                    <div class="asset-price">
+                        <div class="asset-value">$8,965.32</div>
+                        <div class="asset-change negative">-1.2%</div>
+                    </div>
+                </div>
+
+                <!-- Cardano -->
+                <div class="asset-item">
+                    <div class="asset-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="asset-info">
+                        <div class="asset-name">Cardano</div>
+                        <div class="asset-balance">3,250.75 ADA</div>
+                    </div>
+                    <div class="asset-price">
+                        <div class="asset-value">$4,875.45</div>
+                        <div class="asset-change positive">+5.7%</div>
+                    </div>
+                </div>
+
+                <!-- Solana -->
+                <div class="asset-item">
+                    <div class="asset-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="asset-info">
+                        <div class="asset-name">Solana</div>
+                        <div class="asset-balance">45.8234 SOL</div>
+                    </div>
+                    <div class="asset-price">
+                        <div class="asset-value">$4,582.34</div>
+                        <div class="asset-change positive">+3.8%</div>
+                    </div>
+                </div>
+
+                <!-- Polkadot -->
+                <div class="asset-item">
+                    <div class="asset-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="asset-info">
+                        <div class="asset-name">Polkadot</div>
+                        <div class="asset-balance">156.4523 DOT</div>
+                    </div>
+                    <div class="asset-price">
+                        <div class="asset-value">$3,180.31</div>
+                        <div class="asset-change negative">-0.8%</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Istoric Tranzacții -->
-            <div class="transaction-history">
-                <div class="section-header">
-                    <h3>Istoric Tranzacții</h3>
+            <div class="transactions-history">
+                <div class="transactions-header">
+                    <h3 class="transactions-title">Istoric Tranzacții</h3>
                 </div>
-                <!-- Lista de tranzacții va fi populată dinamic -->
+                
+                <div class="transactions-container">
+                    <div class="transaction-list">
+                        <!-- Tranzacțiile vor fi adăugate aici -->
+                    </div>
+                    <div class="transactions-fade"></div>
+                </div>
+                
+                <button class="view-all-btn">
+                    Vezi toate tranzacțiile
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+
+            <!-- Statistici -->
+            <div class="wallet-stats">
+                <div class="stats-header">
+                    <h3 class="stats-title">Statistici</h3>
+                </div>
+                
+                <div class="stats-grid">
+                    <!-- Profit Total -->
+                    <div class="stat-card">
+                        <div class="stat-icon profit">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Profit Total</div>
+                            <div class="stat-value positive">+2,145.32 USD</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                +4.12%
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Valoare 24h -->
+                    <div class="stat-card">
+                        <div class="stat-icon daily">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Valoare 24h</div>
+                            <div class="stat-value negative">-27.15 USD</div>
+                            <div class="stat-change negative">
+                                <i class="fas fa-arrow-down"></i>
+                                -0.05%
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tranzacții -->
+                    <div class="stat-card">
+                        <div class="stat-icon transactions">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Tranzacții</div>
+                            <div class="stat-value">27</div>
+                            <div class="stat-change">Luna aceasta</div>
+                        </div>
+                    </div>
+
+                    <!-- Performanță -->
+                    <div class="stat-card">
+                        <div class="stat-icon performance">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Performanță</div>
+                            <div class="stat-value">A+</div>
+                            <div class="stat-change positive">Top 10%</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="https://kit.fontawesome.com/your-kit-code.js"></script>
+    <!-- Modal Depunere -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-arrow-down"></i> Depunere</h2>
+                <button class="close-modal" id="closeDepositModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="depositForm">
+                    <div class="form-group">
+                        <label for="depositCrypto">Selectează Criptomoneda</label>
+                        <div class="select-wrapper">
+                            <select id="depositCrypto" required>
+                                <option value="" disabled selected>Alege o criptomonedă</option>
+                                <option value="BTC">Bitcoin (BTC)</option>
+                                <option value="ETH">Ethereum (ETH)</option>
+                                <option value="ADA">Cardano (ADA)</option>
+                                <option value="SOL">Solana (SOL)</option>
+                                <option value="DOT">Polkadot (DOT)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="depositAmount">Sumă</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="depositAmount" step="0.00000001" required>
+                            <span class="currency-label">USD</span>
+                        </div>
+                    </div>
+                    <div class="form-info">
+                        <div class="info-item">
+                            <span class="label">Comision:</span>
+                            <span class="value">0.1%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Vei primi:</span>
+                            <span class="value" id="depositReceive">0.00000000 BTC</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-arrow-down"></i>
+                        Depune
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Retragere -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-arrow-up"></i> Retragere</h2>
+                <button class="close-modal" id="closeWithdrawModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="withdrawForm">
+                    <div class="form-group">
+                        <label for="withdrawCrypto">Selectează Criptomoneda</label>
+                        <div class="select-wrapper">
+                            <select id="withdrawCrypto" required>
+                                <option value="" disabled selected>Alege o criptomonedă</option>
+                                <option value="BTC">Bitcoin (BTC)</option>
+                                <option value="ETH">Ethereum (ETH)</option>
+                                <option value="ADA">Cardano (ADA)</option>
+                                <option value="SOL">Solana (SOL)</option>
+                                <option value="DOT">Polkadot (DOT)</option>
+                            </select>
+                        </div>
+                        <small class="balance-info">Disponibil: <span id="withdrawAvailable">0.00000000 BTC</span></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="withdrawAmount">Sumă</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="withdrawAmount" step="0.00000001" required>
+                            <button type="button" class="max-btn">MAX</button>
+                            <span class="currency-label">USD</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="withdrawAddress">Adresă Destinație</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="withdrawAddress" placeholder="Introdu adresa portofelului" required>
+                            <button type="button" class="paste-btn"><i class="fas fa-paste"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-info">
+                        <div class="info-item">
+                            <span class="label">Comision Rețea:</span>
+                            <span class="value">0.0005 BTC</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Vei primi:</span>
+                            <span class="value" id="withdrawReceive">0.00000000 BTC</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-arrow-up"></i>
+                        Retrage
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Swap -->
+    <div id="swapModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-exchange-alt"></i> Swap</h2>
+                <button class="close-modal" id="closeSwapModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="swapForm">
+                    <div class="swap-container">
+                        <div class="form-group">
+                            <label>Din</label>
+                            <div class="select-wrapper">
+                                <select id="fromCrypto" required>
+                                    <option value="" disabled selected>Alege o criptomonedă</option>
+                                    <option value="BTC">Bitcoin (BTC)</option>
+                                    <option value="ETH">Ethereum (ETH)</option>
+                                    <option value="ADA">Cardano (ADA)</option>
+                                    <option value="SOL">Solana (SOL)</option>
+                                    <option value="DOT">Polkadot (DOT)</option>
+                                </select>
+                            </div>
+                            <div class="input-wrapper mt-2">
+                                <input type="number" id="fromAmount" step="0.00000001" required placeholder="0.00">
+                                <button type="button" class="max-btn">MAX</button>
+                            </div>
+                            <small class="balance-info">Disponibil: <span id="fromAvailableBalance">0.00000000</span></small>
+                        </div>
+
+                        <button type="button" id="switchPair" class="switch-btn">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+
+                        <div class="form-group">
+                            <label>În</label>
+                            <div class="select-wrapper">
+                                <select id="toCrypto" required>
+                                    <option value="" disabled selected>Alege o criptomonedă</option>
+                                    <option value="ETH">Ethereum (ETH)</option>
+                                    <option value="BTC">Bitcoin (BTC)</option>
+                                    <option value="ADA">Cardano (ADA)</option>
+                                    <option value="SOL">Solana (SOL)</option>
+                                    <option value="DOT">Polkadot (DOT)</option>
+                                </select>
+                            </div>
+                            <div class="input-wrapper mt-2">
+                                <input type="number" id="toAmount" readonly placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="swap-info">
+                        <div class="info-item">
+                            <span class="label">Rată de schimb:</span>
+                            <span class="value" id="exchangeRate">1 BTC = 0 ETH</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Comision:</span>
+                            <span class="value" id="swapFee">0.00 USD</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Minim primit:</span>
+                            <span class="value" id="minReceived">0.000000 ETH</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-exchange-alt"></i>
+                        Swap
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
-</html> 
 </html> 

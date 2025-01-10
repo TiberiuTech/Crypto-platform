@@ -7,6 +7,7 @@
     --text-secondary: rgba(255, 255, 255, 0.6);
     --background-dark: rgb(13, 17, 28);
     --background-light: rgb(19, 23, 34);
+    --border-color: rgba(30, 41, 59, 0.3);
 }
 
 * {
@@ -20,6 +21,8 @@ body {
     background: var(--background-dark);
     color: var(--text-primary);
     line-height: 1.5;
+    min-height: 100vh;
+    padding-top: 60px; /* Pentru a compensa navbar-ul fix */
 }
 
 a {
@@ -30,4 +33,77 @@ a {
 button {
     cursor: pointer;
     font-family: inherit;
+    border: none;
+    outline: none;
+}
+
+/* Layout */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Utilități */
+.text-primary {
+    color: var(--text-primary);
+}
+
+.text-secondary {
+    color: var(--text-secondary);
+}
+
+.bg-dark {
+    background: var(--background-dark);
+}
+
+.bg-light {
+    background: var(--background-light);
+}
+
+/* Notificări */
+.notification {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 24px;
+    border-radius: 12px;
+    background: var(--background-light);
+    color: var(--text-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(100%);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+}
+
+.notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.notification.success {
+    border-left: 4px solid var(--success-color);
+}
+
+.notification.error {
+    border-left: 4px solid var(--error-color);
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notification i {
+    font-size: 1.2rem;
+}
+
+.notification.success i {
+    color: var(--success-color);
+}
+
+.notification.error i {
+    color: var(--error-color);
 } 

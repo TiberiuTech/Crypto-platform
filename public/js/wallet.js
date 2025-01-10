@@ -5,9 +5,19 @@ const walletService = new WalletService();
 
 // Declarații globale pentru elementele DOM
 const swapModal = document.getElementById('swapModal');
+const depositModal = document.getElementById('depositModal');
+const withdrawModal = document.getElementById('withdrawModal');
+
 const closeSwapModal = document.getElementById('closeSwapModal');
-const swapBtn = document.getElementById('swapBtn');
-const switchPairBtn = document.getElementById('switchPair');
+const closeDepositModal = document.getElementById('closeDepositModal');
+const closeWithdrawModal = document.getElementById('closeWithdrawModal');
+
+const depositBtn = document.querySelector('.action-btn.deposit');
+const withdrawBtn = document.querySelector('.action-btn.withdraw');
+const swapBtn = document.querySelector('.action-btn.swap');
+
+// Elemente pentru Swap
+const swapForm = document.getElementById('swapForm');
 const fromCryptoSelect = document.getElementById('fromCrypto');
 const toCryptoSelect = document.getElementById('toCrypto');
 const fromAmountInput = document.getElementById('fromAmount');
@@ -16,440 +26,461 @@ const fromAvailableBalance = document.getElementById('fromAvailableBalance');
 const exchangeRateSpan = document.getElementById('exchangeRate');
 const swapFeeSpan = document.getElementById('swapFee');
 const minReceivedSpan = document.getElementById('minReceived');
-const swapForm = document.getElementById('swapForm');
+const switchPairBtn = document.getElementById('switchPair');
+
+// Elemente pentru Depunere
+const depositForm = document.getElementById('depositForm');
+const depositAmount = document.getElementById('depositAmount');
+const depositCrypto = document.getElementById('depositCrypto');
+const depositReceive = document.getElementById('depositReceive');
+
+// Elemente pentru Retragere
+const withdrawForm = document.getElementById('withdrawForm');
+const withdrawAmount = document.getElementById('withdrawAmount');
+const withdrawCrypto = document.getElementById('withdrawCrypto');
+const withdrawReceive = document.getElementById('withdrawReceive');
+const withdrawAvailable = document.getElementById('withdrawAvailable');
 const maxButtons = document.querySelectorAll('.max-btn');
-const depositBtn = document.getElementById('depositBtn');
-const withdrawBtn = document.getElementById('withdrawBtn');
-const depositModal = document.getElementById('depositModal');
-const withdrawModal = document.getElementById('withdrawModal');
-const closeDepositModal = document.getElementById('closeDepositModal');
-const closeWithdrawModal = document.getElementById('closeWithdrawModal');
+const pasteBtn = document.querySelector('.paste-btn');
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Inițializare UI
-    updateWalletUI();
+// Date pentru criptomonede
+const cryptoPrices = {
+    'BTC': 32420.65,
+    'ETH': 2127.84,
+    'ADA': 1.50,
+    'SOL': 100.23,
+    'DOT': 20.33
+};
 
-    // Event listeners pentru filtrele de tranzacții
-    document.querySelectorAll('.transaction-filters .filter-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            // Actualizăm starea activă a butoanelor
-            e.target.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
+const cryptoBalances = {
+    'BTC': 0.8942,
+    'ETH': 4.2156,
+    'ADA': 3250.75,
+    'SOL': 45.8234,
+    'DOT': 156.4523
+};
 
-            const filter = e.target.textContent.toLowerCase();
-            const transactions = walletService.getFilteredTransactions(filter);
-            updateTransactionsList(transactions);
-        });
-    });
+// Funcții pentru modale
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
 
-    // Event Listeners pentru Swap
-    if (swapBtn) {
-        swapBtn.addEventListener('click', () => {
-            if (swapModal) {
-                swapModal.style.display = 'block';
-                const fromCrypto = fromCryptoSelect.value;
-                const balance = walletService.getCoinBalance(fromCrypto);
-                if (fromAvailableBalance) {
-                    fromAvailableBalance.textContent = formatNumber(balance);
-                }
-                updateSwapInfo();
-                updateCryptoIcons();
-            }
-        });
-    }
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
 
-    if (closeSwapModal) {
-        closeSwapModal.addEventListener('click', () => {
-            if (swapModal) {
-                swapModal.style.display = 'none';
-            }
-        });
-    }
+// Event listeners pentru butoane modale
+if (depositBtn) depositBtn.addEventListener('click', () => openModal('depositModal'));
+if (withdrawBtn) withdrawBtn.addEventListener('click', () => openModal('withdrawModal'));
+if (swapBtn) swapBtn.addEventListener('click', () => openModal('swapModal'));
 
-    if (switchPairBtn) {
-        switchPairBtn.addEventListener('click', () => {
-            if (fromCryptoSelect && toCryptoSelect) {
-                const fromValue = fromCryptoSelect.value;
-                const toValue = toCryptoSelect.value;
-                fromCryptoSelect.value = toValue;
-                toCryptoSelect.value = fromValue;
-                updateSwapInfo();
-            }
-        });
-    }
+if (closeDepositModal) closeDepositModal.addEventListener('click', () => closeModal('depositModal'));
+if (closeWithdrawModal) closeWithdrawModal.addEventListener('click', () => closeModal('withdrawModal'));
+if (closeSwapModal) closeSwapModal.addEventListener('click', () => closeModal('swapModal'));
 
-    // Event listeners pentru selectoare crypto
-    if (fromCryptoSelect) {
-        fromCryptoSelect.addEventListener('change', () => {
-            const fromCrypto = fromCryptoSelect.value;
-            const availableBalance = walletService.getCoinBalance(fromCrypto);
-            if (fromAvailableBalance) {
-                fromAvailableBalance.textContent = formatNumber(availableBalance);
-            }
-            updateSwapInfo();
-            updateCryptoIcons();
-        });
-    }
-
-    if (toCryptoSelect) {
-        toCryptoSelect.addEventListener('change', () => {
-            updateSwapInfo();
-            updateCryptoIcons();
-        });
-    }
-
-    // Event listeners pentru input
-    if (fromAmountInput) {
-        fromAmountInput.addEventListener('input', (e) => {
-            const input = e.target;
-            let value = input.value;
-            const cursorPosition = input.selectionStart;
-            
-            // Permitem ștergerea completă a valorii
-            if (value === '') {
-                updateSwapInfo();
-                return;
-            }
-
-            // Eliminăm orice caracter care nu este număr sau punct
-            value = value.replace(/[^\d.]/g, '');
-            
-            // Gestionăm punctele multiple
-            const parts = value.split('.');
-            if (parts.length > 2) {
-                value = parts[0] + '.' + parts.slice(1).join('');
-            }
-            
-            // Limităm zecimalele la 8 cifre
-            if (parts.length === 2 && parts[1].length > 8) {
-                value = parts[0] + '.' + parts[1].slice(0, 8);
-            }
-            
-            // Actualizăm valoarea și păstrăm poziția cursorului
-            input.value = value;
-            input.setSelectionRange(cursorPosition, cursorPosition);
-            
-            updateSwapInfo();
-        });
-    }
-
-    // Event listeners pentru MAX
-    if (maxButtons) {
-        maxButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (fromCryptoSelect && fromAmountInput) {
-                    const fromCrypto = fromCryptoSelect.value;
-                    const availableBalance = walletService.getCoinBalance(fromCrypto);
-                    fromAmountInput.value = formatNumber(availableBalance);
-                    updateSwapInfo();
-                }
-            });
-        });
-    }
-
-    // Event listeners pentru Depunere/Retragere
-    if (depositBtn && depositModal) {
-        depositBtn.addEventListener('click', () => {
-            depositModal.style.display = 'block';
-        });
-    }
-
-    if (closeDepositModal && depositModal) {
-        closeDepositModal.addEventListener('click', () => {
-            depositModal.style.display = 'none';
-        });
-    }
-
-    if (withdrawBtn && withdrawModal) {
-        withdrawBtn.addEventListener('click', () => {
-            withdrawModal.style.display = 'block';
-        });
-    }
-
-    if (closeWithdrawModal && withdrawModal) {
-        closeWithdrawModal.addEventListener('click', () => {
-            withdrawModal.style.display = 'none';
-        });
-    }
-
-    // Event listener pentru închiderea modalelor
-    window.addEventListener('click', (e) => {
-        if (depositModal && e.target === depositModal) {
-            depositModal.style.display = 'none';
-        }
-        if (withdrawModal && e.target === withdrawModal) {
-            withdrawModal.style.display = 'none';
-        }
-        if (swapModal && e.target === swapModal) {
-            swapModal.style.display = 'none';
-        }
-    });
-
-    // Event listener pentru form submit
-    if (swapForm) {
-        swapForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!fromCryptoSelect || !toCryptoSelect || !fromAmountInput) return;
-            
-            const fromCrypto = fromCryptoSelect.value;
-            const toCrypto = toCryptoSelect.value;
-            const fromAmount = parseFloat(fromAmountInput.value);
-
-            if (!fromAmount || fromAmount <= 0) {
-                showNotification('error', 'Introduceți o sumă validă');
-                return;
-            }
-
-            try {
-                const transaction = await walletService.executeSwap(fromCrypto, toCrypto, fromAmount);
-                showNotification('success', 'Swap efectuat cu succes!');
-                if (swapModal) {
-                    swapModal.style.display = 'none';
-                }
-                updateWalletUI();
-            } catch (error) {
-                showNotification('error', error.message);
-            }
-        });
+// Închide modalele la click în afară
+window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+        closeModal(e.target.id);
     }
 });
 
-async function updateSwapInfo() {
-    if (!fromCryptoSelect || !toCryptoSelect || !fromAmountInput || !fromAvailableBalance || 
-        !exchangeRateSpan || !swapFeeSpan || !minReceivedSpan || !toAmountInput) {
+// Funcționalitate pentru depunere
+if (depositForm) {
+    depositAmount?.addEventListener('input', updateDepositReceive);
+    depositCrypto?.addEventListener('change', updateDepositReceive);
+
+    depositForm.addEventListener('submit', handleDepositSubmit);
+}
+
+function updateDepositReceive() {
+    if (!depositAmount || !depositCrypto || !depositReceive) return;
+    
+    const amount = parseFloat(depositAmount.value) || 0;
+    const crypto = depositCrypto.value;
+    const fee = amount * 0.001; // 0.1% comision
+    const netAmount = amount - fee;
+    const cryptoAmount = netAmount / cryptoPrices[crypto];
+    depositReceive.textContent = `${cryptoAmount.toFixed(8)} ${crypto}`;
+}
+
+async function handleDepositSubmit(e) {
+    e.preventDefault();
+    if (!depositAmount || !depositCrypto) return;
+
+    const amount = parseFloat(depositAmount.value);
+    const crypto = depositCrypto.value;
+    
+    try {
+        const transaction = await walletService.processDeposit(crypto, amount / cryptoPrices[crypto]);
+        addTransaction('buy', crypto, amount);
+        closeModal('depositModal');
+        depositForm.reset();
+        updateBalanceDisplay();
+        showNotification('Depunere efectuată cu succes', 'success');
+    } catch (error) {
+        showNotification(error.message, 'error');
+    }
+}
+
+// Funcționalitate pentru retragere
+if (withdrawForm) {
+    withdrawCrypto?.addEventListener('change', updateWithdrawInfo);
+    withdrawAmount?.addEventListener('input', updateWithdrawInfo);
+    withdrawForm.addEventListener('submit', handleWithdrawSubmit);
+}
+
+function updateWithdrawInfo() {
+    if (!withdrawCrypto || !withdrawAmount || !withdrawAvailable || !withdrawReceive) return;
+
+    const crypto = withdrawCrypto.value;
+    withdrawAvailable.textContent = `${cryptoBalances[crypto]} ${crypto}`;
+    
+    const amount = parseFloat(withdrawAmount.value) || 0;
+    const fee = 0.0005; // Network fee în crypto
+    const cryptoAmount = amount / cryptoPrices[crypto];
+    const netAmount = cryptoAmount - fee;
+    withdrawReceive.textContent = `${netAmount.toFixed(8)} ${crypto}`;
+}
+
+// Funcționalitate pentru MAX și PASTE
+maxButtons?.forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (!withdrawCrypto || !withdrawAmount) return;
+        
+        const crypto = withdrawCrypto.value;
+        const maxAmount = cryptoBalances[crypto] * cryptoPrices[crypto];
+        withdrawAmount.value = maxAmount.toFixed(2);
+        updateWithdrawInfo();
+    });
+});
+
+pasteBtn?.addEventListener('click', async () => {
+    try {
+        const text = await navigator.clipboard.readText();
+        const withdrawAddress = document.getElementById('withdrawAddress');
+        if (withdrawAddress) {
+            withdrawAddress.value = text;
+        }
+    } catch (err) {
+        console.error('Failed to read clipboard:', err);
+    }
+});
+
+async function handleWithdrawSubmit(e) {
+    e.preventDefault();
+    if (!withdrawAmount || !withdrawCrypto) return;
+
+    const amount = parseFloat(withdrawAmount.value);
+    const crypto = withdrawCrypto.value;
+    const address = document.getElementById('withdrawAddress')?.value;
+    
+    if (!address) {
+        showNotification('Te rugăm să introduci o adresă de destinație', 'error');
         return;
     }
+    
+    try {
+        const transaction = await walletService.processWithdraw(crypto, amount / cryptoPrices[crypto], 'withdraw', address);
+        addTransaction('sell', crypto, amount);
+        closeModal('withdrawModal');
+        withdrawForm.reset();
+        updateBalanceDisplay();
+        showNotification('Retragere efectuată cu succes', 'success');
+    } catch (error) {
+        showNotification(error.message, 'error');
+    }
+}
+
+// Funcționalitate pentru swap
+if (swapForm) {
+    fromCryptoSelect?.addEventListener('change', updateSwapInfo);
+    toCryptoSelect?.addEventListener('change', updateSwapInfo);
+    fromAmountInput?.addEventListener('input', updateSwapInfo);
+    switchPairBtn?.addEventListener('click', handleSwitchPair);
+    swapForm.addEventListener('submit', handleSwapSubmit);
+}
+
+function updateSwapInfo() {
+    if (!fromCryptoSelect || !toCryptoSelect || !fromAmountInput || !toAmountInput || 
+        !exchangeRateSpan || !swapFeeSpan || !minReceivedSpan || !fromAvailableBalance) return;
+
+    const from = fromCryptoSelect.value;
+    const to = toCryptoSelect.value;
+    const amount = parseFloat(fromAmountInput.value) || 0;
+    
+    // Calculează rata de schimb
+    const rate = cryptoPrices[to] / cryptoPrices[from];
+    exchangeRateSpan.textContent = `1 ${from} = ${rate.toFixed(6)} ${to}`;
+    
+    // Calculează suma primită
+    const convertedAmount = amount * rate;
+    const fee = convertedAmount * 0.005; // 0.5% comision
+    const netAmount = convertedAmount - fee;
+    
+    toAmountInput.value = netAmount.toFixed(8);
+    swapFeeSpan.textContent = `${fee.toFixed(8)} ${to}`;
+    minReceivedSpan.textContent = `${(netAmount * 0.995).toFixed(8)} ${to}`; // 0.5% slippage
+    
+    // Actualizează soldul disponibil
+    fromAvailableBalance.textContent = `${cryptoBalances[from]} ${from}`;
+}
+
+function handleSwitchPair() {
+    if (!fromCryptoSelect || !toCryptoSelect) return;
+    
+    const tempValue = fromCryptoSelect.value;
+    fromCryptoSelect.value = toCryptoSelect.value;
+    toCryptoSelect.value = tempValue;
+    updateSwapInfo();
+}
+
+async function handleSwapSubmit(e) {
+    e.preventDefault();
+    if (!fromCryptoSelect || !toCryptoSelect || !fromAmountInput) return;
 
     const fromCrypto = fromCryptoSelect.value;
     const toCrypto = toCryptoSelect.value;
-    const fromAmount = parseFloat(fromAmountInput.value) || 0;
-
-    // Actualizăm soldul disponibil
-    const availableBalance = walletService.getCoinBalance(fromCrypto);
-    if (fromAvailableBalance) {
-        fromAvailableBalance.textContent = formatNumber(availableBalance);
-    }
-
-    if (fromAmount > 0) {
-        try {
-            const swapDetails = await walletService.getSwapRate(fromCrypto, toCrypto, fromAmount);
-            
-            // Actualizăm informațiile de swap
-            exchangeRateSpan.textContent = `1 ${fromCrypto.toUpperCase()} = ${formatNumber(swapDetails.rate)} ${toCrypto.toUpperCase()}`;
-            swapFeeSpan.textContent = formatPrice(swapDetails.fee);
-            minReceivedSpan.textContent = `${formatNumber(swapDetails.minReceived)} ${toCrypto.toUpperCase()}`;
-            toAmountInput.value = formatNumber(swapDetails.estimatedAmount);
-        } catch (error) {
-            showNotification('error', 'Nu s-a putut calcula rata de schimb');
-        }
-    } else {
-        // Resetăm câmpurile dacă suma este 0
-        exchangeRateSpan.textContent = '-';
-        swapFeeSpan.textContent = '0.00 USD';
-        minReceivedSpan.textContent = '0.000 ' + toCrypto.toUpperCase();
-        toAmountInput.value = '';
+    const amount = parseFloat(fromAmountInput.value);
+    
+    try {
+        const transaction = await walletService.executeSwap(fromCrypto, toCrypto, amount / cryptoPrices[fromCrypto]);
+        addTransaction('swap', `${fromCrypto}->${toCrypto}`, amount);
+        closeModal('swapModal');
+        swapForm.reset();
+        updateBalanceDisplay();
+        showNotification('Swap efectuat cu succes', 'success');
+    } catch (error) {
+        showNotification(error.message, 'error');
     }
 }
 
-// Funcție pentru afișarea notificărilor
-function showNotification(type, message) {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <div class="notification-content">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-            <span>${message}</span>
+// Funcții pentru tranzacții
+function addTransaction(type, crypto, amount) {
+    const transactionList = document.querySelector('.transaction-list');
+    if (!transactionList) return;
+
+    const date = new Date().toLocaleString('ro-RO', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    let typeText, valueText, iconClass;
+    
+    switch(type) {
+        case 'buy':
+            typeText = `Cumpărare ${crypto}`;
+            valueText = `+${amount.toFixed(8)} ${crypto}`;
+            iconClass = 'buy';
+            break;
+        case 'sell':
+            typeText = `Vânzare ${crypto}`;
+            valueText = `-${amount.toFixed(8)} ${crypto}`;
+            iconClass = 'sell';
+            break;
+        case 'swap':
+            const [fromCrypto, toCrypto] = crypto.split('->');
+            const fromAmount = amount / cryptoPrices[fromCrypto.trim()];
+            const toAmount = (amount * (1 - 0.005)) / cryptoPrices[toCrypto.trim()];
+            typeText = `Swap ${fromCrypto.trim()} -> ${toCrypto.trim()}`;
+            valueText = `${fromAmount.toFixed(8)} ${fromCrypto.trim()} -> ${toAmount.toFixed(8)} ${toCrypto.trim()}`;
+            iconClass = 'swap';
+            break;
+    }
+    
+    const transactionHTML = `
+        <div class="transaction-item">
+            <div class="transaction-icon ${iconClass}">
+                <i class="fas fa-${type === 'buy' ? 'arrow-down' : type === 'sell' ? 'arrow-up' : 'exchange-alt'}"></i>
+            </div>
+            <div class="transaction-info">
+                <div class="transaction-type">${typeText}</div>
+                <div class="transaction-date">${date}</div>
+            </div>
+            <div class="transaction-amount">
+                <div class="transaction-value">${valueText}</div>
+                <div class="transaction-price">${type === 'swap' ? '' : `$${amount.toFixed(2)}`}</div>
+            </div>
         </div>
     `;
-    document.body.appendChild(notification);
     
-    // Adăugăm clasa show pentru animație
-    setTimeout(() => notification.classList.add('show'), 100);
+    // Adaugă tranzacția la începutul listei
+    transactionList.insertAdjacentHTML('afterbegin', transactionHTML);
     
-    // Ștergem notificarea după 3 secunde
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+    // Actualizează starea listei și a butonului
+    updateTransactionsList();
 }
 
-// Funcție pentru actualizarea UI-ului portofelului
-async function updateWalletUI() {
-    try {
-        // Actualizăm soldul total
-        const totalBalance = await walletService.getTotalBalance();
-        document.querySelector('.balance').textContent = formatPrice(totalBalance);
-        
-        // Actualizăm lista de active
-        const assets = await walletService.getAssets();
-        const assetsList = document.querySelector('.assets-list');
-        document.querySelector('.asset-count').textContent = `(${assets.length})`;
+// Funcție pentru gestionarea butonului View All
+function updateTransactionsList() {
+    const container = document.querySelector('.transactions-container');
+    const fade = document.querySelector('.transactions-fade');
+    const viewAllBtn = document.querySelector('.view-all-btn');
+    const transactionList = document.querySelector('.transaction-list');
+    
+    if (!container || !fade || !viewAllBtn || !transactionList) return;
+    
+    // Verifică dacă există overflow
+    const hasOverflow = transactionList.scrollHeight > container.offsetHeight;
+    
+    // Afișează/ascunde butonul și fade-ul în funcție de overflow
+    fade.style.display = hasOverflow ? 'block' : 'none';
+    viewAllBtn.style.display = hasOverflow ? 'flex' : 'none';
+    
+    // Actualizează starea fade-ului
+    if (container.classList.contains('expanded')) {
+        fade.classList.add('hidden');
+    } else {
+        fade.classList.remove('hidden');
+    }
+}
 
-        if (assets.length === 0) {
-            assetsList.innerHTML = '<div class="no-assets">Nu există active în portofel</div>';
-        } else {
-            assetsList.innerHTML = assets.map(asset => `
-                <div class="asset-item">
-                    <div class="asset-info">
-                        <div class="asset-details">
-                            <h4>${asset.name}</h4>
-                            <p>${formatNumber(asset.balance)} ${asset.symbol}</p>
-                        </div>
-                    </div>
-                    <div class="asset-value">
-                        <h4>${formatPrice(asset.value)}</h4>
-                        <p class="${asset.change >= 0 ? 'positive' : 'negative'}">
-                            ${asset.change >= 0 ? '+' : ''}${asset.change.toFixed(2)}%
-                        </p>
-                    </div>
-                </div>
-            `).join('');
+// Event listener pentru butonul View All
+const viewAllBtn = document.querySelector('.view-all-btn');
+if (viewAllBtn) {
+    viewAllBtn.addEventListener('click', function() {
+        const container = document.querySelector('.transactions-container');
+        const fade = document.querySelector('.transactions-fade');
+        
+        if (!container || !fade) return;
+        
+        container.classList.toggle('expanded');
+        this.classList.toggle('expanded');
+        
+        const isExpanded = container.classList.contains('expanded');
+        this.innerHTML = isExpanded ? 
+            'Arată mai puțin <i class="fas fa-chevron-up"></i>' : 
+            'Vezi toate tranzacțiile <i class="fas fa-chevron-down"></i>';
+        
+        updateTransactionsList();
+    });
+}
+
+function updateBalance(amount) {
+    const balanceElement = document.querySelector('.balance');
+    if (!balanceElement) return;
+
+    const currentBalance = parseFloat(balanceElement.textContent.replace(/[^0-9.-]+/g, ""));
+    const newBalance = currentBalance + amount;
+    balanceElement.textContent = `${newBalance.toFixed(2)} USD`;
+    
+    const changeElement = document.querySelector('.change');
+    if (!changeElement) return;
+
+    const changePercent = (amount / currentBalance) * 100;
+    changeElement.textContent = `${changePercent > 0 ? '+' : ''}${changePercent.toFixed(2)}%`;
+    changeElement.className = `change ${changePercent >= 0 ? 'positive' : 'negative'}`;
+}
+
+// Funcție pentru validarea input-urilor numerice
+function validateNumberInput(e) {
+    // Permite: backspace, delete, tab, escape, enter, punct și numere
+    if (
+        e.key === 'Backspace' ||
+        e.key === 'Delete' ||
+        e.key === 'Tab' ||
+        e.key === 'Escape' ||
+        e.key === 'Enter' ||
+        e.key === '.' ||
+        (e.key >= '0' && e.key <= '9')
+    ) {
+        // Verifică dacă deja există un punct și se încearcă adăugarea altui punct
+        if (e.key === '.' && e.target.value.includes('.')) {
+            e.preventDefault();
         }
-        
-        // Actualizăm procentul de schimbare în 24h
-        const totalChange = assets.reduce((acc, asset) => acc + asset.change, 0) / assets.length;
-        const balanceChange = document.querySelector('.balance-change .change');
-        balanceChange.textContent = `${totalChange >= 0 ? '+' : ''}${totalChange.toFixed(2)}%`;
-        balanceChange.className = `change ${totalChange >= 0 ? 'positive' : 'negative'}`;
-
-        // Actualizăm istoricul tranzacțiilor
-        const transactions = walletService.getTransactions();
-        updateTransactionsList(transactions);
-    } catch (error) {
-        showNotification('error', 'Eroare la actualizarea datelor');
+        return true;
     }
+    e.preventDefault();
+    return false;
 }
 
-// Event listeners pentru filtrele de active și tranzacții
-document.querySelectorAll('.asset-filters .filter-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-        // Actualizăm starea activă a butoanelor
-        e.target.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-
-        const filter = e.target.textContent.toLowerCase();
-        const assets = await walletService.getFilteredAssets(filter);
-        updateAssetsList(assets);
-    });
-});
-
-document.querySelectorAll('.transaction-filters .filter-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        // Actualizăm starea activă a butoanelor
-        e.target.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-
-        const filter = e.target.textContent.toLowerCase();
-        const transactions = walletService.getFilteredTransactions(filter);
-        updateTransactionsList(transactions);
-    });
-});
-
-// Funcții helper pentru actualizarea listelor
-function updateAssetsList(assets) {
-    const assetsList = document.querySelector('.assets-list');
-    document.querySelector('.asset-count').textContent = `(${assets.length})`;
-    
-    if (assets.length === 0) {
-        assetsList.innerHTML = '<div class="no-assets">Nu există active în această categorie</div>';
-        return;
-    }
-
-    assetsList.innerHTML = assets.map(asset => `
-        <div class="asset-item">
-            <div class="asset-info">
-                <div class="asset-details">
-                    <h4>${asset.name}</h4>
-                    <p>${formatNumber(asset.balance)} ${asset.symbol}</p>
-                </div>
-            </div>
-            <div class="asset-value">
-                <h4>${formatPrice(asset.value)}</h4>
-                <p class="${asset.change >= 0 ? 'positive' : 'negative'}">
-                    ${asset.change >= 0 ? '+' : ''}${asset.change.toFixed(2)}%
-                </p>
-            </div>
-        </div>
-    `).join('');
+// Adaugă validarea la input-uri
+if (depositAmount) {
+    depositAmount.addEventListener('keydown', validateNumberInput);
 }
 
-function updateTransactionsList(transactions) {
-    const transactionsList = document.querySelector('.transactions-list');
-    
-    if (!transactions || transactions.length === 0) {
-        transactionsList.innerHTML = '<div class="no-transactions">Nu există tranzacții în această categorie</div>';
-        return;
-    }
+if (withdrawAmount) {
+    withdrawAmount.addEventListener('keydown', validateNumberInput);
+}
 
-    transactionsList.innerHTML = transactions.map(tx => {
-        let icon, title;
+if (fromAmountInput) {
+    fromAmountInput.addEventListener('keydown', validateNumberInput);
+}
+
+function showNotification(message, type = 'info') {
+    // Implementare simplă a notificărilor
+    alert(message);
+}
+
+async function updateBalanceDisplay() {
+    const balanceElement = document.querySelector('.balance');
+    if (!balanceElement) return;
+
+    const totalBalance = await walletService.getTotalBalance();
+    balanceElement.textContent = `${totalBalance.toFixed(2)} USD`;
+    
+    // Actualizează și soldurile pentru fiecare criptomonedă
+    walletService.assets.forEach(asset => {
+        const assetElement = document.querySelector(`[data-crypto="${asset.symbol}"] .asset-balance`);
+        if (assetElement) {
+            assetElement.textContent = `${asset.balance.toFixed(8)} ${asset.symbol}`;
+        }
+    });
+}
+
+// Inițializare
+document.addEventListener('DOMContentLoaded', () => {
+    updateWithdrawInfo();
+    updateSwapInfo();
+    
+    // Adaugă tranzacții de test
+    const testTransactions = [
+        { type: 'buy', crypto: 'BTC', amount: 15000 },
+        { type: 'sell', crypto: 'ETH', amount: 8000 },
+        { type: 'swap', crypto: 'ADA->SOL', amount: 5000 },
+        { type: 'buy', crypto: 'DOT', amount: 3000 },
+        { type: 'sell', crypto: 'BTC', amount: 12000 },
+        { type: 'buy', crypto: 'ETH', amount: 9000 },
+        { type: 'swap', crypto: 'SOL->BTC', amount: 4000 },
+        { type: 'buy', crypto: 'ADA', amount: 2000 },
+        { type: 'sell', crypto: 'DOT', amount: 6000 },
+        { type: 'buy', crypto: 'SOL', amount: 7000 }
+    ];
+
+    // Adaugă tranzacțiile de test
+    testTransactions.forEach(tx => {
+        addTransaction(tx.type, tx.crypto, tx.amount);
+    });
+    
+    updateTransactionsList();
+    updateBalanceDisplay();
+    
+    // Încarcă tranzacțiile salvate
+    const transactions = walletService.transactions;
+    transactions.forEach(tx => {
+        let type, crypto, amount;
         switch(tx.type) {
             case 'deposit':
-                icon = 'arrow-down';
-                title = 'Depunere';
+                type = 'buy';
+                crypto = tx.symbol;
+                amount = tx.value;
                 break;
             case 'withdraw':
-                icon = 'arrow-up';
-                title = 'Retragere';
+                type = 'sell';
+                crypto = tx.symbol;
+                amount = Math.abs(tx.value);
                 break;
             case 'swap':
-                icon = 'exchange-alt';
-                title = 'Swap';
+                type = 'swap';
+                crypto = `${tx.fromCrypto}->${tx.toCrypto}`;
+                amount = tx.fromAmount * cryptoPrices[tx.fromCrypto];
                 break;
-            default:
-                icon = 'circle';
-                title = 'Tranzacție';
         }
-
-        let details;
-        if (tx.type === 'swap') {
-            details = `${formatNumber(tx.fromAmount)} ${tx.fromCrypto} → ${formatNumber(tx.toAmount)} ${tx.toCrypto}`;
-        } else {
-            details = `${formatNumber(tx.amount)} ${tx.crypto}`;
-        }
-
-        return `
-            <div class="transaction-item">
-                <div class="transaction-info">
-                    <i class="fas fa-${icon}"></i>
-                    <div class="transaction-details">
-                        <h4>${title}</h4>
-                        <p>${new Date(tx.timestamp).toLocaleString('ro-RO')}</p>
-                    </div>
-                </div>
-                <div class="transaction-amount">
-                    <h4>${details}</h4>
-                    <span class="status ${tx.status.toLowerCase()}">${tx.status}</span>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function updateCryptoIcons() {
-    if (!fromCryptoSelect || !toCryptoSelect) {
-        return;
-    }
-
-    // Actualizăm iconițele pentru ambele selectoare
-    const fromIcon = fromCryptoSelect.nextElementSibling;
-    const toIcon = toCryptoSelect.nextElementSibling;
-    
-    if (fromIcon) {
-        fromIcon.className = `crypto-icon fab fa-${fromCryptoSelect.value.toLowerCase()}`;
-        // Pentru Orionix folosim un icon special
-        if (fromCryptoSelect.value.toLowerCase() === 'orx') {
-            fromIcon.className = 'crypto-icon fas fa-gem';
-        }
-    }
-    
-    if (toIcon) {
-        toIcon.className = `crypto-icon fab fa-${toCryptoSelect.value.toLowerCase()}`;
-        // Pentru Orionix folosim un icon special
-        if (toCryptoSelect.value.toLowerCase() === 'orx') {
-            toIcon.className = 'crypto-icon fas fa-gem';
-        }
-    }
-} 
+        addTransaction(type, crypto, amount);
+    });
+}); 
