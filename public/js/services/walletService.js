@@ -1,155 +1,93 @@
 export class WalletService {
     constructor() {
-        this.assets = [
-            { symbol: 'BTC', name: 'Bitcoin', balance: 0.8942, value: 32420.65 },
-            { symbol: 'ETH', name: 'Ethereum', balance: 4.2156, value: 2127.84 },
-            { symbol: 'ADA', name: 'Cardano', balance: 3250.75, value: 1.50 },
-            { symbol: 'SOL', name: 'Solana', balance: 45.8234, value: 100.23 },
-            { symbol: 'DOT', name: 'Polkadot', balance: 156.4523, value: 20.33 }
-        ];
-        this.transactions = [];
-        this.loadFromLocalStorage();
+        this.assets = {
+            'BTC': {
+                symbol: 'BTC',
+                name: 'Bitcoin',
+                amount: 0.8942,
+                value: 32420.65,
+                priceChange: -0.05
+            },
+            'ETH': {
+                symbol: 'ETH',
+                name: 'Ethereum',
+                amount: 4.2156,
+                value: 8965.32,
+                priceChange: -1.2
+            },
+            'ADA': {
+                symbol: 'ADA',
+                name: 'Cardano',
+                amount: 5000.0000,
+                value: 4875.45,
+                priceChange: 5.7
+            },
+            'SOL': {
+                symbol: 'SOL',
+                name: 'Solana',
+                amount: 150.0000,
+                value: 4582.34,
+                priceChange: 3.8
+            },
+            'DOT': {
+                symbol: 'DOT',
+                name: 'Polkadot',
+                amount: 300.0000,
+                value: 3180.31,
+                priceChange: -0.8
+            }
+        };
+
+        // Generăm date istorice simulate pentru ultimele 7 zile
+        this.historicalData = {};
+        Object.keys(this.assets).forEach(symbol => {
+            this.historicalData[symbol] = this.generateHistoricalData(this.assets[symbol].value);
+        });
     }
 
-    loadFromLocalStorage() {
-        const savedAssets = localStorage.getItem('wallet_assets');
-        const savedTransactions = localStorage.getItem('wallet_transactions');
-        
-        if (savedAssets) {
-            this.assets = JSON.parse(savedAssets);
-        }
-        
-        if (savedTransactions) {
-            this.transactions = JSON.parse(savedTransactions);
-        }
-    }
-
-    saveToLocalStorage() {
-        localStorage.setItem('wallet_assets', JSON.stringify(this.assets));
-        localStorage.setItem('wallet_transactions', JSON.stringify(this.transactions));
-    }
-
-    getBalance(symbol) {
-        const asset = this.assets.find(a => a.symbol === symbol);
-        return asset ? asset.balance : 0;
+    getAssets() {
+        return this.assets;
     }
 
     getTotalBalance() {
-        return this.assets.reduce((total, asset) => {
-            return total + (asset.balance * asset.value);
+        return Object.values(this.assets).reduce((total, asset) => total + asset.value, 0);
+    }
+
+    getTotalChange() {
+        const totalValue = this.getTotalBalance();
+        const weightedChange = Object.values(this.assets).reduce((total, asset) => {
+            return total + (asset.priceChange * (asset.value / totalValue));
         }, 0);
+        return weightedChange;
     }
 
-    async processDeposit(symbol, amount, type = 'deposit') {
-        const asset = this.assets.find(a => a.symbol === symbol);
-        if (!asset) throw new Error('Criptomonedă invalidă');
+    // Generează date istorice simulate pentru un activ
+    generateHistoricalData(currentValue) {
+        const days = 7;
+        const data = [];
+        let value = currentValue;
 
-        asset.balance += amount;
-        
-        const transaction = {
-            type,
-            symbol,
-            amount,
-            value: amount * asset.value,
-            timestamp: new Date(),
-            status: 'Completat'
-        };
+        for (let i = days - 1; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            
+            // Generăm o variație aleatoare între -5% și +5%
+            const variation = (Math.random() - 0.5) * 0.1;
+            value = value * (1 + variation);
 
-        this.transactions.unshift(transaction);
-        this.saveToLocalStorage();
-        return transaction;
-    }
-
-    async processWithdraw(symbol, amount, type = 'withdraw', address = '') {
-        const asset = this.assets.find(a => a.symbol === symbol);
-        if (!asset) throw new Error('Criptomonedă invalidă');
-        
-        if (asset.balance < amount) {
-            throw new Error('Sold insuficient');
+            data.push({
+                x: date,  // Returnăm direct obiectul Date
+                y: value
+            });
         }
 
-        asset.balance -= amount;
-        
-        const transaction = {
-            type,
-            symbol,
-            amount: -amount,
-            value: amount * asset.value,
-            timestamp: new Date(),
-            address,
-            status: 'Completat'
-        };
-
-        this.transactions.unshift(transaction);
-        this.saveToLocalStorage();
-        return transaction;
+        return data;
     }
 
-    async getAssets() {
-        return this.assets;
+    // Returnează datele istorice pentru un activ specific
+    getAssetHistory(symbol) {
+        return this.historicalData[symbol] || [];
     }
+}
 
-    async getFilteredAssets(filter) {
-        return this.assets;
-    }
-
-    getCoinBalance(symbol) {
-        const asset = this.assets.find(a => a.symbol.toLowerCase() === symbol.toLowerCase());
-        return asset ? asset.balance : 0;
-    }
-
-    getTransactions() {
-        return this.transactions;
-    }
-
-    getFilteredTransactions(filter) {
-        if (filter === 'toate') return this.transactions;
-        return this.transactions.filter(tx => tx.type === filter);
-    }
-
-    async executeSwap(fromCrypto, toCrypto, amount) {
-        const fromAsset = this.assets.find(a => a.symbol === fromCrypto);
-        const toAsset = this.assets.find(a => a.symbol === toCrypto);
-        
-        if (!fromAsset || !toAsset) {
-            throw new Error('Criptomonedă invalidă');
-        }
-
-        if (fromAsset.balance < amount) {
-            throw new Error('Sold insuficient');
-        }
-
-        const transaction = {
-            type: 'swap',
-            fromCrypto,
-            toCrypto,
-            fromAmount: amount,
-            toAmount: amount * (toAsset.value / fromAsset.value),
-            timestamp: new Date(),
-            status: 'Completat'
-        };
-
-        this.transactions.unshift(transaction);
-        return transaction;
-    }
-
-    async getSwapRate(fromCrypto, toCrypto, amount) {
-        const fromAsset = this.assets.find(a => a.symbol === fromCrypto);
-        const toAsset = this.assets.find(a => a.symbol === toCrypto);
-        
-        if (!fromAsset || !toAsset) {
-            throw new Error('Criptomonedă invalidă');
-        }
-
-        const rate = toAsset.value / fromAsset.value;
-        const estimatedAmount = amount * rate;
-        const fee = amount * 0.001; // 0.1% fee
-
-        return {
-            rate,
-            estimatedAmount,
-            fee: fee * fromAsset.value,
-            minReceived: estimatedAmount * 0.995 // 0.5% slippage
-        };
-    }
-} 
+export default new WalletService(); 
