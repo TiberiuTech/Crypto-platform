@@ -29,13 +29,41 @@
     padding: var(--spacing-lg);
     height: 400px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.chart-controls {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+}
+
+.period-btn {
+    background: transparent;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.period-btn:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.5);
+    color: var(--text-primary);
+}
+
+.period-btn.active {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: #3B82F6;
+    color: #3B82F6;
 }
 
 .chart-container canvas {
     width: 100% !important;
-    height: 100% !important;
+    height: calc(100% - 40px) !important;
 }
 
 @media (max-width: 968px) {

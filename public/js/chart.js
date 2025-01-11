@@ -1,6 +1,11 @@
 // Configurare Chart.js
-Chart.defaults.color = '#94A3B8';
-Chart.defaults.font.family = "'Inter', sans-serif";
+if (typeof Chart === 'undefined') {
+    console.error('Chart.js nu este încărcat!');
+} else {
+    console.log('Chart.js este încărcat corect');
+    Chart.defaults.color = '#94A3B8';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+}
 
 import walletService from './services/walletService.js';
 

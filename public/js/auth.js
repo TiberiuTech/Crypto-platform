@@ -1,21 +1,96 @@
-import authService from './services/authService.js';
-
-// Funcție pentru afișarea notificărilor
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.classList.add('show');
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }, 100);
+// Funcție pentru verificarea dacă utilizatorul este autentificat
+function isAuthenticated() {
+    return localStorage.getItem('user') !== null;
 }
+
+// Funcție pentru afișarea alertei personalizate
+function showAlert(message, callback) {
+    // Creăm overlay-ul
+    const overlay = document.createElement('div');
+    overlay.className = 'alert-overlay';
+    overlay.style.display = 'flex';
+    overlay.style.opacity = '1';
+    overlay.style.visibility = 'visible';
+    
+    // Creăm alerta
+    const alertBox = document.createElement('div');
+    alertBox.className = 'custom-alert';
+    
+    // Adăugăm mesajul
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'alert-message';
+    messageDiv.textContent = message;
+    
+    // Adăugăm butonul OK
+    const button = document.createElement('button');
+    button.className = 'alert-button';
+    button.textContent = 'OK';
+    button.onclick = () => {
+        document.body.removeChild(overlay);
+        if (callback) {
+            setTimeout(callback, 100);
+        }
+    };
+    
+    // Asamblăm alerta
+    alertBox.appendChild(messageDiv);
+    alertBox.appendChild(button);
+    overlay.appendChild(alertBox);
+    document.body.appendChild(overlay);
+}
+
+// Facem showAlert disponibil global
+window.showAlert = showAlert;
+
+// Funcție pentru redirecționare către login cu warning
+function redirectToLoginWithWarning() {
+    localStorage.setItem('loginWarning', 'Trebuie să vă autentificați pentru a accesa această secțiune.');
+    localStorage.setItem('redirectAfterLogin', window.location.pathname);
+    window.location.href = '/pages/login.html';
+}
+
+// Funcție pentru atașarea event listener-ilor
+function setupProtectedLinks() {
+    const protectedLinks = document.querySelectorAll('a[href*="wallet"], a[href*="trade"]');
+    protectedLinks.forEach(link => {
+        link.addEventListener('click', handleProtectedLink);
+    });
+}
+
+function handleProtectedLink(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isAuthenticated()) {
+        localStorage.setItem('loginWarning', 'Trebuie să vă autentificați pentru a accesa această secțiune.');
+        window.location.replace('/pages/login.html');
+    }
+}
+
+// Funcție pentru verificarea și afișarea warning-ului pe pagina de login
+function checkLoginWarning() {
+    const warning = localStorage.getItem('loginWarning');
+    if (warning) {
+        showAlert(warning);
+        localStorage.removeItem('loginWarning');
+    }
+}
+
+// Inițializare când documentul este gata
+function init() {
+    setupProtectedLinks();
+    checkForWarning();
+}
+
+// Atașăm event listener-ul când DOM-ul este încărcat
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+
+// Exportăm funcțiile necesare
+export { isAuthenticated, showAlert };
 
 // Funcție pentru validarea parolei
 function validatePassword(password) {
@@ -72,7 +147,7 @@ document.querySelectorAll('.toggle-password').forEach(button => {
 // Verificăm dacă există un warning de autentificare
 const authWarning = localStorage.getItem('auth_warning');
 if (authWarning) {
-    showNotification(authWarning, 'warning');
+    showAlert(authWarning);
     localStorage.removeItem('auth_warning');
 }
 
@@ -87,18 +162,17 @@ if (loginForm) {
         const remember = loginForm.remember?.checked;
 
         if (!validateEmail(email)) {
-            showNotification('Te rugăm să introduci o adresă de email validă', 'error');
+            showAlert('Te rugăm să introduci o adresă de email validă');
             return;
         }
 
         try {
             authService.login(email, password);
-            showNotification('Autentificare reușită!', 'success');
-            setTimeout(() => {
+            showAlert('Autentificare reușită!', () => {
                 authService.handleRedirectAfterLogin();
-            }, 1000);
+            });
         } catch (error) {
-            showNotification(error.message || 'Eroare la autentificare', 'error');
+            showAlert(error.message || 'Eroare la autentificare');
         }
     });
 }
@@ -116,35 +190,33 @@ if (signupForm) {
         const terms = signupForm.terms.checked;
 
         if (!validateEmail(email)) {
-            showNotification('Te rugăm să introduci o adresă de email validă', 'error');
+            showAlert('Te rugăm să introduci o adresă de email validă');
             return;
         }
 
         if (password !== confirmPassword) {
-            showNotification('Parolele nu coincid', 'error');
+            showAlert('Parolele nu coincid');
             return;
         }
 
         const passwordErrors = validatePassword(password);
         if (passwordErrors.length > 0) {
-            showNotification(passwordErrors[0], 'error');
+            showAlert(passwordErrors[0]);
             return;
         }
 
         if (!terms) {
-            showNotification('Te rugăm să accepți termenii și condițiile', 'error');
+            showAlert('Te rugăm să accepți termenii și condițiile');
             return;
         }
 
         try {
-            // După înregistrare, autentificăm automat utilizatorul
             authService.login(email, password);
-            showNotification('Cont creat cu succes!', 'success');
-            setTimeout(() => {
+            showAlert('Cont creat cu succes!', () => {
                 authService.handleRedirectAfterLogin();
-            }, 1000);
+            });
         } catch (error) {
-            showNotification(error.message || 'Eroare la crearea contului', 'error');
+            showAlert(error.message || 'Eroare la crearea contului');
         }
     });
 }
@@ -158,4 +230,12 @@ document.querySelectorAll('.auth-btn').forEach(btn => {
             window.location.href = 'signup.html';
         }
     });
-}); 
+});
+
+function checkForWarning() {
+    const warning = localStorage.getItem('loginWarning');
+    if (warning) {
+        showAlert(warning);
+        localStorage.removeItem('loginWarning');
+    }
+} 

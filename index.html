@@ -4,34 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto-Impact</title>
-    <link rel="stylesheet" href="public/styles/main.css">
-    <link rel="stylesheet" href="public/styles/components/navbar.css">
-    <link rel="stylesheet" href="public/styles/components/hero.css">
-    <link rel="stylesheet" href="public/styles/components/about.css">
-    <link rel="stylesheet" href="public/styles/components/prices.css">
-    <link rel="stylesheet" href="public/styles/components/news.css">
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/components/navbar.css">
+    <link rel="stylesheet" href="/styles/components/hero.css">
+    <link rel="stylesheet" href="/styles/components/about.css">
+    <link rel="stylesheet" href="/styles/components/compare.css">
+    <link rel="stylesheet" href="/styles/components/news.css">
+    <link rel="stylesheet" href="/styles/components/prices.css">
+    <link rel="stylesheet" href="/styles/components/wallet.css">
+    <link rel="stylesheet" href="/styles/components/trade.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="public/js/auth.js" type="module" defer></script>
+    <script src="/js/auth.js" type="module" defer></script>
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-left">
-            <a href="index.html" class="logo">Crypto-Impact</a>
+            <a href="/" class="logo">Crypto-Impact</a>
         </div>
         <div class="nav-center">
-            <a href="public/pages/news.html" class="nav-btn">News</a>
-            <a href="public/pages/prices.html" class="nav-btn">Prices</a>
-            <a href="public/pages/wallet.html" class="nav-btn">Wallet</a>
-            <a href="public/pages/trade.html" class="nav-btn">Trade</a>
+            <a href="/pages/news.html" class="nav-btn">News</a>
+            <a href="/pages/prices.html" class="nav-btn">Prices</a>
+            <a href="/pages/wallet.html" class="nav-btn">Wallet</a>
+            <a href="/pages/trade.html" class="nav-btn">Trade</a>
         </div>
         <div class="nav-right">
             <div class="notification-bell">
                 <i class="fas fa-bell"></i>
                 <span class="notification-count">0</span>
             </div>
-            <a href="public/pages/login.html" class="auth-btn login">Login</a>
-            <a href="public/pages/signup.html" class="auth-btn signup">Sign Up</a>
+            <a href="/pages/login.html" class="auth-btn login">Login</a>
+            <a href="/pages/signup.html" class="auth-btn signup">Sign Up</a>
         </div>
     </nav>
 
@@ -43,7 +46,7 @@
         <div class="crypto-cards">
             <div class="crypto-card bitcoin">
                 <div class="crypto-icon">
-                    <img src="public/assets/images/bitcoin.png" alt="Bitcoin">
+                    <img src="/assets/images/bitcoin.png" alt="Bitcoin">
                 </div>
                 <div class="crypto-data">
                     <h3>Bitcoin</h3>
@@ -66,7 +69,7 @@
             
             <div class="crypto-card orionix featured">
                 <div class="crypto-icon">
-                    <img src="public/assets/images/orionix.png" alt="Orionix">
+                    <img src="/assets/images/orionix.png" alt="Orionix">
                 </div>
                 <div class="crypto-data">
                     <h3>Orionix</h3>
@@ -89,7 +92,7 @@
             
             <div class="crypto-card ethereum">
                 <div class="crypto-icon">
-                    <img src="public/assets/images/ethereum.png" alt="Ethereum">
+                    <img src="/assets/images/ethereum.png" alt="Ethereum">
                 </div>
                 <div class="crypto-data">
                     <h3>Ethereum</h3>
@@ -120,7 +123,14 @@
                 <!-- Conținutul va fi populat dinamic -->
             </div>
             <div class="chart-container">
-                <canvas id="orionixChart"></canvas>
+                <div class="chart-controls">
+                    <button class="period-btn active" data-period="1L">1L</button>
+                    <button class="period-btn" data-period="3L">3L</button>
+                    <button class="period-btn" data-period="6L">6L</button>
+                    <button class="period-btn" data-period="1A">1A</button>
+                    <button class="period-btn" data-period="Tot">Tot</button>
+                </div>
+                <canvas id="portfolioChart"></canvas>
             </div>
         </div>
     </section>
@@ -219,8 +229,10 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="public/js/main.js" type="module"></script>
-    <script src="public/js/chart.js" type="module"></script>
-    <script src="public/js/wallet.js" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="/js/services/walletService.js" type="module"></script>
+    <script src="/js/main.js" type="module"></script>
+    <script src="/js/chart.js" type="module"></script>
+    <script src="/js/wallet.js" type="module"></script>
 </body>
 </html>

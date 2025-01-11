@@ -4,38 +4,28 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background: rgb(13, 17, 28);
 }
 
 .auth-card {
     background: rgb(30, 41, 59);
-    border: 1px solid rgb(99, 102, 241);
-    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 8px;
     padding: 2rem;
     width: 100%;
-    max-width: 480px;
+    max-width: 400px;
 }
 
-.auth-header {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.auth-header h2 {
+.auth-card h2 {
     color: var(--text-primary);
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
-}
-
-.auth-header p {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
 }
 
 .auth-form {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.5rem;
 }
 
 .form-group {
@@ -49,136 +39,186 @@
     font-size: 0.9rem;
 }
 
-.input-group {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-group i {
-    position: absolute;
-    left: 1rem;
-    color: var(--text-secondary);
-}
-
-.input-group input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.5rem;
-    background: rgb(51, 65, 85);
-    border: 1px solid rgb(99, 102, 241);
+.form-group input {
+    padding: 0.75rem;
+    background: rgba(51, 65, 85, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
     border-radius: 8px;
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
-.input-group input:focus {
+.form-group input:focus {
     outline: none;
     border-color: var(--primary-color);
 }
 
-.toggle-password {
-    position: absolute;
-    right: 1rem;
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-}
-
-.toggle-password:hover {
-    color: var(--text-primary);
-}
-
-.form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.5rem;
-}
-
-.remember-me, .terms {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-
-.remember-me input[type="checkbox"],
-.terms input[type="checkbox"] {
-    width: 1rem;
-    height: 1rem;
-    accent-color: var(--primary-color);
-}
-
-.forgot-password {
-    color: var(--primary-color);
-    font-size: 0.9rem;
-    text-decoration: none;
-}
-
-.forgot-password:hover {
-    text-decoration: underline;
-}
-
 .submit-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
     background: var(--primary-color);
     color: white;
     border: none;
-    padding: 0.875rem;
+    padding: 0.75rem;
     border-radius: 8px;
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-top: 1rem;
 }
 
 .submit-btn:hover {
-    background: rgb(79, 70, 229);
+    background: var(--primary-color-dark);
+    transform: translateY(-2px);
 }
 
-.submit-btn i {
-    font-size: 0.9rem;
-    transition: transform 0.3s ease;
-}
-
-.submit-btn:hover i {
-    transform: translateX(4px);
-}
-
-.auth-footer {
+.auth-links {
+    margin-top: 1.5rem;
     text-align: center;
-    margin-top: 2rem;
+    font-size: 0.9rem;
     color: var(--text-secondary);
+}
+
+.auth-links a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.auth-links a:hover {
+    color: var(--primary-color-dark);
+}
+
+.divider {
+    margin: 0 0.5rem;
+    color: var(--text-secondary);
+}
+
+/* Stilizare pentru notificări */
+.notification {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.75rem 1.5rem;
+    background: rgba(13, 17, 28, 0.95);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    border-radius: 6px;
+    color: rgba(234, 179, 8, 0.9);
+    font-size: 0.9rem;
+    font-weight: 400;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.notification.warning {
+    background: rgba(234, 179, 8, 0.1);
+    border: 1px solid rgba(234, 179, 8, 0.5);
+    color: rgb(234, 179, 8);
+}
+
+.alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+}
+
+.alert-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.alert-box {
+    background: rgb(30, 41, 59);
+    border-radius: 8px;
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.alert-message {
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.alert-button {
+    background: rgb(99, 102, 241);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.alert-button:hover {
+    background: rgb(79, 70, 229);
+    transform: translateY(-1px);
+}
+
+.custom-alert {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    background: rgb(30, 41, 59);
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 300px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+}
+
+.alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: none;
+    z-index: 999;
+}
+
+.alert-message {
+    margin-bottom: 12px;
+    color: rgb(234, 179, 8);
     font-size: 0.95rem;
 }
 
-.auth-footer a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
+.alert-button {
+    background: rgba(234, 179, 8, 0.2);
+    color: rgb(234, 179, 8);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
 }
 
-.auth-footer a:hover {
-    text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-    .auth-container {
-        padding: 1rem;
-    }
-
-    .auth-card {
-        padding: 1.5rem;
-    }
-
-    .form-options {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
-    }
+.alert-button:hover {
+    background: rgba(234, 179, 8, 0.3);
+    transform: translateY(-1px);
 } 
