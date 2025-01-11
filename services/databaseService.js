@@ -1,73 +1,96 @@
 import mysql from 'mysql2/promise';
-import { dbConfig } from '../config/database.js';
+import bcrypt from 'bcrypt';
 
-class DatabaseService {
-    constructor() {
-        this.pool = mysql.createPool(dbConfig);
-    }
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: 'Elefant20!',
+    database: 'crypto_platform',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
 
-    async query(sql, params) {
-        try {
-            const [results] = await this.pool.execute(sql, params);
-            return results;
-        } catch (error) {
-            console.error('Database Error:', error);
-            throw error;
-        }
-    }
-
-    async syncCryptoPrices() {
-        const connection = await this.pool.getConnection();
-        try {
-            await connection.beginTransaction();
-
-            // Obținem toate activele din baza de date
-            const assets = await this.query('SELECT * FROM assets');
-            
-            // Simulăm obținerea prețurilor (vom înlocui cu date reale de la CryptoCompare)
-            const timestamp = new Date();
-            for (const asset of assets) {
-                const mockPrice = Math.random() * 1000;
-                const mockChange = (Math.random() * 10) - 5;
-                
-                // Inserare în asset_prices
-                await this.query(`
-                    INSERT INTO asset_prices (asset_id, price, price_change_24h, timestamp)
-                    VALUES (?, ?, ?, ?)
-                `, [asset.id, mockPrice, mockChange, timestamp]);
-
-                // Inserare în price_history
-                await this.query(`
-                    INSERT INTO price_history (asset_id, price, timestamp)
-                    VALUES (?, ?, ?)
-                `, [asset.id, mockPrice, timestamp]);
-            }
-
-            await connection.commit();
-            return true;
-        } catch (error) {
-            await connection.rollback();
-            throw error;
-        } finally {
-            connection.release();
-        }
-    }
-
-    async getLatestPrices() {
-        return await this.query(`
-            SELECT a.symbol, a.name, ap.price, ap.price_change_24h, ap.timestamp
-            FROM assets a
-            LEFT JOIN (
-                SELECT ap1.*
-                FROM asset_prices ap1
-                INNER JOIN (
-                    SELECT asset_id, MAX(timestamp) as max_timestamp
-                    FROM asset_prices
-                    GROUP BY asset_id
-                ) ap2 ON ap1.asset_id = ap2.asset_id AND ap1.timestamp = ap2.max_timestamp
-            ) ap ON a.id = ap.asset_id
-        `);
+export async function createUser(name, email, password) {
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const [result] = await pool.execute(
+            'INSERT INTO users (name, email, password_hash, created_at) VALUES (?, ?, ?, NOW())',
+            [name, email, hashedPassword]
+        );
+        return result.insertId;
+    } catch (error) {
+        console.error('Error creating user:', error);
+        throw new Error('Eroare la crearea contului');
     }
 }
 
-export default new DatabaseService(); 
+export async function loginUser(email, password) {
+    try {
+        const [rows] = await pool.execute(
+            'SELECT * FROM users WHERE email = ?',
+            [email]
+        );
+        
+        if (rows.length === 0) {
+            throw new Error('Email sau parolă incorectă');
+        }
+
+        const user = rows[0];
+        const isValid = await bcrypt.compare(password, user.password_hash);
+        
+        if (!isValid) {
+            throw new Error('Email sau parolă incorectă');
+        }
+
+        return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            created_at: user.created_at
+        };
+    } catch (error) {
+        console.error('Error logging in:', error);
+        throw error;
+    }
+}
+
+export async function getUserById(userId) {
+    try {
+        const [rows] = await pool.execute(
+            'SELECT id, name, email, created_at FROM users WHERE id = ?',
+            [userId]
+        );
+        return rows[0] || null;
+    } catch (error) {
+        console.error('Error getting user:', error);
+        throw new Error('Eroare la obținerea datelor utilizatorului');
+    }
+}
+
+export async function updateUserProfile(userId, name, email) {
+    try {
+        await pool.execute(
+            'UPDATE users SET name = ?, email = ? WHERE id = ?',
+            [name, email, userId]
+        );
+        return true;
+    } catch (error) {
+        console.error('Error updating user:', error);
+        throw new Error('Eroare la actualizarea profilului');
+    }
+}
+
+// Funcție pentru verificarea dacă emailul există deja
+export async function checkEmailExists(email) {
+    try {
+        const [rows] = await pool.execute(
+            'SELECT COUNT(*) as count FROM users WHERE email = ?',
+            [email]
+        );
+        return rows[0].count > 0;
+    } catch (error) {
+        console.error('Error checking email:', error);
+        throw new Error('Eroare la verificarea emailului');
+    }
+} 

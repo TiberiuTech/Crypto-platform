@@ -159,7 +159,6 @@ if (loginForm) {
         
         const email = loginForm.email.value;
         const password = loginForm.password.value;
-        const remember = loginForm.remember?.checked;
 
         if (!validateEmail(email)) {
             showAlert('Te rugăm să introduci o adresă de email validă');
@@ -167,9 +166,23 @@ if (loginForm) {
         }
 
         try {
-            authService.login(email, password);
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Eroare la autentificare');
+            }
+
+            localStorage.setItem('user', JSON.stringify(data.user));
             showAlert('Autentificare reușită!', () => {
-                authService.handleRedirectAfterLogin();
+                window.location.href = '/';
             });
         } catch (error) {
             showAlert(error.message || 'Eroare la autentificare');
@@ -211,9 +224,23 @@ if (signupForm) {
         }
 
         try {
-            authService.login(email, password);
+            const response = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, email, password })
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Eroare la crearea contului');
+            }
+
+            localStorage.setItem('user', JSON.stringify(data.user));
             showAlert('Cont creat cu succes!', () => {
-                authService.handleRedirectAfterLogin();
+                window.location.href = '/';
             });
         } catch (error) {
             showAlert(error.message || 'Eroare la crearea contului');
@@ -238,4 +265,52 @@ function checkForWarning() {
         showAlert(warning);
         localStorage.removeItem('loginWarning');
     }
-} 
+}
+
+function updateUIForAuthState() {
+    const userProfile = document.querySelector('.user-profile');
+    const authButtons = document.querySelector('.auth-buttons');
+    
+    if (!userProfile || !authButtons) return;
+    
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (user) {
+        userProfile.style.display = 'flex';
+        authButtons.style.display = 'none';
+        
+        const usernameElement = userProfile.querySelector('.username');
+        if (usernameElement) {
+            usernameElement.textContent = user.name || user.email;
+        }
+    } else {
+        userProfile.style.display = 'none';
+        authButtons.style.display = 'flex';
+    }
+}
+
+function handleLogout() {
+    localStorage.removeItem('user');
+    updateUIForAuthState();
+    window.location.href = '/';
+}
+
+// Adăugăm event listener pentru butonul de logout
+document.querySelector('.logout-btn')?.addEventListener('click', handleLogout);
+
+// Funcție pentru inițializarea UI-ului pe toate paginile
+function initializeUI() {
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+        updateUIForAuthState();
+        
+        // Adăugăm event listener pentru logout doar dacă butonul există
+        const logoutBtn = document.querySelector('.logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', handleLogout);
+        }
+    }
+}
+
+// Atașăm event listener-ul pentru încărcarea paginii
+document.addEventListener('DOMContentLoaded', initializeUI); 

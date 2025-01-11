@@ -205,20 +205,13 @@ const formatNumber = (number) => {
 
 // Funcție pentru formatarea prețului
 const formatPrice = (price) => {
-    if (price < 1) {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 4
-        }).format(price);
+    if (price >= 1) {
+        // Pentru prețuri mai mari sau egale cu 1, afișăm doar partea întreagă
+        return `$${Math.floor(price).toLocaleString('en-US')}`;
+    } else {
+        // Pentru prețuri sub 1 (ex: $0.341389), păstrăm formatul cu zecimale
+        return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
     }
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(price);
 };
 
 // Funcție pentru actualizarea prețurilor

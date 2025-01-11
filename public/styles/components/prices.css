@@ -144,10 +144,9 @@ body {
 
 /* Navigation Buttons */
 .prices {
-    padding: 0;
-    background: rgb(13, 17, 28);
-    min-height: 100vh;
-    margin-top: 60px;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .prices h2 {
@@ -460,70 +459,79 @@ body {
 }
 
 .top-movers {
-    margin-bottom: 40px;
-    padding: 0 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 2rem;
     overflow: hidden;
-    position: relative;
 }
 
 .top-movers-header {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 1rem;
 }
 
 .top-movers-header h3 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
+    font-size: 1.25rem;
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
 .info-icon {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
     cursor: help;
 }
 
 .movers-carousel {
     position: relative;
-    overflow: hidden;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    -webkit-mask-image: linear-gradient(to right, black calc(100% - 30px), transparent calc(100% - 30px));
-    mask-image: linear-gradient(to right, black calc(100% - 30px), transparent calc(100% - 30px));
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .movers-container {
     display: flex;
-    gap: 16px;
-    overflow-x: auto;
+    gap: 0.25rem;
+    overflow-x: hidden;
     scroll-behavior: smooth;
-    scrollbar-width: none;
     scroll-snap-type: x mandatory;
-    padding: 10px 0;
-    margin-right: -30px;
+    padding: 0.5rem;
 }
 
-.movers-container::-webkit-scrollbar {
-    display: none;
+.carousel-btn {
+    background: var(--background-tertiary);
+    border: none;
+    color: var(--text-primary);
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.carousel-btn:hover {
+    background: var(--background-hover);
 }
 
 .mover-card {
-    min-width: 300px;
-    height: 140px;
+    min-width: calc((100% - 0.75rem) / 4);
+    height: 130px;
     background: rgb(19, 23, 34);
     border: 1px solid rgba(30, 41, 59, 0.3);
     border-radius: 8px;
-    padding: 16px;
+    padding: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
-    gap: 16px;
+    gap: 14px;
     scroll-snap-align: start;
     scroll-snap-stop: always;
     flex-shrink: 0;
@@ -545,12 +553,12 @@ body {
 .mover-header {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .mover-icon {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
 }
 
@@ -578,7 +586,7 @@ body {
 }
 
 .mover-price {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #fff;
     margin-bottom: 0;
