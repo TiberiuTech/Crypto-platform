@@ -106,4 +106,8 @@ button {
 
 .notification.error i {
     color: var(--error-color);
+}
+
+.protected-content {
+    display: none !important;
 } 

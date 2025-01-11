@@ -124,38 +124,46 @@
 }
 
 .auth-btn {
-    padding: 8px 20px;
-    border-radius: 12px;
-    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
     font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    transition: all 0.3s ease;
+    background: none;
+    border: 1px solid rgb(99, 102, 241);
+    color: var(--text-primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-btn:hover {
+    background: rgba(99, 102, 241, 0.1);
+    transform: translateY(-2px);
 }
 
 .auth-btn.login {
-    color: rgba(255, 255, 255, 0.8);
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.auth-btn.login:hover {
-    color: rgba(255, 255, 255, 0.95);
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
+    margin-right: 0.5rem;
 }
 
 .auth-btn.signup {
+    background: rgb(99, 102, 241);
     color: white;
-    background: rgb(56, 97, 251);
-    border: none;
-    box-shadow: 0 4px 12px rgba(56, 97, 251, 0.25);
 }
 
 .auth-btn.signup:hover {
-    background: rgb(45, 85, 255);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(56, 97, 251, 0.3);
+    background: rgb(79, 70, 229);
+}
+
+.auth-btn.active {
+    background: rgb(99, 102, 241);
+    color: white;
+}
+
+.auth-btn.active:hover {
+    background: rgb(79, 70, 229);
 }
 
 @media (max-width: 768px) {

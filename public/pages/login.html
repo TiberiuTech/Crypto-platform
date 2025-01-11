@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Crypto-Impact</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/components/navbar.css">
+    <link rel="stylesheet" href="../styles/components/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="../js/auth.js" type="module" defer></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="../../index.html" class="logo">Crypto-Impact</a>
+        </div>
+        <div class="nav-center">
+            <a href="news.html" class="nav-btn">News</a>
+            <a href="prices.html" class="nav-btn">Prices</a>
+            <a href="wallet.html" class="nav-btn">Wallet</a>
+            <a href="trade.html" class="nav-btn">Trade</a>
+        </div>
+        <div class="nav-right">
+            <a href="login.html" class="auth-btn login active">Login</a>
+            <a href="signup.html" class="auth-btn signup">Sign Up</a>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>Autentificare</h2>
+                <p>Bine ai revenit! Te rugăm să te autentifici în contul tău.</p>
+            </div>
+            
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" required placeholder="Introdu adresa de email">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Parolă</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" required placeholder="Introdu parola">
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember">
+                        <span>Ține-mă minte</span>
+                    </label>
+                    <a href="#" class="forgot-password">Ai uitat parola?</a>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span>Autentificare</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Nu ai cont încă? <a href="signup.html">Înregistrează-te</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
