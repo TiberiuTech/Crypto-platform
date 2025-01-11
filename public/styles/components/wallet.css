@@ -28,8 +28,8 @@
 }
 
 .wallet-balance {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: rgb(30, 41, 59);
+    border: 1px solid rgb(99, 102, 241);
     border-radius: 12px;
     padding: 1.5rem;
 }
@@ -63,13 +63,13 @@
 }
 
 .change.positive {
-    background: rgba(34, 197, 94, 0.2);
-    color: rgb(34, 197, 94);
+    background: rgb(34, 197, 94);
+    color: white;
 }
 
 .change.negative {
-    background: rgba(239, 68, 68, 0.2);
-    color: rgb(239, 68, 68);
+    background: rgb(239, 68, 68);
+    color: white;
 }
 
 .period {
@@ -90,8 +90,8 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.75rem;
-    background: rgba(51, 65, 85, 0.4);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: rgb(51, 65, 85);
+    border: 1px solid rgb(99, 102, 241);
     border-radius: 8px;
     color: var(--text-primary);
     font-size: 0.9rem;
@@ -100,7 +100,7 @@
 }
 
 .action-btn:hover {
-    background: rgba(51, 65, 85, 0.6);
+    background: rgb(71, 85, 105);
     transform: translateY(-2px);
 }
 
@@ -109,8 +109,8 @@
 }
 
 .portfolio-chart {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: rgb(30, 41, 59);
+    border: 1px solid rgb(99, 102, 241);
     border-radius: 12px;
     padding: 1.5rem;
     height: 100%;
@@ -148,8 +148,8 @@
 
 .period-btn {
     padding: 0.5rem 0.75rem;
-    background: rgba(51, 65, 85, 0.4);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: rgb(51, 65, 85);
+    border: 1px solid rgb(99, 102, 241);
     border-radius: 6px;
     color: var(--text-secondary);
     font-size: 0.85rem;
@@ -158,7 +158,7 @@
 }
 
 .period-btn:hover {
-    background: rgba(51, 65, 85, 0.6);
+    background: rgb(71, 85, 105);
 }
 
 .period-btn.active {
@@ -168,8 +168,8 @@
 }
 
 .assets-list {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: rgb(30, 41, 59);
+    border: 1px solid rgb(99, 102, 241);
     border-radius: 12px;
     padding: 1.5rem;
 }
@@ -198,7 +198,7 @@
 }
 
 .asset-item:hover {
-    background: rgba(51, 65, 85, 0.4);
+    background: rgb(51, 65, 85);
 }
 
 .asset-icon {
@@ -212,28 +212,28 @@
 }
 
 .asset-icon.BTC {
-    background: rgba(247, 147, 26, 0.2);
-    color: rgb(247, 147, 26);
+    background: rgb(247, 147, 26);
+    color: white;
 }
 
 .asset-icon.ETH {
-    background: rgba(98, 126, 234, 0.2);
-    color: rgb(98, 126, 234);
+    background: rgb(98, 126, 234);
+    color: white;
 }
 
 .asset-icon.ADA {
-    background: rgba(0, 51, 173, 0.2);
-    color: rgb(0, 51, 173);
+    background: rgb(0, 51, 173);
+    color: white;
 }
 
 .asset-icon.SOL {
-    background: rgba(220, 31, 255, 0.2);
-    color: rgb(220, 31, 255);
+    background: rgb(220, 31, 255);
+    color: white;
 }
 
 .asset-icon.DOT {
-    background: rgba(230, 0, 122, 0.2);
-    color: rgb(230, 0, 122);
+    background: rgb(230, 0, 122);
+    color: white;
 }
 
 .asset-info {
@@ -273,8 +273,8 @@
 }
 
 .transactions-history {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: rgb(30, 41, 59);
+    border: 1px solid rgb(99, 102, 241);
     border-radius: 12px;
     padding: 1.5rem;
 }
@@ -307,7 +307,7 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: rgba(51, 65, 85, 0.4);
+    background: rgb(51, 65, 85);
     border-radius: 8px;
 }
 
@@ -322,18 +322,18 @@
 }
 
 .transaction-icon.deposit {
-    background: rgba(34, 197, 94, 0.2);
-    color: rgb(34, 197, 94);
+    background: rgb(34, 197, 94);
+    color: white;
 }
 
 .transaction-icon.withdraw {
-    background: rgba(239, 68, 68, 0.2);
-    color: rgb(239, 68, 68);
+    background: rgb(239, 68, 68);
+    color: white;
 }
 
 .transaction-icon.swap {
-    background: rgba(99, 102, 241, 0.2);
-    color: rgb(99, 102, 241);
+    background: rgb(99, 102, 241);
+    color: white;
 }
 
 .transaction-info {
@@ -399,8 +399,8 @@
     width: 100%;
     padding: 1rem;
     margin-top: 1rem;
-    background: rgba(51, 65, 85, 0.4);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: rgb(51, 65, 85);
+    border: 1px solid rgb(99, 102, 241);
     border-radius: 8px;
     color: var(--text-primary);
     font-size: 0.95rem;
@@ -409,7 +409,135 @@
 }
 
 .view-all-btn:hover {
-    background: rgba(51, 65, 85, 0.6);
+    background: rgb(71, 85, 105);
+}
+
+/* Modal și formular */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: rgb(30, 41, 59);
+    border: 1px solid rgb(99, 102, 241);
+    border-radius: 12px;
+    padding: 24px;
+    width: 100%;
+    max-width: 480px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: var(--text-primary);
+}
+
+.transaction-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.form-group select,
+.form-group input {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgb(99, 102, 241);
+    background: rgb(51, 65, 85);
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.submit-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background: rgb(79, 70, 229);
+}
+
+/* Notificări */
+.notification {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    background: rgb(30, 41, 59);
+    color: var(--text-primary);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.notification.success {
+    background: rgb(34, 197, 94);
+    color: white;
+}
+
+.notification.error {
+    background: rgb(239, 68, 68);
+    color: white;
 }
 
 @media (max-width: 1200px) {

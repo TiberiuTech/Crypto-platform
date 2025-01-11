@@ -11,6 +11,30 @@ function formatUSD(value) {
     }).format(value);
 }
 
+// Funcție pentru formatarea numerelor crypto
+function formatCrypto(value, decimals = 4) {
+    if (typeof value !== 'number') return '0';
+    // Determinăm numărul de zecimale în funcție de mărimea numărului
+    if (value >= 1000) {
+        return Number(value).toFixed(2);
+    } else if (value >= 1) {
+        return Number(value).toFixed(3);
+    } else {
+        return Number(value).toFixed(4);
+    }
+}
+
+// Funcție pentru formatarea datei
+function formatDate(date) {
+    return new Intl.DateTimeFormat('ro-RO', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).format(date);
+}
+
 // Funcție pentru actualizarea UI-ului
 function updateBalanceDisplay() {
     const balanceElement = document.querySelector('.balance');
@@ -30,30 +54,22 @@ function updateBalanceDisplay() {
 
 // Funcție pentru actualizarea listei de active
 function updateAssetsList() {
-    console.log('Actualizare listă active...');
     const assetsList = document.querySelector('.assets-list');
-    if (!assetsList) {
-        console.error('Nu s-a găsit elementul .assets-list');
-        return;
-    }
+    if (!assetsList) return;
 
     const assets = walletService.getAssets() || {};
     const assetsCount = Object.keys(assets).length;
-    console.log('Număr de active:', assetsCount);
 
-    // Actualizăm header-ul cu numărul de active
     const assetsHeader = document.createElement('div');
     assetsHeader.className = 'assets-header';
     assetsHeader.innerHTML = `
         <div class="assets-title">Active (${assetsCount})</div>
     `;
 
-    // Generăm lista de active
     const assetsContainer = document.createElement('div');
     assetsContainer.className = 'assets-container';
     
     const assetsHTML = Object.values(assets).map(asset => {
-        // Definim iconițele pentru fiecare criptomonedă
         const iconMap = {
             'BTC': '<i class="fab fa-bitcoin"></i>',
             'ETH': '<i class="fab fa-ethereum"></i>',
@@ -63,7 +79,10 @@ function updateAssetsList() {
         };
 
         const icon = iconMap[asset.symbol] || '<i class="fas fa-coins"></i>';
-        console.log(`Generare HTML pentru ${asset.symbol} cu iconița:`, icon);
+        
+        // Determinăm numărul de zecimale în funcție de simbol
+        const decimals = asset.symbol === 'BTC' ? 8 : 
+                        asset.symbol === 'ETH' ? 6 : 4;
         
         return `
             <div class="asset-item">
@@ -72,7 +91,7 @@ function updateAssetsList() {
                 </div>
                 <div class="asset-info">
                     <div class="asset-name">${asset.name || 'Unknown'}</div>
-                    <div class="asset-balance">${(asset.amount || 0).toFixed(4)} ${asset.symbol}</div>
+                    <div class="asset-balance">${formatCrypto(asset.amount, decimals)} ${asset.symbol}</div>
                 </div>
                 <div class="asset-price">
                     <div class="asset-value">${formatUSD(asset.value || 0)}</div>
@@ -85,18 +104,115 @@ function updateAssetsList() {
     }).join('');
 
     assetsContainer.innerHTML = assetsHTML;
-    console.log('HTML generat pentru container:', assetsContainer.innerHTML);
     
-    // Curățăm conținutul existent și adăugăm noile elemente
     assetsList.innerHTML = '';
     assetsList.appendChild(assetsHeader);
     assetsList.appendChild(assetsContainer);
+}
+
+// Funcție pentru actualizarea istoricului tranzacțiilor
+function updateTransactionHistory() {
+    const historyContainer = document.querySelector('.transaction-history');
+    if (!historyContainer) return;
+
+    const transactions = walletService.getTransactions();
+    
+    const historyHTML = transactions.map(transaction => {
+        let description = '';
+        let icon = '';
+        
+        switch(transaction.type) {
+            case 'deposit':
+                description = `Depunere ${transaction.amount} ${transaction.toAsset}`;
+                icon = '<i class="fas fa-arrow-down text-success"></i>';
+                break;
+            case 'withdraw':
+                description = `Retragere ${transaction.amount} ${transaction.fromAsset}`;
+                icon = '<i class="fas fa-arrow-up text-danger"></i>';
+                break;
+            case 'swap':
+                description = `Swap ${transaction.amount} ${transaction.fromAsset} → ${transaction.toAsset}`;
+                icon = '<i class="fas fa-exchange-alt text-primary"></i>';
+                break;
+        }
+
+        return `
+            <div class="transaction-item">
+                <div class="transaction-icon">${icon}</div>
+                <div class="transaction-info">
+                    <div class="transaction-description">${description}</div>
+                    <div class="transaction-date">${formatDate(transaction.timestamp)}</div>
+                </div>
+                <div class="transaction-value">${formatUSD(transaction.value)}</div>
+            </div>
+        `;
+    }).join('');
+
+    historyContainer.innerHTML = `
+        <div class="history-header">
+            <h3>Istoric Tranzacții</h3>
+        </div>
+        <div class="history-content">
+            ${transactions.length > 0 ? historyHTML : '<div class="no-transactions">Nu există tranzacții</div>'}
+        </div>
+    `;
+}
+
+// Funcție pentru procesarea depunerii
+async function handleDeposit(asset, amount) {
+    try {
+        await walletService.deposit(asset, parseFloat(amount));
+        showNotification('Depunere efectuată cu succes!', 'success');
+        updateUI();
+    } catch (error) {
+        showNotification(error.message, 'error');
+    }
+}
+
+// Funcție pentru procesarea retragerii
+async function handleWithdraw(asset, amount) {
+    try {
+        await walletService.withdraw(asset, parseFloat(amount));
+        showNotification('Retragere efectuată cu succes!', 'success');
+        updateUI();
+    } catch (error) {
+        showNotification(error.message, 'error');
+    }
+}
+
+// Funcție pentru procesarea swap-ului
+async function handleSwap(fromAsset, toAsset, amount) {
+    try {
+        await walletService.swap(fromAsset, toAsset, parseFloat(amount));
+        showNotification('Swap efectuat cu succes!', 'success');
+        updateUI();
+    } catch (error) {
+        showNotification(error.message, 'error');
+    }
+}
+
+// Funcție pentru afișarea notificărilor
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }, 100);
 }
 
 // Funcție pentru actualizarea întregului UI
 async function updateUI() {
     updateBalanceDisplay();
     updateAssetsList();
+    updateTransactionHistory();
 }
 
 // Event listener pentru actualizări de la walletService
@@ -104,9 +220,7 @@ window.addEventListener('wallet-update', updateUI);
 
 // Inițializare
 document.addEventListener('DOMContentLoaded', async () => {
-    // Așteptăm inițializarea serviciului
     try {
-        // Inițial actualizăm UI-ul
         await updateUI();
     } catch (error) {
         console.error('Eroare la inițializarea UI:', error);
@@ -119,159 +233,166 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (depositBtn) {
         depositBtn.addEventListener('click', () => {
-            // Logica pentru depunere
-            console.log('Depunere clicked');
+            showTransactionModal('deposit');
         });
     }
 
     if (withdrawBtn) {
         withdrawBtn.addEventListener('click', () => {
-            // Logica pentru retragere
-            console.log('Retragere clicked');
+            showTransactionModal('withdraw');
         });
     }
 
     if (swapBtn) {
         swapBtn.addEventListener('click', () => {
-            // Logica pentru swap
-            console.log('Swap clicked');
+            showTransactionModal('swap');
         });
     }
-
-    updateCryptoIcons();
 });
 
-// Funcție pentru crearea unui formular modal
-function createModalForm(type) {
-    const formId = `${type}-form`;
+// Funcție pentru afișarea modalului de tranzacție
+function showTransactionModal(type) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    
+    let title = '';
+    let content = '';
+    
+    switch(type) {
+        case 'deposit':
+            title = 'Depunere';
+            content = createDepositForm();
+            break;
+        case 'withdraw':
+            title = 'Retragere';
+            content = createWithdrawForm();
+            break;
+        case 'swap':
+            title = 'Swap';
+            content = createSwapForm();
+            break;
+    }
+    
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>${title}</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                ${content}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Event listeners pentru modal
+    const closeBtn = modal.querySelector('.close-btn');
+    closeBtn.addEventListener('click', () => modal.remove());
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+    
+    // Event listener pentru form
+    const form = modal.querySelector('form');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        
+        switch(type) {
+            case 'deposit':
+                await handleDeposit(formData.get('asset'), formData.get('amount'));
+                break;
+            case 'withdraw':
+                await handleWithdraw(formData.get('asset'), formData.get('amount'));
+                break;
+            case 'swap':
+                await handleSwap(
+                    formData.get('fromAsset'),
+                    formData.get('toAsset'),
+                    formData.get('amount')
+                );
+                break;
+        }
+        
+        modal.remove();
+    });
+}
+
+// Funcții pentru crearea formularelor
+function createDepositForm() {
+    const assets = walletService.getAssets();
     return `
-        <form id="${formId}" class="modal-form">
+        <form class="transaction-form">
             <div class="form-group">
-                <label for="${type}-asset-select">Selectează activ</label>
-                <div class="select-wrapper">
-                    <select id="${type}-asset-select" name="asset" class="form-control" required>
-                        ${Object.values(walletService.getAssets()).map(asset => 
-                            `<option value="${asset.symbol}">${asset.name} (${asset.symbol})</option>`
-                        ).join('')}
-                    </select>
-                </div>
+                <label>Activ</label>
+                <select name="asset" required>
+                    ${Object.values(assets).map(asset => 
+                        `<option value="${asset.symbol}">${asset.name} (${asset.symbol})</option>`
+                    ).join('')}
+                </select>
             </div>
             <div class="form-group">
-                <label for="${type}-amount-input">Sumă</label>
-                <div class="input-wrapper">
-                    <input type="number" 
-                           id="${type}-amount-input" 
-                           name="amount" 
-                           step="any" 
-                           min="0" 
-                           required 
-                           placeholder="Introdu suma" />
-                    <button type="button" 
-                            class="max-btn" 
-                            data-form="${formId}"
-                            onclick="setMaxAmount(this)">
-                        Max
-                    </button>
-                </div>
-                <span class="balance-info" id="${type}-balance-info"></span>
+                <label>Sumă</label>
+                <input type="number" name="amount" step="any" min="0" required>
             </div>
+            <button type="submit" class="submit-btn">Depune</button>
         </form>
     `;
 }
 
-// Funcție pentru setarea sumei maxime
-function setMaxAmount(button) {
-    const formId = button.getAttribute('data-form');
-    const form = document.getElementById(formId);
-    if (!form) return;
-
-    const assetSelect = form.querySelector('select[name="asset"]');
-    const amountInput = form.querySelector('input[name="amount"]');
-    if (!assetSelect || !amountInput) return;
-
-    const asset = walletService.getAssets()[assetSelect.value];
-    if (asset) {
-        amountInput.value = asset.amount;
-        updateBalanceInfo(formId);
-    }
+function createWithdrawForm() {
+    const assets = walletService.getAssets();
+    return `
+        <form class="transaction-form">
+            <div class="form-group">
+                <label>Activ</label>
+                <select name="asset" required>
+                    ${Object.values(assets).map(asset => {
+                        const decimals = asset.symbol === 'BTC' ? 8 : 
+                                       asset.symbol === 'ETH' ? 6 : 4;
+                        return `<option value="${asset.symbol}">${asset.name} (${asset.symbol}) - Disponibil: ${formatCrypto(asset.amount, decimals)}</option>`;
+                    }).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Sumă</label>
+                <input type="number" name="amount" step="any" min="0" required>
+            </div>
+            <button type="submit" class="submit-btn">Retrage</button>
+        </form>
+    `;
 }
 
-// Funcție pentru actualizarea informațiilor despre sold
-function updateBalanceInfo(formId) {
-    const form = document.getElementById(formId);
-    if (!form) return;
-
-    const assetSelect = form.querySelector('select[name="asset"]');
-    const balanceInfo = form.querySelector('.balance-info');
-    if (!assetSelect || !balanceInfo) return;
-
-    const asset = walletService.getAssets()[assetSelect.value];
-    if (asset) {
-        balanceInfo.textContent = `Sold disponibil: ${asset.amount.toFixed(8)} ${asset.symbol}`;
-    }
-}
-
-// Funcție pentru actualizarea imaginilor criptomonedelor
-function updateCryptoIcons() {
-    const cryptoIcons = document.querySelectorAll('.crypto-icon');
-    cryptoIcons.forEach(icon => {
-        const symbol = icon.closest('.asset-icon').classList[1]; // Obține simbolul din clasa (BTC, ETH, etc.)
-        if (!symbol) return;
-        
-        // Construiește URL-ul corect pentru API-ul Compare
-        const baseUrl = 'https://www.cryptocompare.com';
-        const imageUrl = `${baseUrl}/media/19633/${symbol.toLowerCase()}.png`;
-        
-        // Setează URL-ul imaginii
-        icon.src = imageUrl;
-        
-        // Adaugă handler pentru erori la încărcarea imaginii
-        icon.onerror = function() {
-            // Încearcă un URL alternativ dacă primul eșuează
-            const alternativeUrl = `${baseUrl}/media/19684/${symbol.toLowerCase()}.png`;
-            this.src = alternativeUrl;
-            
-            // Dacă și al doilea URL eșuează, încearcă un al treilea format
-            this.onerror = function() {
-                const fallbackUrl = `${baseUrl}/media/37746251/${symbol.toLowerCase()}.png`;
-                this.src = fallbackUrl;
-                
-                // Dacă toate încercările eșuează, folosește o imagine generică
-                this.onerror = function() {
-                    this.src = `${baseUrl}/media/37746251/generic.png`;
-                };
-            };
-        };
-    });
-}
-
-// Apelează funcția când se încarcă pagina și după fiecare actualizare a listei de active
-document.addEventListener('DOMContentLoaded', () => {
-    updateCryptoIcons();
-    // Adaugă un observer pentru a detecta când se adaugă noi active
-    const observer = new MutationObserver(updateCryptoIcons);
-    const assetsList = document.querySelector('.assets-list');
-    if (assetsList) {
-        observer.observe(assetsList, { childList: true, subtree: true });
-    }
-});
-
-// Funcționalitate pentru butonul "Vezi toate tranzacțiile"
-document.addEventListener('DOMContentLoaded', () => {
-    const viewAllBtn = document.querySelector('.view-all-btn');
-    const transactionsContainer = document.querySelector('.transactions-container');
-    let isExpanded = false;
-
-    if (viewAllBtn && transactionsContainer) {
-        viewAllBtn.addEventListener('click', () => {
-            isExpanded = !isExpanded;
-            transactionsContainer.classList.toggle('expanded');
-            viewAllBtn.classList.toggle('expanded');
-            
-            // Actualizăm textul butonului
-            viewAllBtn.innerHTML = isExpanded ? 
-                'Arată mai puțin <i class="fas fa-chevron-up"></i>' : 
-                'Vezi toate tranzacțiile <i class="fas fa-chevron-down"></i>';
-        });
-    }
-}); 
+function createSwapForm() {
+    const assets = walletService.getAssets();
+    return `
+        <form class="transaction-form">
+            <div class="form-group">
+                <label>De la</label>
+                <select name="fromAsset" required>
+                    ${Object.values(assets).map(asset => {
+                        const decimals = asset.symbol === 'BTC' ? 8 : 
+                                       asset.symbol === 'ETH' ? 6 : 4;
+                        return `<option value="${asset.symbol}">${asset.name} (${asset.symbol}) - Disponibil: ${formatCrypto(asset.amount, decimals)}</option>`;
+                    }).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Sumă</label>
+                <input type="number" name="amount" step="any" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>La</label>
+                <select name="toAsset" required>
+                    ${Object.values(assets).map(asset => 
+                        `<option value="${asset.symbol}">${asset.name} (${asset.symbol})</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <button type="submit" class="submit-btn">Swap</button>
+        </form>
+    `;
+} 

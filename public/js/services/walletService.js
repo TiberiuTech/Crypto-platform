@@ -11,38 +11,128 @@ export class WalletService {
             'ETH': {
                 symbol: 'ETH',
                 name: 'Ethereum',
-                amount: 4.2156,
+                amount: 4.215,
                 value: 8965.32,
                 priceChange: -1.2
             },
             'ADA': {
                 symbol: 'ADA',
                 name: 'Cardano',
-                amount: 5000.0000,
+                amount: 5000,
                 value: 4875.45,
                 priceChange: 5.7
             },
             'SOL': {
                 symbol: 'SOL',
                 name: 'Solana',
-                amount: 150.0000,
+                amount: 150,
                 value: 4582.34,
                 priceChange: 3.8
             },
             'DOT': {
                 symbol: 'DOT',
                 name: 'Polkadot',
-                amount: 300.0000,
+                amount: 300,
                 value: 3180.31,
                 priceChange: -0.8
             }
         };
+
+        // Inițializăm istoricul tranzacțiilor
+        this.transactions = [];
 
         // Generăm date istorice simulate pentru ultimele 7 zile
         this.historicalData = {};
         Object.keys(this.assets).forEach(symbol => {
             this.historicalData[symbol] = this.generateHistoricalData(this.assets[symbol].value);
         });
+    }
+
+    // Metodă pentru adăugarea unei tranzacții în istoric
+    addTransaction(type, fromAsset, toAsset, amount, value) {
+        const transaction = {
+            id: Date.now(),
+            type,
+            fromAsset,
+            toAsset,
+            amount,
+            value,
+            timestamp: new Date()
+        };
+        this.transactions.unshift(transaction);
+        this.notifyUpdate();
+    }
+
+    // Metodă pentru obținerea istoricului tranzacțiilor
+    getTransactions() {
+        return this.transactions;
+    }
+
+    // Metodă pentru depunere
+    deposit(asset, amount) {
+        if (!this.assets[asset]) {
+            throw new Error('Activul nu există');
+        }
+        if (amount <= 0) {
+            throw new Error('Suma trebuie să fie pozitivă');
+        }
+
+        this.assets[asset].amount += amount;
+        const value = amount * (this.assets[asset].value / this.assets[asset].amount);
+        this.addTransaction('deposit', null, asset, amount, value);
+        this.notifyUpdate();
+        return true;
+    }
+
+    // Metodă pentru retragere
+    withdraw(asset, amount) {
+        if (!this.assets[asset]) {
+            throw new Error('Activul nu există');
+        }
+        if (amount <= 0) {
+            throw new Error('Suma trebuie să fie pozitivă');
+        }
+        if (this.assets[asset].amount < amount) {
+            throw new Error('Sold insuficient');
+        }
+
+        this.assets[asset].amount -= amount;
+        const value = amount * (this.assets[asset].value / this.assets[asset].amount);
+        this.addTransaction('withdraw', asset, null, amount, value);
+        this.notifyUpdate();
+        return true;
+    }
+
+    // Metodă pentru swap
+    swap(fromAsset, toAsset, amount) {
+        if (!this.assets[fromAsset] || !this.assets[toAsset]) {
+            throw new Error('Unul dintre active nu există');
+        }
+        if (amount <= 0) {
+            throw new Error('Suma trebuie să fie pozitivă');
+        }
+        if (this.assets[fromAsset].amount < amount) {
+            throw new Error('Sold insuficient');
+        }
+
+        // Calculăm valoarea în USD a activului sursă
+        const fromValue = amount * (this.assets[fromAsset].value / this.assets[fromAsset].amount);
+        
+        // Calculăm cantitatea de activ destinație bazată pe valoarea USD
+        const toAmount = fromValue / (this.assets[toAsset].value / this.assets[toAsset].amount);
+
+        // Actualizăm soldurile
+        this.assets[fromAsset].amount -= amount;
+        this.assets[toAsset].amount += toAmount;
+
+        this.addTransaction('swap', fromAsset, toAsset, amount, fromValue);
+        this.notifyUpdate();
+        return true;
+    }
+
+    // Metodă pentru notificarea actualizărilor
+    notifyUpdate() {
+        window.dispatchEvent(new CustomEvent('wallet-update'));
     }
 
     getAssets() {
@@ -61,7 +151,6 @@ export class WalletService {
         return weightedChange;
     }
 
-    // Generează date istorice simulate pentru un activ
     generateHistoricalData(currentValue) {
         const days = 7;
         const data = [];
@@ -71,12 +160,11 @@ export class WalletService {
             const date = new Date();
             date.setDate(date.getDate() - i);
             
-            // Generăm o variație aleatoare între -5% și +5%
             const variation = (Math.random() - 0.5) * 0.1;
             value = value * (1 + variation);
 
             data.push({
-                x: date,  // Returnăm direct obiectul Date
+                x: date,
                 y: value
             });
         }
@@ -84,7 +172,6 @@ export class WalletService {
         return data;
     }
 
-    // Returnează datele istorice pentru un activ specific
     getAssetHistory(symbol) {
         return this.historicalData[symbol] || [];
     }
