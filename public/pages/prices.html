@@ -11,7 +11,8 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <script src="/js/auth.js" type="module" defer></script>
+    <script src="/js/services/authService.js" type="module"></script>
+    <script src="/js/auth-check.js" type="module"></script>
 </head>
 <body>
     <!-- Navbar -->
@@ -21,7 +22,7 @@
         </div>
         <div class="nav-center">
             <a href="/pages/news.html" class="nav-btn">News</a>
-            <a href="/pages/prices.html" class="nav-btn">Prices</a>
+            <a href="/pages/prices.html" class="nav-btn active">Prices</a>
             <a href="/pages/wallet.html" class="nav-btn">Wallet</a>
             <a href="/pages/trade.html" class="nav-btn">Trade</a>
         </div>
@@ -34,7 +35,7 @@
                 <a href="/pages/login.html" class="auth-btn login">Login</a>
                 <a href="/pages/signup.html" class="auth-btn signup">Sign Up</a>
             </div>
-            <div class="user-profile" style="display: none;">
+            <div class="user-profile">
                 <img src="/assets/images/user-avatar.png" alt="User Avatar" class="user-avatar">
                 <span class="username">User</span>
                 <button class="logout-btn">Logout</button>

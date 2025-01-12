@@ -63,7 +63,10 @@ function handleProtectedLink(e) {
     
     if (!isAuthenticated()) {
         localStorage.setItem('loginWarning', 'Trebuie să vă autentificați pentru a accesa această secțiune.');
-        window.location.replace('/pages/login.html');
+        window.location.href = '/pages/login.html';
+    } else {
+        // Dacă utilizatorul este autentificat, permitem navigarea
+        window.location.href = e.target.closest('a').href;
     }
 }
 
@@ -181,9 +184,15 @@ if (loginForm) {
             }
 
             localStorage.setItem('user', JSON.stringify(data.user));
-            showAlert('Autentificare reușită!', () => {
+            
+            // Verificăm dacă există o pagină de redirecționare
+            const redirectUrl = localStorage.getItem('redirect_after_login');
+            if (redirectUrl) {
+                localStorage.removeItem('redirect_after_login');
+                window.location.href = redirectUrl;
+            } else {
                 window.location.href = '/';
-            });
+            }
         } catch (error) {
             showAlert(error.message || 'Eroare la autentificare');
         }

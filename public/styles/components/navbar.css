@@ -1,16 +1,62 @@
+/* Starea inițială - ascunde elementele de autentificare până se încarcă JavaScript */
+.nav-right .auth-buttons,
+.nav-right .user-profile {
+    visibility: hidden;
+    opacity: 0;
+    display: none;
+}
+
+/* Starea pentru utilizator autentificat */
+.is-authenticated .auth-buttons {
+    display: none !important;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.is-authenticated .user-profile {
+    display: flex !important;
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Starea pentru utilizator neautentificat */
+.not-authenticated .auth-buttons {
+    display: flex !important;
+    visibility: visible;
+    opacity: 1;
+}
+
+.not-authenticated .user-profile {
+    display: none !important;
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* Navbar principal */
 .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 2rem;
+    background-color: var(--background-dark);
+    border-bottom: 1px solid var(--border-color);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 60px;
-    background: rgb(13, 17, 28);
+    z-index: 1000;
+}
+
+/* Tranziție pentru nav-right */
+.nav-right {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    border-bottom: 1px solid rgba(30, 41, 59, 0.3);
-    z-index: 1000;
+    gap: 1rem;
+}
+
+.nav-right .auth-buttons,
+.nav-right .user-profile {
+    transition: opacity 0.15s ease-out;
 }
 
 .logo {
@@ -61,12 +107,6 @@
 
 .nav-link:hover::after {
     transform: scaleX(1);
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 24px;
 }
 
 .notification-bell {

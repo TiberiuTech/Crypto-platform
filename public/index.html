@@ -14,7 +14,8 @@
     <link rel="stylesheet" href="/styles/components/wallet.css">
     <link rel="stylesheet" href="/styles/components/trade.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="/js/auth.js" type="module" defer></script>
+    <script src="/js/services/authService.js" type="module"></script>
+    <script src="/js/auth-check.js" type="module"></script>
 </head>
 <body>
     <!-- Navbar -->
@@ -37,7 +38,7 @@
                 <a href="/pages/login.html" class="auth-btn login">Login</a>
                 <a href="/pages/signup.html" class="auth-btn signup">Sign Up</a>
             </div>
-            <div class="user-profile" style="display: none;">
+            <div class="user-profile">
                 <img src="/assets/images/user-avatar.png" alt="User Avatar" class="user-avatar">
                 <span class="username">User</span>
                 <button class="logout-btn">Logout</button>

@@ -14,23 +14,30 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar">
+    <nav class="navbar auth-loading">
         <div class="nav-left">
-            <a href="../../index.html" class="logo">Crypto-Impact</a>
+            <a href="/" class="logo">Crypto-Impact</a>
         </div>
         <div class="nav-center">
-            <a href="news.html" class="nav-btn">News</a>
-            <a href="prices.html" class="nav-btn">Prices</a>
-            <a href="wallet.html" class="nav-btn active">Wallet</a>
-            <a href="trade.html" class="nav-btn">Trade</a>
+            <a href="/pages/news.html" class="nav-btn">News</a>
+            <a href="/pages/prices.html" class="nav-btn">Prices</a>
+            <a href="/pages/wallet.html" class="nav-btn active">Wallet</a>
+            <a href="/pages/trade.html" class="nav-btn">Trade</a>
         </div>
-        <div class="nav-right">
+        <div class="nav-right auth-hidden">
             <div class="notification-bell">
                 <i class="fas fa-bell"></i>
                 <span class="notification-count">0</span>
             </div>
-            <button class="auth-btn login">Login</button>
-            <button class="auth-btn signup">Sign Up</button>
+            <div class="auth-buttons">
+                <a href="/pages/login.html" class="auth-btn login">Login</a>
+                <a href="/pages/signup.html" class="auth-btn signup">Sign Up</a>
+            </div>
+            <div class="user-profile" style="display: none;">
+                <img src="/assets/images/user-avatar.png" alt="User Avatar" class="user-avatar">
+                <span class="username">User</span>
+                <button class="logout-btn">Logout</button>
+            </div>
         </div>
     </nav>
 

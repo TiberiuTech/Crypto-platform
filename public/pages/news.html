@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="/styles/components/navbar.css">
     <link rel="stylesheet" href="/styles/components/news.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="/js/auth.js" type="module" defer></script>
+    <script src="/js/services/authService.js" type="module"></script>
+    <script src="/js/auth-check.js" type="module"></script>
 </head>
 <body>
     <!-- Navbar -->
@@ -17,7 +18,7 @@
             <a href="/" class="logo">Crypto-Impact</a>
         </div>
         <div class="nav-center">
-            <a href="/pages/news.html" class="nav-btn">News</a>
+            <a href="/pages/news.html" class="nav-btn active">News</a>
             <a href="/pages/prices.html" class="nav-btn">Prices</a>
             <a href="/pages/wallet.html" class="nav-btn">Wallet</a>
             <a href="/pages/trade.html" class="nav-btn">Trade</a>
@@ -31,7 +32,7 @@
                 <a href="/pages/login.html" class="auth-btn login">Login</a>
                 <a href="/pages/signup.html" class="auth-btn signup">Sign Up</a>
             </div>
-            <div class="user-profile" style="display: none;">
+            <div class="user-profile">
                 <img src="/assets/images/user-avatar.png" alt="User Avatar" class="user-avatar">
                 <span class="username">User</span>
                 <button class="logout-btn">Logout</button>
