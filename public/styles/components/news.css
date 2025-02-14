@@ -3,8 +3,8 @@
     flex-direction: column;
     min-height: calc(100vh - 60px);
     margin-top: 60px;
-    background-color: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(10px);
+    background-color: rgb(13, 17, 28);
+    backdrop-filter: none;
 }
 
 .news-container {
