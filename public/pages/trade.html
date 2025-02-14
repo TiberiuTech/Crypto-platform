@@ -51,11 +51,51 @@
             <div class="trading-left-panel">
                 <!-- Header cu informații despre pereche -->
                 <div class="pair-header">
-                    <select class="pair-selector">
-                        <option value="BTC/USD">BTC/USD</option>
-                        <option value="ETH/USD">ETH/USD</option>
-                        <option value="ORX/USD">ORX/USD</option>
-                    </select>
+                    <div class="pair-selector-container">
+                        <div class="selected-pair">
+                            <img src="https://www.cryptocompare.com/media/37746251/btc.png" alt="BTC" />
+                            <span>BTC/USD</span>
+                        </div>
+                        <div class="pair-dropdown">
+                            <div class="pair-option" data-pair="BTC/USD">
+                                <img src="https://www.cryptocompare.com/media/37746251/btc.png" alt="BTC" />
+                                <span>BTC/USD</span>
+                            </div>
+                            <div class="pair-option" data-pair="ETH/USD">
+                                <img src="https://www.cryptocompare.com/media/37746238/eth.png" alt="ETH" />
+                                <span>ETH/USD</span>
+                            </div>
+                            <div class="pair-option" data-pair="USDT/USD">
+                                <img src="https://www.cryptocompare.com/media/37746338/usdt.png" alt="USDT" />
+                                <span>USDT/USD</span>
+                            </div>
+                            <div class="pair-option" data-pair="XRP/USD">
+                                <img src="https://www.cryptocompare.com/media/38553096/xrp.png" alt="XRP" />
+                                <span>XRP/USD</span>
+                            </div>
+                            <div class="pair-option" data-pair="BNB/USD">
+                                <img src="https://www.cryptocompare.com/media/40485170/bnb.png" alt="BNB" />
+                                <span>BNB/USD</span>
+                            </div>
+                            <div class="pair-option" data-pair="SOL/USD">
+                                <img src="https://www.cryptocompare.com/media/37747734/sol.png" alt="SOL" />
+                                <span>SOL/USD</span>
+                            </div>
+                            <div class="pair-option" data-pair="DOGE/USD">
+                                <img src="https://www.cryptocompare.com/media/37746339/doge.png" alt="DOGE" />
+                                <span>DOGE/USD</span>
+                            </div>
+                            <div class="pair-option" data-pair="USDC/USD">
+                                <img src="https://www.cryptocompare.com/media/34835941/usdc.png" alt="USDC" />
+                                <span>USDC/USD</span>
+                            </div>
+                            <div class="pair-option" data-pair="ADA/USD">
+                                <img src="https://www.cryptocompare.com/media/37746235/ada.png" alt="ADA" />
+                                <span>ADA/USD</span>
+                            </div>
+                            <!-- Adaugă restul monedelor în același format -->
+                        </div>
+                    </div>
                     <div class="price-info">
                         <span class="current-price">Loading...</span>
                         <span class="price-change">0.00%</span>
@@ -86,11 +126,13 @@
                             <span>Cantitate</span>
                             <span>Total</span>
                         </div>
-                        <div class="orderbook-asks"></div>
-                        <div class="orderbook-spread">
-                            <span class="spread-value">Spread: 0.01%</span>
+                        <div class="orderbook-content">
+                            <div class="orderbook-asks"></div>
+                            <div class="orderbook-spread">
+                                <span class="spread-value">Spread: 0.01%</span>
+                            </div>
+                            <div class="orderbook-bids"></div>
                         </div>
-                        <div class="orderbook-bids"></div>
                     </div>
                     <div class="recent-trades">
                         <h3>Tranzacții Recente</h3>

@@ -123,38 +123,51 @@ export class ApiService {
             }
 
             const symbol = this.getSymbol(coin);
-            let limit = 24; // Default pentru 1H
-            let aggregate = 1;
+            let endpoint = 'histohour';
+            let limit = 24;
+
+            // Normalizăm timeframe-ul la uppercase
+            timeframe = timeframe.toUpperCase();
 
             switch (timeframe) {
+                case '1H':
+                    endpoint = 'histominute';
+                    limit = 60; // 60 minute pentru 1H
+                    break;
                 case '4H':
-                    limit = 96;
-                    aggregate = 4;
+                    endpoint = 'histominute';
+                    limit = 240; // 240 minute pentru 4H
                     break;
                 case '1D':
-                    limit = 24;
-                    aggregate = 24;
+                    endpoint = 'histohour';
+                    limit = 24; // 24 ore pentru 1D
                     break;
                 case '1W':
-                    limit = 168;
-                    aggregate = 24;
+                    endpoint = 'histoday';
+                    limit = 7; // 7 zile pentru 1W
                     break;
+                default:
+                    endpoint = 'histohour';
+                    limit = 24;
             }
 
             const response = await fetch(
-                `${this.baseUrl}/v2/histohour?fsym=${symbol}&tsym=USD&limit=${limit}&aggregate=${aggregate}`
+                `${this.baseUrl}/v2/${endpoint}?fsym=${symbol}&tsym=USD&limit=${limit}&aggregate=1`
             );
             const data = await response.json();
 
-            if (data.Response === 'Success') {
-                return data.Data.Data.map(point => ({
-                    timestamp: point.time * 1000, // Convert to milliseconds timestamp
+            if (data.Response === 'Success' && data.Data.Data && data.Data.Data.length > 0) {
+                const points = data.Data.Data.map(point => ({
+                    timestamp: point.time * 1000,
                     open: point.open,
                     high: point.high,
                     low: point.low,
                     close: point.close
                 }));
+
+                return points;
             }
+            console.warn(`No data returned from API for ${symbol} with timeframe ${timeframe}`);
             return [];
         } catch (error) {
             console.error('Error fetching historical data:', error);
@@ -167,26 +180,37 @@ export class ApiService {
         const now = Date.now();
         const basePrice = this.mockData['ORX'].USD.PRICE;
         let numPoints = 24;
+        let interval = 3600000; // 1 hour in milliseconds
+
+        // Normalizăm timeframe-ul la uppercase
+        timeframe = timeframe.toUpperCase();
 
         switch (timeframe) {
+            case '1H':
+                numPoints = 60;
+                interval = 60000; // 1 minute
+                break;
             case '4H':
-                numPoints = 96;
+                numPoints = 12;
+                interval = 14400000; // 4 hours
                 break;
             case '1D':
                 numPoints = 24;
+                interval = 3600000; // 1 hour
                 break;
             case '1W':
-                numPoints = 168;
+                numPoints = 7;
+                interval = 86400000; // 1 day
                 break;
         }
 
         for (let i = numPoints; i > 0; i--) {
-            const timestamp = now - (i * 3600000); // 1 hour in milliseconds
-            const variation = (Math.random() * 0.1 - 0.05) * basePrice; // ±5% variație
+            const timestamp = now - (i * interval);
+            const variation = (Math.random() * 0.1 - 0.05) * basePrice;
             const open = basePrice + variation;
-            const close = open + (Math.random() * 0.02 - 0.01) * basePrice; // ±1% variație
-            const high = Math.max(open, close) + (Math.random() * 0.01) * basePrice; // +1% max
-            const low = Math.min(open, close) - (Math.random() * 0.01) * basePrice; // -1% min
+            const close = open + (Math.random() * 0.02 - 0.01) * basePrice;
+            const high = Math.max(open, close) + (Math.random() * 0.01) * basePrice;
+            const low = Math.min(open, close) - (Math.random() * 0.01) * basePrice;
 
             points.push({
                 timestamp,

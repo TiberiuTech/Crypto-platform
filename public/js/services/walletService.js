@@ -22,12 +22,19 @@ export class WalletService {
                 value: 10000.00,
                 priceChange: 0
             },
-            'ADA': {
-                symbol: 'ADA',
-                name: 'Cardano',
+            'XRP': {
+                symbol: 'XRP',
+                name: 'Ripple',
                 amount: 5000,
-                value: 4875.45,
-                priceChange: 5.7
+                value: 2790.00,
+                priceChange: 13.48
+            },
+            'BNB': {
+                symbol: 'BNB',
+                name: 'Binance Coin',
+                amount: 25,
+                value: 7500.00,
+                priceChange: 2.1
             },
             'SOL': {
                 symbol: 'SOL',
@@ -35,6 +42,20 @@ export class WalletService {
                 amount: 150,
                 value: 4582.34,
                 priceChange: 3.8
+            },
+            'DOGE': {
+                symbol: 'DOGE',
+                name: 'Dogecoin',
+                amount: 15000,
+                value: 1875.00,
+                priceChange: -1.2
+            },
+            'ADA': {
+                symbol: 'ADA',
+                name: 'Cardano',
+                amount: 5000,
+                value: 4875.45,
+                priceChange: 5.7
             },
             'DOT': {
                 symbol: 'DOT',
@@ -77,11 +98,19 @@ export class WalletService {
 
     // Metodă pentru depunere
     deposit(asset, amount) {
-        if (!this.assets[asset]) {
-            throw new Error('Activul nu există');
-        }
         if (amount <= 0) {
             throw new Error('Suma trebuie să fie pozitivă');
+        }
+
+        // Dacă activul nu există, îl inițializăm
+        if (!this.assets[asset]) {
+            this.assets[asset] = {
+                symbol: asset,
+                name: asset,
+                amount: 0,
+                value: 0,
+                priceChange: 0
+            };
         }
 
         this.assets[asset].amount += amount;
@@ -94,7 +123,7 @@ export class WalletService {
     // Metodă pentru retragere
     withdraw(asset, amount) {
         if (!this.assets[asset]) {
-            throw new Error('Activul nu există');
+            throw new Error(`Nu aveți ${asset} în portofel`);
         }
         if (amount <= 0) {
             throw new Error('Suma trebuie să fie pozitivă');

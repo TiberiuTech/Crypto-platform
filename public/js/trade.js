@@ -23,16 +23,39 @@ class TradingPage {
         this.submitButton = document.getElementById('submitTrade');
         this.quickAmountButtons = document.querySelectorAll('.quick-amount-btn');
         
+        // Inițializăm starea din localStorage sau folosim valori default
+        const savedState = localStorage.getItem('tradingState');
+        const defaultState = {
+            activeOrders: [],
+            recentTrades: [],
+            currentPair: this.getInitialPair(),
+            orderType: 'market',
+            tradeType: 'buy'
+        };
+        
+        const state = savedState ? JSON.parse(savedState) : defaultState;
+        
         // State
-        this.selectedPair = this.getInitialPair();
-        this.selectedTimeframe = '1H';
-        this.selectedOrderType = 'market';
-        this.selectedTradeType = 'buy';
+        this.activeOrders = state.activeOrders;
+        this.recentTrades = state.recentTrades;
+        this.currentPair = state.currentPair;
+        this.orderType = state.orderType;
+        this.tradeType = state.tradeType;
         this.currentPriceValue = 0;
         this.chart = null;
+        this.selectedTimeframe = '4H';
         
-        // Adăugăm array pentru ordine active
-        this.activeOrders = [];
+        // Salvăm starea la fiecare modificare
+        this.saveState = () => {
+            const state = {
+                activeOrders: this.activeOrders,
+                recentTrades: this.recentTrades,
+                currentPair: this.currentPair,
+                orderType: this.orderType,
+                tradeType: this.tradeType
+            };
+            localStorage.setItem('tradingState', JSON.stringify(state));
+        };
         
         // Adăugăm interval pentru verificarea ordinelor
         setInterval(() => this.checkPendingOrders(), 5000);
@@ -49,77 +72,77 @@ class TradingPage {
     }
     
     getInitialPair() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const coin = urlParams.get('coin');
-        if (coin) {
-            // Verificăm dacă perechea există în selector
-            const pair = `${coin}/USD`;
-            const exists = Array.from(this.pairSelector.options).some(option => option.value === pair);
-            if (exists) {
-                this.pairSelector.value = pair;
-                return pair;
-            }
-        }
-        return 'BTC/USD';
+        const selectedPair = document.querySelector('.selected-pair span');
+        return selectedPair ? selectedPair.textContent : 'BTC/USD';
     }
     
     initializeEventListeners() {
-        // Pair selection
-        this.pairSelector.addEventListener('change', (e) => {
-            this.selectedPair = e.target.value;
-            this.updatePrice();
-            this.updateChart();
-            
-            // Actualizăm URL-ul
-            const url = new URL(window.location);
-            url.searchParams.set('coin', this.selectedPair.split('/')[0]);
-            window.history.pushState({}, '', url);
-        });
-        
-        // Timeframe selection
-        this.timeframeButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                this.timeframeButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                this.selectedTimeframe = button.dataset.timeframe;
+        // Event listeners pentru selectorul de perechi
+        const pairOptions = document.querySelectorAll('.pair-option');
+        pairOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const pair = option.dataset.pair;
+                this.currentPair = pair;
                 this.updateChart();
-            });
-        });
-        
-        // Order type selection
-        this.orderTypeButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                this.orderTypeButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                this.selectedOrderType = button.dataset.type;
+                this.updatePrice();
+                this.updateOrderbook();
                 this.updateForm();
-            });
-        });
-        
-        // Trade type selection
-        this.tradeTypeButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                this.tradeTypeButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                this.selectedTradeType = button.dataset.type;
                 this.updateSubmitButton();
             });
         });
         
-        // Quick amount buttons
-        this.quickAmountButtons.forEach(button => {
+        // Event listeners pentru butoanele de timeframe
+        const timeframeButtons = document.querySelectorAll('.timeframe-btn');
+        timeframeButtons.forEach(button => {
             button.addEventListener('click', () => {
-                console.log('Quick amount button clicked');
+                document.querySelector('.timeframe-btn.active').classList.remove('active');
+                button.classList.add('active');
+                this.selectedTimeframe = button.dataset.timeframe.toUpperCase();
+                this.updateChart();
+            });
+        });
+        
+        // Event listeners pentru tipul de ordin
+        const orderTypeButtons = document.querySelectorAll('.order-type-btn');
+        orderTypeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelector('.order-type-btn.active').classList.remove('active');
+                button.classList.add('active');
+                this.orderType = button.dataset.type;
+                this.updateForm();
+            });
+        });
+        
+        // Event listeners pentru tipul de tranzacție
+        const tradeTypeButtons = document.querySelectorAll('.trade-type-btn');
+        tradeTypeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelector('.trade-type-btn.active').classList.remove('active');
+                button.classList.add('active');
+                this.tradeType = button.dataset.type;
+                this.updateForm();
+                this.updateSubmitButton();
+            });
+        });
+        
+        // Event listeners pentru butoanele de sumă rapidă
+        const quickAmountButtons = document.querySelectorAll('.quick-amount-btn');
+        quickAmountButtons.forEach(button => {
+            button.addEventListener('click', () => {
                 const percentage = parseInt(button.dataset.percentage);
+                const maxAmount = this.calculateMaxAmount();
+                const amount = (maxAmount * percentage) / 100;
+                document.getElementById('amountInput').value = amount.toFixed(8);
+                this.updateTotal();
                 console.log('Percentage:', percentage);
                 
-                const [baseCurrency, quoteCurrency] = this.selectedPair.split('/');
-                console.log('Selected pair:', this.selectedPair);
+                const [baseCurrency, quoteCurrency] = this.currentPair.split('/');
+                console.log('Selected pair:', this.currentPair);
                 console.log('Base currency:', baseCurrency);
                 console.log('Quote currency:', quoteCurrency);
-                console.log('Trade type:', this.selectedTradeType);
+                console.log('Trade type:', this.tradeType);
                 
-                if (this.selectedTradeType === 'buy') {
+                if (this.tradeType === 'buy') {
                     const quoteCurrencyBalance = this.walletService.getBalance(quoteCurrency);
                     const currentPrice = parseFloat(this.priceInput.value) || 0;
                     
@@ -195,11 +218,22 @@ class TradingPage {
             }
         };
 
+        // Configurație inițială pentru scala de timp
+        const timeConfig = {
+            unit: 'hour',
+            displayFormats: {
+                minute: 'HH:mm',
+                hour: 'HH:mm',
+                day: 'DD MMM',
+                week: 'DD MMM'
+            }
+        };
+
         this.chart = new Chart(ctx, {
             type: 'candlestick',
             data: {
                 datasets: [{
-                    label: this.selectedPair,
+                    label: this.currentPair,
                     data: [],
                     color: {
                         up: candleColor.up.border,
@@ -229,15 +263,7 @@ class TradingPage {
                 scales: {
                     x: {
                         type: 'time',
-                        time: {
-                            unit: 'hour',
-                            displayFormats: {
-                                minute: 'HH:mm',
-                                hour: 'DD MMM, HH:mm',
-                                day: 'DD MMM',
-                                week: 'DD MMM'
-                            }
-                        },
+                        time: timeConfig,
                         adapters: {
                             date: {
                                 locale: 'ro'
@@ -246,7 +272,8 @@ class TradingPage {
                         ticks: {
                             source: 'auto',
                             maxRotation: 0,
-                            color: 'rgba(255, 255, 255, 0.7)'
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            maxTicksLimit: 8
                         },
                         grid: {
                             color: 'rgba(255, 255, 255, 0.1)'
@@ -275,6 +302,7 @@ class TradingPage {
                         callbacks: {
                             label: function(context) {
                                 const ohlc = context.raw;
+                                if (!ohlc) return [];
                                 return [
                                     'Open: $' + ohlc.o.toFixed(2),
                                     'High: $' + ohlc.h.toFixed(2),
@@ -293,16 +321,22 @@ class TradingPage {
             }
         });
         
+        // Inițializăm cu date
         await this.updateChart();
     }
     
     async updateChart() {
         try {
             const data = await this.apiService.getHistoricalData(
-                this.selectedPair.split('/')[0],
+                this.currentPair.split('/')[0],
                 this.selectedTimeframe
             );
             
+            if (!data || data.length === 0) {
+                console.warn('No historical data available');
+                return;
+            }
+
             // Formatăm datele pentru graficul candlestick
             const formattedData = data.map(candle => ({
                 x: candle.timestamp,
@@ -312,7 +346,43 @@ class TradingPage {
                 c: candle.close
             }));
 
+            // Actualizăm label-ul și datele graficului
+            this.chart.data.datasets[0].label = this.currentPair;
             this.chart.data.datasets[0].data = formattedData;
+
+            // Ajustăm scala de timp în funcție de timeframe
+            let timeUnit = 'hour';
+            let displayFormats = {
+                minute: 'HH:mm',
+                hour: 'HH:mm',
+                day: 'DD MMM',
+                week: 'DD MMM'
+            };
+
+            switch(this.selectedTimeframe) {
+                case '1H':
+                    timeUnit = 'minute';
+                    break;
+                case '4H':
+                    timeUnit = 'hour';
+                    break;
+                case '1D':
+                    timeUnit = 'hour';
+                    break;
+                case '1W':
+                    timeUnit = 'day';
+                    break;
+                default:
+                    timeUnit = 'hour';
+            }
+            
+            // Actualizăm configurația scalei de timp
+            if (this.chart.options.scales.x) {
+                this.chart.options.scales.x.time.unit = timeUnit;
+                this.chart.options.scales.x.time.displayFormats = displayFormats;
+            }
+
+            // Actualizăm graficul
             this.chart.update();
         } catch (error) {
             console.error('Error updating chart:', error);
@@ -331,19 +401,34 @@ class TradingPage {
     
     async updatePrice() {
         try {
-            const price = await this.apiService.getPrice(this.selectedPair.split('/')[0]);
-            const priceChange = await this.apiService.getPriceChange(this.selectedPair.split('/')[0]);
+            const symbol = this.currentPair.split('/')[0];
+            const price = await this.apiService.getPrice(symbol);
+            const priceChange = await this.apiService.getPriceChange(symbol);
             
-            this.currentPriceValue = price;
-            this.currentPrice.textContent = `$${price.toFixed(2)}`;
+            const priceElement = document.querySelector('.current-price');
+            const changeElement = document.querySelector('.price-change');
             
-            this.priceChange.textContent = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}%`;
-            this.priceChange.className = `price-change ${priceChange >= 0 ? 'positive' : 'negative'}`;
-            
-            if (this.selectedOrderType === 'market') {
-                this.priceInput.value = price.toFixed(2);
-                this.updateTotal();
+            if (priceElement) {
+                priceElement.textContent = `$${price.toFixed(2)}`;
             }
+            
+            if (changeElement) {
+                const isPositive = priceChange >= 0;
+                changeElement.textContent = `${isPositive ? '+' : ''}${priceChange.toFixed(2)}%`;
+                changeElement.className = `price-change ${isPositive ? 'positive' : 'negative'}`;
+            }
+
+            // Actualizăm prețul în formular doar pentru ordinele de tip market
+            if (this.orderType === 'market') {
+                const priceInput = document.getElementById('priceInput');
+                if (priceInput) {
+                    priceInput.value = price.toFixed(2);
+                    this.updateTotal(); // Recalculăm totalul cu noul preț
+                }
+            }
+            
+            // Salvăm prețul curent pentru referințe viitoare
+            this.currentPriceValue = price;
         } catch (error) {
             console.error('Error updating price:', error);
             this.showNotification('Eroare la actualizarea prețului', 'error');
@@ -351,51 +436,55 @@ class TradingPage {
     }
     
     updateForm() {
-        if (this.selectedOrderType === 'market') {
+        if (this.orderType === 'market') {
             this.priceInput.value = this.currentPriceValue.toFixed(2);
             this.priceInput.disabled = true;
         } else {
+            // Pentru ordine limit și stop, permitem editarea prețului
+            // și păstrăm valoarea existentă dacă există
             this.priceInput.disabled = false;
+            if (!this.priceInput.value) {
+                this.priceInput.value = this.currentPriceValue.toFixed(2);
+            }
         }
 
-        // Verificăm dacă sunt introduse valorile necesare
-        if (!this.priceInput.value || !this.amountInput.value) {
-            this.showNotification('Introduceți prețul și cantitatea', 'error');
-            return;
+        // Calculăm totalul doar dacă ambele valori sunt prezente
+        if (this.priceInput.value && this.amountInput.value) {
+            const total = parseFloat(this.priceInput.value) * parseFloat(this.amountInput.value);
+            this.totalInput.value = total.toFixed(2);
         }
-
-        // Calculăm totalul
-        const total = parseFloat(this.priceInput.value) * parseFloat(this.amountInput.value);
-        this.totalInput.value = total.toFixed(2);
+        
+        // Actualizăm butonul de submit
+        this.updateSubmitButton();
     }
     
     updateSubmitButton() {
-        this.submitButton.className = `submit-btn ${this.selectedTradeType}`;
-        this.submitButton.textContent = `${this.selectedTradeType === 'buy' ? 'Cumpără' : 'Vinde'} ${this.selectedPair.split('/')[0]}`;
-    }
-    
-    updateAvailableBalance() {
-        const [baseCurrency, quoteCurrency] = this.selectedPair.split('/');
-        const balance = this.selectedTradeType === 'buy' 
-            ? this.walletService.getBalance(quoteCurrency)
-            : this.walletService.getBalance(baseCurrency);
-        
-        if (this.selectedTradeType === 'buy') {
-            this.availableBalance.textContent = `${balance.toFixed(2)} ${quoteCurrency}`;
-        } else {
-            this.availableBalance.textContent = `${balance.toFixed(8)} ${baseCurrency}`;
-        }
+        this.submitButton.className = `submit-btn ${this.tradeType}`;
+        this.submitButton.textContent = `${this.tradeType === 'buy' ? 'Cumpără' : 'Vinde'} ${this.currentPair.split('/')[0]}`;
     }
     
     calculateMaxAmount() {
-        const [baseCurrency, quoteCurrency] = this.selectedPair.split('/');
+        const [baseCurrency, quoteCurrency] = this.currentPair.split('/');
         
-        if (this.selectedTradeType === 'buy') {
+        if (this.tradeType === 'buy') {
             const usdBalance = this.walletService.getBalance(quoteCurrency) || 0;
             return this.currentPriceValue > 0 ? usdBalance / this.currentPriceValue : 0;
         } else {
             const cryptoBalance = this.walletService.getBalance(baseCurrency) || 0;
             return cryptoBalance;
+        }
+    }
+    
+    updateAvailableBalance() {
+        const [baseCurrency, quoteCurrency] = this.currentPair.split('/');
+        const balance = this.tradeType === 'buy' 
+            ? this.walletService.getBalance(quoteCurrency)
+            : this.walletService.getBalance(baseCurrency);
+        
+        if (this.tradeType === 'buy') {
+            this.availableBalance.textContent = `${balance.toFixed(2)} ${quoteCurrency}`;
+        } else {
+            this.availableBalance.textContent = `${balance.toFixed(8)} ${baseCurrency}`;
         }
     }
     
@@ -417,14 +506,14 @@ class TradingPage {
             }
             
             const order = {
-                pair: this.selectedPair,
-                type: this.selectedOrderType,
-                side: this.selectedTradeType,
+                pair: this.currentPair,
+                type: this.orderType,
+                side: this.tradeType,
                 price: price,
                 amount: amount
             };
             
-            switch (this.selectedOrderType) {
+            switch (this.orderType) {
                 case 'market':
                     await this.executeMarketOrder(order);
                     break;
@@ -451,50 +540,59 @@ class TradingPage {
                 const balance = this.walletService.getBalance(quoteCurrency);
                 if (balance < total) {
                     this.showNotification('Fonduri insuficiente', 'error');
-                    return;
+                    return false;
                 }
                 
                 await this.walletService.withdraw(quoteCurrency, total);
                 await this.walletService.deposit(baseCurrency, order.amount);
                 
-                // Adăugăm tranzacția în istoric
+                // Adăugăm tranzacția în istoric doar după ce s-a executat cu succes
                 this.addToRecentTrades({
                     type: 'buy',
                     price: order.price,
                     amount: order.amount,
                     total: total,
                     pair: order.pair,
-                    timestamp: new Date()
+                    timestamp: new Date(),
+                    status: 'completed'
                 });
                 
             } else {
                 const balance = this.walletService.getBalance(baseCurrency);
                 if (balance < order.amount) {
                     this.showNotification('Fonduri insuficiente', 'error');
-                    return;
+                    return false;
                 }
                 
                 await this.walletService.withdraw(baseCurrency, order.amount);
                 await this.walletService.deposit(quoteCurrency, total);
                 
-                // Adăugăm tranzacția în istoric
+                // Adăugăm tranzacția în istoric doar după ce s-a executat cu succes
                 this.addToRecentTrades({
                     type: 'sell',
                     price: order.price,
                     amount: order.amount,
                     total: total,
                     pair: order.pair,
-                    timestamp: new Date()
+                    timestamp: new Date(),
+                    status: 'completed'
                 });
             }
             
             this.showNotification('Tranzacție executată cu succes', 'success');
             this.resetForm();
-            this.updateAvailableBalance();
             
+            // Actualizăm toate elementele UI-ului
+            this.updateAvailableBalance();
+            this.updateOrderbook();
+            this.walletService.notifyUpdate();
+            this.saveState(); // Salvăm starea după executarea cu succes
+            
+            return true;
         } catch (error) {
             console.error('Error executing market order:', error);
             this.showNotification(error.message || 'Eroare la executarea ordinului', 'error');
+            return false;
         }
     }
     
@@ -606,28 +704,27 @@ class TradingPage {
             let shouldExecute = false;
             
             if (order.type === 'limit') {
-                if (order.side === 'buy') {
-                    shouldExecute = currentPrice <= order.price;
-                } else {
-                    shouldExecute = currentPrice >= order.price;
+                if (order.side === 'buy' && currentPrice >= order.price) {
+                    shouldExecute = true;
+                } else if (order.side === 'sell' && currentPrice <= order.price) {
+                    shouldExecute = true;
                 }
             } else if (order.type === 'stop') {
-                if (order.side === 'buy') {
-                    shouldExecute = currentPrice >= order.price;
-                } else {
-                    shouldExecute = currentPrice <= order.price;
+                if (order.side === 'buy' && currentPrice >= order.price) {
+                    shouldExecute = true;
+                } else if (order.side === 'sell' && currentPrice <= order.price) {
+                    shouldExecute = true;
                 }
             }
             
             if (shouldExecute) {
                 await this.executeOrder(order);
                 this.activeOrders[index].status = 'executed';
+                // Eliminăm doar ordinele executate după ce au fost procesate
+                this.activeOrders = this.activeOrders.filter(o => o.status === 'pending');
                 this.updateActiveOrdersDisplay();
             }
         });
-        
-        // Curățăm ordinele executate
-        this.activeOrders = this.activeOrders.filter(order => order.status === 'pending');
     }
     
     async executeOrder(order) {
@@ -742,36 +839,31 @@ class TradingPage {
         }, 100);
     }
 
-    // Metodă nouă pentru adăugarea tranzacțiilor în istoric
     addToRecentTrades(trade) {
+        this.recentTrades.unshift(trade);
+        // Păstrăm doar ultimele 50 de tranzacții
+        if (this.recentTrades.length > 50) {
+            this.recentTrades = this.recentTrades.slice(0, 50);
+        }
+        this.updateRecentTradesDisplay();
+        this.saveState(); // Salvăm starea după adăugarea tranzacției
+    }
+
+    updateRecentTradesDisplay() {
         const tradesList = document.querySelector('.trades-list');
         if (!tradesList) return;
 
-        const tradeElement = document.createElement('div');
-        tradeElement.className = 'trade-row';
-        
-        const time = new Intl.DateTimeFormat('ro', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        }).format(trade.timestamp);
-
-        tradeElement.innerHTML = `
-            <span class="price ${trade.type}">${trade.price.toFixed(2)} USD</span>
-            <span class="amount">${trade.amount.toFixed(8)}</span>
-            <span class="time">${time}</span>
-        `;
-
-        // Adăugăm noua tranzacție la început
-        tradesList.insertBefore(tradeElement, tradesList.firstChild);
-
-        // Limităm numărul de tranzacții afișate la 50
-        while (tradesList.children.length > 50) {
-            tradesList.removeChild(tradesList.lastChild);
-        }
+        tradesList.innerHTML = this.recentTrades
+            .map(trade => `
+                <div class="trade-row">
+                    <span class="price ${trade.type}">${trade.price.toFixed(2)}</span>
+                    <span class="amount">${trade.amount.toFixed(8)}</span>
+                    <span class="time">${new Date(trade.timestamp).toLocaleTimeString()}</span>
+                    <span class="status">${trade.status}</span>
+                </div>
+            `).join('');
     }
 
-    // Adăugăm metoda pentru actualizarea orderbook-ului
     async updateOrderbook() {
         try {
             // Simulăm date pentru orderbook
@@ -809,7 +901,6 @@ class TradingPage {
         }
     }
 
-    // Metoda pentru afișarea orderbook-ului
     displayOrderbook() {
         const orderbookElement = document.querySelector('.orderbook');
         if (!orderbookElement) return;
@@ -853,5 +944,59 @@ class TradingPage {
 
 // Inițializare
 document.addEventListener('DOMContentLoaded', () => {
-    new TradingPage();
+    const tradingPage = new TradingPage();
+    
+    // Funcționalitate pentru selectorul de perechi
+    const pairSelectorContainer = document.querySelector('.pair-selector-container');
+    const selectedPair = pairSelectorContainer.querySelector('.selected-pair');
+    const pairDropdown = pairSelectorContainer.querySelector('.pair-dropdown');
+    const pairOptions = pairDropdown.querySelectorAll('.pair-option');
+
+    // Actualizează perechea selectată
+    function updateSelectedPair(option) {
+        const img = option.querySelector('img');
+        const span = option.querySelector('span');
+        const selectedPair = document.querySelector('.selected-pair');
+        
+        selectedPair.innerHTML = `
+            <img src="${img.src}" alt="${img.alt}" />
+            <span>${span.textContent}</span>
+        `;
+        
+        const pair = option.dataset.pair;
+        tradingPage.currentPair = pair;
+        
+        // Actualizăm prețul și graficul pentru noua pereche
+        tradingPage.updatePrice();
+        tradingPage.updateChart();
+        tradingPage.updateOrderbook();
+        
+        // Resetăm formularul pentru noua pereche
+        tradingPage.resetForm();
+        
+        // Actualizăm soldul disponibil pentru noua pereche
+        tradingPage.updateAvailableBalance();
+    }
+
+    // Adaugă evenimente pentru opțiuni
+    pairOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            updateSelectedPair(option);
+            pairDropdown.style.display = 'none';
+        });
+    });
+
+    // Închide dropdown-ul când se face click în afara lui
+    document.addEventListener('click', (e) => {
+        if (!pairSelectorContainer.contains(e.target)) {
+            pairDropdown.style.display = 'none';
+        }
+    });
+
+    // Deschide dropdown-ul la click pe containerul selector
+    selectedPair.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isVisible = pairDropdown.style.display === 'block';
+        pairDropdown.style.display = isVisible ? 'none' : 'block';
+    });
 }); 

@@ -1,28 +1,25 @@
 .trading-section {
-    min-height: 100vh;
-    padding: 10px 0 0;
-    background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(9, 14, 52, 0.97));
+    padding-top: 60px;
+    min-height: calc(100vh - 60px);
+    background: rgb(13, 17, 28);
 }
 
 .trading-container {
     display: grid;
     grid-template-columns: 1fr 350px;
-    gap: 0.75rem;
-    padding: 0.5rem;
-    max-width: 1800px;
+    gap: 1rem;
+    max-width: 1600px;
     margin: 0 auto;
-    height: calc(100vh - 10px);
+    padding: 1rem;
+    height: calc(100vh - 60px);
 }
 
-/* Left Panel Styles */
 .trading-left-panel {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 12px;
-    padding: 0.75rem;
+    gap: 1rem;
+    height: 100%;
+    overflow: hidden;
 }
 
 .pair-header {
@@ -33,14 +30,175 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.pair-selector {
+.pair-selector-container {
+    position: relative;
+    width: 150px;
+    cursor: pointer;
+}
+
+.selected-pair {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.selected-pair img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.pair-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    z-index: 1000;
+}
+
+.pair-selector-container:hover .pair-dropdown {
+    display: block;
+}
+
+.pair-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.pair-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pair-option img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+/* Stiluri pentru scrollbar */
+.pair-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.pair-dropdown::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.pair-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.pair-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.pair-selector:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.pair-selector option {
+    background: rgb(30, 41, 59);
+    color: var(--text-primary);
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+.pair-option span {
+    color: var(--text-primary);
+}
+
+/* Customizare pentru select */
+.pair-selector-container {
+    position: relative;
+    width: fit-content;
+}
+
+.pair-selector-container .selected-pair {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
     background: rgba(51, 65, 85, 0.4);
     border: 1px solid rgba(99, 102, 241, 0.2);
     border-radius: 8px;
-    color: var(--text-primary);
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
     cursor: pointer;
+}
+
+.pair-selector-container .selected-pair img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.pair-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: rgb(30, 41, 59);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    z-index: 1000;
+    display: none;
+}
+
+.pair-dropdown.show {
+    display: block;
+}
+
+/* Stilizare pentru scrollbar în dropdown */
+.pair-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pair-dropdown::-webkit-scrollbar-track {
+    background: rgba(17, 24, 39, 0.2);
+    border-radius: 4px;
+}
+
+.pair-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.3);
+    border-radius: 4px;
+}
+
+.pair-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.5);
+}
+
+/* Stilizare pentru Firefox */
+.pair-dropdown {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.3) rgba(17, 24, 39, 0.2);
+}
+
+/* Stilizare pentru dropdown deschis */
+.pair-selector:focus option:checked {
+    background: var(--primary-color);
+    color: white;
+}
+
+.pair-selector option:hover {
+    background: rgba(99, 102, 241, 0.2);
 }
 
 .price-info {
@@ -104,14 +262,12 @@
 
 .chart-container {
     flex: 1;
-    position: relative;
-    background: rgba(51, 65, 85, 0.4);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    min-height: 400px;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    padding: 0.5rem;
-    min-height: 80px;
-    height: 80px;
-    width: 100%;
+    padding: 1rem;
+    position: relative;
 }
 
 .chart-container canvas {
@@ -122,61 +278,41 @@
 .market-data {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-    height: 280px;
+    gap: 1rem;
+    height: 340px;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
 }
 
 .orderbook, .recent-trades {
-    background: rgba(51, 65, 85, 0.4);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 8px;
-    padding: 0.75rem;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
 }
 
 .orderbook h3, .recent-trades h3 {
-    margin-bottom: 0.5rem;
-    color: var(--text-primary);
     font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
 }
 
 .orderbook-header, .trades-header {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .orderbook-content {
-    display: flex;
-    flex-direction: column;
-    height: calc(100% - 3rem);
+    flex: 1;
     overflow-y: auto;
-    background: rgba(17, 24, 39, 0.5);
-    border-radius: 8px;
-    padding: 0.5rem;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(99, 102, 241, 0.3) rgba(17, 24, 39, 0.2);
-}
-
-.orderbook-content::-webkit-scrollbar {
-    width: 6px;
-}
-
-.orderbook-content::-webkit-scrollbar-track {
-    background: rgba(17, 24, 39, 0.2);
-    border-radius: 3px;
-}
-
-.orderbook-content::-webkit-scrollbar-thumb {
-    background: rgba(99, 102, 241, 0.3);
-    border-radius: 3px;
-}
-
-.orderbook-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(99, 102, 241, 0.5);
+    padding-right: 0.5rem;
 }
 
 .orderbook-asks, .orderbook-bids {
@@ -187,10 +323,10 @@
 .orderbook-row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    padding: 0.25rem 0.5rem;
+    padding: 0.35rem 0.5rem;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background-color 0.2s;
 }
 
 .orderbook-row:hover {
@@ -212,11 +348,11 @@
 .orderbook-spread {
     text-align: center;
     padding: 0.5rem;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    margin: 0.5rem 0;
-    font-size: 0.9rem;
     color: var(--text-secondary);
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 /* Adăugăm gradient pentru volume bars */
@@ -490,15 +626,18 @@
 
 /* Stiluri pentru Tranzacții Recente */
 .trades-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
 }
 
 .trade-row {
-    padding: 0.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 0.35rem 0.5rem;
     font-size: 0.9rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
 .trade-row:hover {
@@ -639,4 +778,34 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Stiluri pentru scrollbar */
+.orderbook-content::-webkit-scrollbar,
+.trades-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.orderbook-content::-webkit-scrollbar-track,
+.trades-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.orderbook-content::-webkit-scrollbar-thumb,
+.trades-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.orderbook-content::-webkit-scrollbar-thumb:hover,
+.trades-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Stiluri pentru Firefox */
+.orderbook-content,
+.trades-list {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
 } 
