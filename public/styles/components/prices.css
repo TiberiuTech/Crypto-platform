@@ -264,11 +264,33 @@ body {
     justify-content: center;
     align-items: center;
     padding: 0 !important;
+    position: relative;
+    cursor: pointer;
 }
 
 .chart-cell canvas {
     width: 100px !important;
     height: 30px !important;
+    transition: all 0.3s ease;
+}
+
+.chart-tooltip {
+    position: absolute;
+    background: rgb(24, 29, 42);
+    border: 1px solid rgba(30, 41, 59, 0.5);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #fff;
+    pointer-events: none;
+    z-index: 20;
+    white-space: nowrap;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+
+.chart-cell:hover .chart-tooltip {
+    display: block;
 }
 
 .chart-preview {
@@ -640,11 +662,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    cursor: pointer;
 }
 
 .mover-chart canvas {
     width: 100% !important;
     height: 100% !important;
+    transition: all 0.3s ease;
 }
 
 /* Remove carousel navigation buttons styles */

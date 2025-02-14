@@ -6,6 +6,9 @@ class TradingPage {
         this.apiService = new ApiService();
         this.walletService = new WalletService();
         
+        console.log('WalletService initialized:', this.walletService);
+        console.log('Available assets:', this.walletService.getAssets());
+        
         // Elemente DOM
         this.pairSelector = document.querySelector('.pair-selector');
         this.currentPrice = document.querySelector('.current-price');
@@ -27,6 +30,18 @@ class TradingPage {
         this.selectedTradeType = 'buy';
         this.currentPriceValue = 0;
         this.chart = null;
+        
+        // Adăugăm array pentru ordine active
+        this.activeOrders = [];
+        
+        // Adăugăm interval pentru verificarea ordinelor
+        setInterval(() => this.checkPendingOrders(), 5000);
+        
+        // În constructor, după inițializarea altor variabile
+        this.orderbook = {
+            asks: [],
+            bids: []
+        };
         
         this.initializeEventListeners();
         this.initializeChart();
@@ -94,19 +109,75 @@ class TradingPage {
         // Quick amount buttons
         this.quickAmountButtons.forEach(button => {
             button.addEventListener('click', () => {
+                console.log('Quick amount button clicked');
                 const percentage = parseInt(button.dataset.percentage);
-                const maxAmount = this.calculateMaxAmount();
-                this.amountInput.value = (maxAmount * percentage / 100).toFixed(8);
+                console.log('Percentage:', percentage);
+                
+                const [baseCurrency, quoteCurrency] = this.selectedPair.split('/');
+                console.log('Selected pair:', this.selectedPair);
+                console.log('Base currency:', baseCurrency);
+                console.log('Quote currency:', quoteCurrency);
+                console.log('Trade type:', this.selectedTradeType);
+                
+                if (this.selectedTradeType === 'buy') {
+                    const quoteCurrencyBalance = this.walletService.getBalance(quoteCurrency);
+                    const currentPrice = parseFloat(this.priceInput.value) || 0;
+                    
+                    console.log('Buy calculation:');
+                    console.log('Quote currency balance:', quoteCurrencyBalance);
+                    console.log('Current price:', currentPrice);
+                    console.log('Price input value:', this.priceInput.value);
+                    
+                    if (currentPrice > 0 && quoteCurrencyBalance > 0) {
+                        const maxBuyAmount = quoteCurrencyBalance / currentPrice;
+                        const amount = (maxBuyAmount * percentage / 100).toFixed(8);
+                        console.log('Max buy amount:', maxBuyAmount);
+                        console.log('Calculated amount:', amount);
+                        this.amountInput.value = amount;
+                    } else {
+                        console.log('Cannot calculate buy amount:', {
+                            currentPrice,
+                            quoteCurrencyBalance,
+                            reason: currentPrice <= 0 ? 'Invalid price' : 'Insufficient balance'
+                        });
+                    }
+                } else {
+                    const baseCurrencyBalance = this.walletService.getBalance(baseCurrency);
+                    console.log('Sell calculation:');
+                    console.log('Base currency balance:', baseCurrencyBalance);
+                    
+                    if (baseCurrencyBalance > 0) {
+                        const amount = (baseCurrencyBalance * percentage / 100).toFixed(8);
+                        console.log('Calculated amount:', amount);
+                        this.amountInput.value = amount;
+                    } else {
+                        console.log('Cannot calculate sell amount:', {
+                            baseCurrencyBalance,
+                            reason: 'Insufficient balance'
+                        });
+                    }
+                }
+                
                 this.updateTotal();
+                this.updateAvailableBalance();
             });
         });
         
         // Input handlers
-        this.priceInput.addEventListener('input', () => this.updateTotal());
-        this.amountInput.addEventListener('input', () => this.updateTotal());
+        this.priceInput.addEventListener('input', () => {
+            this.updateTotal();
+            this.updateAvailableBalance();
+        });
+        this.amountInput.addEventListener('input', () => {
+            this.updateTotal();
+            this.updateAvailableBalance();
+        });
         
         // Submit handler
         this.submitButton.addEventListener('click', () => this.submitTrade());
+
+        // Actualizăm soldul disponibil inițial
+        this.updateAvailableBalance();
     }
     
     async initializeChart() {
@@ -251,7 +322,11 @@ class TradingPage {
     
     startPriceUpdates() {
         this.updatePrice();
-        setInterval(() => this.updatePrice(), 5000);
+        this.updateOrderbook();
+        setInterval(() => {
+            this.updatePrice();
+            this.updateOrderbook();
+        }, 5000);
     }
     
     async updatePrice() {
@@ -276,11 +351,22 @@ class TradingPage {
     }
     
     updateForm() {
-        this.priceInput.disabled = this.selectedOrderType === 'market';
         if (this.selectedOrderType === 'market') {
             this.priceInput.value = this.currentPriceValue.toFixed(2);
+            this.priceInput.disabled = true;
+        } else {
+            this.priceInput.disabled = false;
         }
-        this.updateTotal();
+
+        // Verificăm dacă sunt introduse valorile necesare
+        if (!this.priceInput.value || !this.amountInput.value) {
+            this.showNotification('Introduceți prețul și cantitatea', 'error');
+            return;
+        }
+
+        // Calculăm totalul
+        const total = parseFloat(this.priceInput.value) * parseFloat(this.amountInput.value);
+        this.totalInput.value = total.toFixed(2);
     }
     
     updateSubmitButton() {
@@ -288,21 +374,36 @@ class TradingPage {
         this.submitButton.textContent = `${this.selectedTradeType === 'buy' ? 'Cumpără' : 'Vinde'} ${this.selectedPair.split('/')[0]}`;
     }
     
-    calculateMaxAmount() {
-        const balance = this.walletService.getBalance(
-            this.selectedTradeType === 'buy' ? this.selectedPair.split('/')[1] : this.selectedPair.split('/')[0]
-        );
+    updateAvailableBalance() {
+        const [baseCurrency, quoteCurrency] = this.selectedPair.split('/');
+        const balance = this.selectedTradeType === 'buy' 
+            ? this.walletService.getBalance(quoteCurrency)
+            : this.walletService.getBalance(baseCurrency);
         
         if (this.selectedTradeType === 'buy') {
-            return balance / this.currentPriceValue;
+            this.availableBalance.textContent = `${balance.toFixed(2)} ${quoteCurrency}`;
+        } else {
+            this.availableBalance.textContent = `${balance.toFixed(8)} ${baseCurrency}`;
         }
-        return balance;
+    }
+    
+    calculateMaxAmount() {
+        const [baseCurrency, quoteCurrency] = this.selectedPair.split('/');
+        
+        if (this.selectedTradeType === 'buy') {
+            const usdBalance = this.walletService.getBalance(quoteCurrency) || 0;
+            return this.currentPriceValue > 0 ? usdBalance / this.currentPriceValue : 0;
+        } else {
+            const cryptoBalance = this.walletService.getBalance(baseCurrency) || 0;
+            return cryptoBalance;
+        }
     }
     
     updateTotal() {
         const price = parseFloat(this.priceInput.value) || 0;
         const amount = parseFloat(this.amountInput.value) || 0;
-        this.totalInput.value = (price * amount).toFixed(2);
+        const total = price * amount;
+        this.totalInput.value = total.toFixed(2);
     }
     
     async submitTrade() {
@@ -323,11 +424,16 @@ class TradingPage {
                 amount: amount
             };
             
-            // Simulăm executarea ordinului
-            if (this.selectedOrderType === 'market') {
-                await this.executeMarketOrder(order);
-            } else {
-                await this.placeLimitOrder(order);
+            switch (this.selectedOrderType) {
+                case 'market':
+                    await this.executeMarketOrder(order);
+                    break;
+                case 'limit':
+                    await this.placeLimitOrder(order);
+                    break;
+                case 'stop':
+                    await this.placeStopOrder(order);
+                    break;
             }
             
         } catch (error) {
@@ -338,8 +444,7 @@ class TradingPage {
     
     async executeMarketOrder(order) {
         try {
-            const baseCurrency = order.pair.split('/')[0];
-            const quoteCurrency = order.pair.split('/')[1];
+            const [baseCurrency, quoteCurrency] = order.pair.split('/');
             const total = order.price * order.amount;
             
             if (order.side === 'buy') {
@@ -349,8 +454,18 @@ class TradingPage {
                     return;
                 }
                 
-                await this.walletService.updateBalance(quoteCurrency, -total);
-                await this.walletService.updateBalance(baseCurrency, order.amount);
+                await this.walletService.withdraw(quoteCurrency, total);
+                await this.walletService.deposit(baseCurrency, order.amount);
+                
+                // Adăugăm tranzacția în istoric
+                this.addToRecentTrades({
+                    type: 'buy',
+                    price: order.price,
+                    amount: order.amount,
+                    total: total,
+                    pair: order.pair,
+                    timestamp: new Date()
+                });
                 
             } else {
                 const balance = this.walletService.getBalance(baseCurrency);
@@ -359,28 +474,250 @@ class TradingPage {
                     return;
                 }
                 
-                await this.walletService.updateBalance(baseCurrency, -order.amount);
-                await this.walletService.updateBalance(quoteCurrency, total);
+                await this.walletService.withdraw(baseCurrency, order.amount);
+                await this.walletService.deposit(quoteCurrency, total);
+                
+                // Adăugăm tranzacția în istoric
+                this.addToRecentTrades({
+                    type: 'sell',
+                    price: order.price,
+                    amount: order.amount,
+                    total: total,
+                    pair: order.pair,
+                    timestamp: new Date()
+                });
             }
             
             this.showNotification('Tranzacție executată cu succes', 'success');
             this.resetForm();
+            this.updateAvailableBalance();
             
         } catch (error) {
             console.error('Error executing market order:', error);
-            this.showNotification('Eroare la executarea ordinului', 'error');
+            this.showNotification(error.message || 'Eroare la executarea ordinului', 'error');
         }
     }
     
     async placeLimitOrder(order) {
         try {
-            // În mod normal, aici am trimite ordinul către backend
-            // Pentru demo, simulăm plasarea ordinului
-            this.showNotification('Ordin plasat cu succes', 'success');
+            const [baseCurrency, quoteCurrency] = order.pair.split('/');
+            const total = order.price * order.amount;
+            
+            // Verificăm dacă utilizatorul are fonduri suficiente
+            if (order.side === 'buy') {
+                const balance = this.walletService.getBalance(quoteCurrency);
+                if (balance < total) {
+                    this.showNotification('Fonduri insuficiente pentru ordin limit', 'error');
+                    return;
+                }
+                
+                // Blocăm fondurile pentru ordin
+                await this.walletService.withdraw(quoteCurrency, total);
+            } else {
+                const balance = this.walletService.getBalance(baseCurrency);
+                if (balance < order.amount) {
+                    this.showNotification('Fonduri insuficiente pentru ordin limit', 'error');
+                    return;
+                }
+                
+                // Blocăm fondurile pentru ordin
+                await this.walletService.withdraw(baseCurrency, order.amount);
+            }
+            
+            // Adăugăm ordinul în lista de ordine active
+            const limitOrder = {
+                id: Date.now(),
+                type: 'limit',
+                side: order.side,
+                price: order.price,
+                amount: order.amount,
+                pair: order.pair,
+                status: 'pending',
+                timestamp: new Date(),
+                total: total
+            };
+            
+            this.activeOrders.push(limitOrder);
+            this.updateActiveOrdersDisplay();
+            this.showNotification('Ordin limit plasat cu succes', 'success');
             this.resetForm();
+            
         } catch (error) {
             console.error('Error placing limit order:', error);
-            this.showNotification('Eroare la plasarea ordinului', 'error');
+            this.showNotification('Eroare la plasarea ordinului limit', 'error');
+        }
+    }
+    
+    async placeStopOrder(order) {
+        try {
+            const [baseCurrency, quoteCurrency] = order.pair.split('/');
+            const total = order.price * order.amount;
+            
+            // Verificăm dacă utilizatorul are fonduri suficiente
+            if (order.side === 'buy') {
+                const balance = this.walletService.getBalance(quoteCurrency);
+                if (balance < total) {
+                    this.showNotification('Fonduri insuficiente pentru ordin stop', 'error');
+                    return;
+                }
+                
+                // Blocăm fondurile pentru ordin
+                await this.walletService.withdraw(quoteCurrency, total);
+            } else {
+                const balance = this.walletService.getBalance(baseCurrency);
+                if (balance < order.amount) {
+                    this.showNotification('Fonduri insuficiente pentru ordin stop', 'error');
+                    return;
+                }
+                
+                // Blocăm fondurile pentru ordin
+                await this.walletService.withdraw(baseCurrency, order.amount);
+            }
+            
+            // Adăugăm ordinul în lista de ordine active
+            const stopOrder = {
+                id: Date.now(),
+                type: 'stop',
+                side: order.side,
+                price: order.price,
+                amount: order.amount,
+                pair: order.pair,
+                status: 'pending',
+                timestamp: new Date(),
+                total: total
+            };
+            
+            this.activeOrders.push(stopOrder);
+            this.updateActiveOrdersDisplay();
+            this.showNotification('Ordin stop plasat cu succes', 'success');
+            this.resetForm();
+            
+        } catch (error) {
+            console.error('Error placing stop order:', error);
+            this.showNotification('Eroare la plasarea ordinului stop', 'error');
+        }
+    }
+    
+    checkPendingOrders() {
+        this.activeOrders.forEach(async (order, index) => {
+            if (order.status !== 'pending') return;
+            
+            const currentPrice = this.currentPriceValue;
+            let shouldExecute = false;
+            
+            if (order.type === 'limit') {
+                if (order.side === 'buy') {
+                    shouldExecute = currentPrice <= order.price;
+                } else {
+                    shouldExecute = currentPrice >= order.price;
+                }
+            } else if (order.type === 'stop') {
+                if (order.side === 'buy') {
+                    shouldExecute = currentPrice >= order.price;
+                } else {
+                    shouldExecute = currentPrice <= order.price;
+                }
+            }
+            
+            if (shouldExecute) {
+                await this.executeOrder(order);
+                this.activeOrders[index].status = 'executed';
+                this.updateActiveOrdersDisplay();
+            }
+        });
+        
+        // Curățăm ordinele executate
+        this.activeOrders = this.activeOrders.filter(order => order.status === 'pending');
+    }
+    
+    async executeOrder(order) {
+        const [baseCurrency, quoteCurrency] = order.pair.split('/');
+        
+        try {
+            if (order.side === 'buy') {
+                await this.walletService.deposit(baseCurrency, order.amount);
+                this.addToRecentTrades({
+                    type: 'buy',
+                    price: order.price,
+                    amount: order.amount,
+                    total: order.total,
+                    pair: order.pair,
+                    timestamp: new Date()
+                });
+            } else {
+                await this.walletService.deposit(quoteCurrency, order.total);
+                this.addToRecentTrades({
+                    type: 'sell',
+                    price: order.price,
+                    amount: order.amount,
+                    total: order.total,
+                    pair: order.pair,
+                    timestamp: new Date()
+                });
+            }
+            
+            this.showNotification(`Ordin ${order.type} executat cu succes`, 'success');
+            this.updateAvailableBalance();
+            
+        } catch (error) {
+            console.error('Error executing order:', error);
+            this.showNotification('Eroare la executarea ordinului', 'error');
+        }
+    }
+    
+    updateActiveOrdersDisplay() {
+        const ordersList = document.querySelector('.orders-list');
+        if (!ordersList) return;
+        
+        ordersList.innerHTML = this.activeOrders
+            .filter(order => order.status === 'pending')
+            .map(order => `
+                <div class="order-item ${order.side}">
+                    <div class="order-info">
+                        <span class="order-type">${order.type.toUpperCase()}</span>
+                        <span class="order-pair">${order.pair}</span>
+                    </div>
+                    <div class="order-details">
+                        <span class="order-price">$${order.price.toFixed(2)}</span>
+                        <span class="order-amount">${order.amount.toFixed(8)}</span>
+                    </div>
+                    <button class="cancel-order" data-id="${order.id}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+            
+        // Adăugăm event listeners pentru butoanele de anulare
+        ordersList.querySelectorAll('.cancel-order').forEach(button => {
+            button.addEventListener('click', () => {
+                this.cancelOrder(parseInt(button.dataset.id));
+            });
+        });
+    }
+    
+    async cancelOrder(orderId) {
+        const order = this.activeOrders.find(o => o.id === orderId);
+        if (!order) return;
+        
+        const [baseCurrency, quoteCurrency] = order.pair.split('/');
+        
+        try {
+            // Returnăm fondurile blocate
+            if (order.side === 'buy') {
+                await this.walletService.deposit(quoteCurrency, order.total);
+            } else {
+                await this.walletService.deposit(baseCurrency, order.amount);
+            }
+            
+            // Eliminăm ordinul din lista activă
+            this.activeOrders = this.activeOrders.filter(o => o.id !== orderId);
+            this.updateActiveOrdersDisplay();
+            this.updateAvailableBalance();
+            
+            this.showNotification('Ordin anulat cu succes', 'success');
+        } catch (error) {
+            console.error('Error canceling order:', error);
+            this.showNotification('Eroare la anularea ordinului', 'error');
         }
     }
     
@@ -389,35 +726,128 @@ class TradingPage {
         this.updateTotal();
     }
     
-    showNotification(message, type) {
+    showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
-        
-        const content = document.createElement('div');
-        content.className = 'notification-content';
-        
-        const icon = document.createElement('i');
-        icon.className = `fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`;
-        
-        const text = document.createElement('span');
-        text.textContent = message;
-        
-        content.appendChild(icon);
-        content.appendChild(text);
-        notification.appendChild(content);
+        notification.textContent = message;
         
         document.body.appendChild(notification);
         
         setTimeout(() => {
             notification.classList.add('show');
-        }, 100);
-        
-        setTimeout(() => {
-            notification.classList.remove('show');
             setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 3000);
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }, 100);
+    }
+
+    // Metodă nouă pentru adăugarea tranzacțiilor în istoric
+    addToRecentTrades(trade) {
+        const tradesList = document.querySelector('.trades-list');
+        if (!tradesList) return;
+
+        const tradeElement = document.createElement('div');
+        tradeElement.className = 'trade-row';
+        
+        const time = new Intl.DateTimeFormat('ro', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        }).format(trade.timestamp);
+
+        tradeElement.innerHTML = `
+            <span class="price ${trade.type}">${trade.price.toFixed(2)} USD</span>
+            <span class="amount">${trade.amount.toFixed(8)}</span>
+            <span class="time">${time}</span>
+        `;
+
+        // Adăugăm noua tranzacție la început
+        tradesList.insertBefore(tradeElement, tradesList.firstChild);
+
+        // Limităm numărul de tranzacții afișate la 50
+        while (tradesList.children.length > 50) {
+            tradesList.removeChild(tradesList.lastChild);
+        }
+    }
+
+    // Adăugăm metoda pentru actualizarea orderbook-ului
+    async updateOrderbook() {
+        try {
+            // Simulăm date pentru orderbook
+            const currentPrice = this.currentPriceValue;
+            const asks = [];
+            const bids = [];
+            
+            // Generăm 10 niveluri de preț pentru vânzări (asks)
+            for (let i = 0; i < 10; i++) {
+                const price = currentPrice * (1 + (i + 1) * 0.001);
+                const amount = Math.random() * 2 + 0.1;
+                asks.push({
+                    price: price,
+                    amount: amount,
+                    total: price * amount
+                });
+            }
+            
+            // Generăm 10 niveluri de preț pentru cumpărări (bids)
+            for (let i = 0; i < 10; i++) {
+                const price = currentPrice * (1 - (i + 1) * 0.001);
+                const amount = Math.random() * 2 + 0.1;
+                bids.push({
+                    price: price,
+                    amount: amount,
+                    total: price * amount
+                });
+            }
+            
+            this.orderbook = { asks, bids };
+            this.displayOrderbook();
+            
+        } catch (error) {
+            console.error('Error updating orderbook:', error);
+        }
+    }
+
+    // Metoda pentru afișarea orderbook-ului
+    displayOrderbook() {
+        const orderbookElement = document.querySelector('.orderbook');
+        if (!orderbookElement) return;
+        
+        // Calculăm spread-ul
+        const lowestAsk = this.orderbook.asks[0]?.price || 0;
+        const highestBid = this.orderbook.bids[0]?.price || 0;
+        const spread = lowestAsk - highestBid;
+        const spreadPercentage = (spread / lowestAsk) * 100;
+        
+        orderbookElement.innerHTML = `
+            <h3>Orderbook</h3>
+            <div class="orderbook-content">
+                <div class="orderbook-asks">
+                    ${this.orderbook.asks.map(ask => `
+                        <div class="orderbook-row">
+                            <span class="price sell">${ask.price.toFixed(2)}</span>
+                            <span class="amount">${ask.amount.toFixed(8)}</span>
+                            <span class="total">${ask.total.toFixed(2)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="orderbook-spread">
+                    Spread: ${spreadPercentage.toFixed(3)}%
+                </div>
+                
+                <div class="orderbook-bids">
+                    ${this.orderbook.bids.map(bid => `
+                        <div class="orderbook-row">
+                            <span class="price buy">${bid.price.toFixed(2)}</span>
+                            <span class="amount">${bid.amount.toFixed(8)}</span>
+                            <span class="total">${bid.total.toFixed(2)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
     }
 }
 

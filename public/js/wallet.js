@@ -2,12 +2,9 @@ import walletService from './services/walletService.js';
 
 // Funcție pentru formatarea valorilor în USD
 function formatUSD(value) {
-    if (typeof value !== 'number') return '0.00 USD';
-    return new Intl.NumberFormat('ro-RO', {
+    return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        currency: 'USD'
     }).format(value);
 }
 
@@ -26,10 +23,9 @@ function formatCrypto(value, decimals = 4) {
 
 // Funcție pentru formatarea datei
 function formatDate(date) {
-    return new Intl.DateTimeFormat('ro-RO', {
-        year: 'numeric',
-        month: 'short',
+    return new Intl.DateTimeFormat('ro', {
         day: 'numeric',
+        month: 'short',
         hour: '2-digit',
         minute: '2-digit'
     }).format(date);
@@ -221,9 +217,20 @@ window.addEventListener('wallet-update', updateUI);
 // Inițializare
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        const chartCanvas = document.getElementById('portfolioChart');
+        if (!chartCanvas) {
+            console.error('Nu s-a găsit elementul canvas pentru grafic');
+            return;
+        }
+
+        console.log('Inițializare grafic...');
+        const chart = initializePortfolioChart();
+        console.log('Grafic inițializat cu succes');
+
+        // Actualizare UI
         await updateUI();
     } catch (error) {
-        console.error('Eroare la inițializarea UI:', error);
+        console.error('Eroare la inițializarea paginii:', error);
     }
 
     // Event listeners pentru butoane
@@ -395,4 +402,177 @@ function createSwapForm() {
             <button type="submit" class="submit-btn">Swap</button>
         </form>
     `;
+}
+
+// Inițializare grafic portofoliu
+function initializePortfolioChart() {
+    const ctx = document.getElementById('portfolioChart').getContext('2d');
+    
+    // Generăm date de exemplu pentru ultimele 30 de zile
+    const dates = [];
+    const values = [];
+    let currentValue = 54024.07;
+    
+    for (let i = 30; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        dates.push(date);
+        
+        // Simulăm fluctuații aleatorii între -2% și +2%
+        const change = (Math.random() * 4 - 2) / 100;
+        currentValue = currentValue * (1 + change);
+        values.push({
+            x: date,
+            y: currentValue
+        });
+    }
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+    gradient.addColorStop(0, 'rgba(56, 97, 251, 0.15)');
+    gradient.addColorStop(1, 'rgba(56, 97, 251, 0)');
+
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                data: values,
+                borderColor: 'rgb(56, 97, 251)',
+                borderWidth: 1.5,
+                fill: true,
+                backgroundColor: gradient,
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 3,
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(56, 97, 251)',
+                pointHoverBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgb(24, 29, 42)',
+                    titleColor: '#94A3B8',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(30, 41, 59, 0.5)',
+                    borderWidth: 1,
+                    padding: 8,
+                    displayColors: false,
+                    callbacks: {
+                        title: function(context) {
+                            return formatDate(context[0].raw.x);
+                        },
+                        label: function(context) {
+                            const value = context.raw.y;
+                            const previousValue = context.dataset.data[context.dataIndex - 1]?.y;
+                            const change = previousValue ? ((value - previousValue) / previousValue * 100) : 0;
+                            
+                            return [
+                                formatUSD(value),
+                                `${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}%`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day',
+                        displayFormats: {
+                            day: 'd MMM'
+                        }
+                    },
+                    grid: {
+                        display: false
+                    },
+                    border: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#94A3B8',
+                        font: {
+                            size: 11
+                        },
+                        maxRotation: 0,
+                        maxTicksLimit: 6
+                    }
+                },
+                y: {
+                    position: 'right',
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.03)'
+                    },
+                    border: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#94A3B8',
+                        font: {
+                            size: 11
+                        },
+                        callback: function(value) {
+                            return formatUSD(value);
+                        },
+                        maxTicksLimit: 6
+                    }
+                }
+            }
+        }
+    });
+
+    // Adăugăm event listeners pentru butoanele de perioadă
+    document.querySelectorAll('.period-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelector('.period-btn.active').classList.remove('active');
+            button.classList.add('active');
+            updateChartPeriod(chart, button.dataset.period);
+        });
+    });
+
+    return chart;
+}
+
+// Funcție pentru actualizarea perioadei graficului
+function updateChartPeriod(chart, period) {
+    const days = {
+        '1L': 7,
+        '3L': 21,
+        '6L': 42,
+        '1A': 365,
+        'Tot': 730
+    }[period] || 7;
+
+    const dates = [];
+    const values = [];
+    let currentValue = 54024.07;
+    
+    for (let i = days; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        dates.push(date);
+        
+        const change = (Math.random() * 4 - 2) / 100;
+        currentValue = currentValue * (1 + change);
+        values.push({
+            x: date,
+            y: currentValue
+        });
+    }
+
+    chart.data.datasets[0].data = values;
+    chart.update();
 } 

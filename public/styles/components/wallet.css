@@ -1,4 +1,309 @@
 .wallet {
+    padding: 1rem;
+    height: calc(100vh - 60px);
+    background: rgb(13, 17, 28);
+    overflow: hidden;
+}
+
+.wallet-content {
+    height: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.main-section {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1rem;
+    height: 100%;
+}
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.wallet-balance {
+    background: rgb(30, 41, 59);
+    border: 1px solid rgb(99, 102, 241);
+    border-radius: 12px;
+    padding: 1rem;
+    height: 30%;
+}
+
+.wallet-balance h3 {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.balance {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.balance-change {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.change {
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.change.positive {
+    background: rgb(34, 197, 94);
+    color: white;
+}
+
+.change.negative {
+    background: rgb(239, 68, 68);
+    color: white;
+}
+
+.period {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.wallet-actions {
+    margin-top: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.action-btn {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.portfolio-chart {
+    background: rgb(19, 23, 34);
+    border: 1px solid rgba(30, 41, 59, 0.3);
+    border-radius: 12px;
+    padding: 1rem;
+    height: 45%;
+}
+
+.chart-container {
+    height: calc(100% - 40px);
+    position: relative;
+}
+
+.chart-header {
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chart-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.chart-period {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.period-btn {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid rgba(30, 41, 59, 0.3);
+    border-radius: 4px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.period-btn:hover {
+    background: rgba(30, 41, 59, 0.5);
+    color: #fff;
+}
+
+.period-btn.active {
+    background: rgb(56, 97, 251);
+    border-color: rgb(56, 97, 251);
+    color: #fff;
+}
+
+#portfolioChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.assets-list {
+    background: rgb(30, 41, 59);
+    border: 1px solid rgb(99, 102, 241);
+    border-radius: 12px;
+    padding: 1rem;
+    height: calc(70% - 1rem);
+    display: flex;
+    flex-direction: column;
+}
+
+.assets-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.assets-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.asset-item {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(51, 65, 85, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.asset-item:hover {
+    background: rgb(51, 65, 85);
+}
+
+.asset-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.2rem;
+}
+
+.asset-icon.BTC {
+    background: rgb(247, 147, 26);
+    color: white;
+}
+
+.asset-icon.ETH {
+    background: rgb(98, 126, 234);
+    color: white;
+}
+
+.asset-icon.ADA {
+    background: rgb(0, 51, 173);
+    color: white;
+}
+
+.asset-icon.SOL {
+    background: rgb(220, 31, 255);
+    color: white;
+}
+
+.asset-icon.DOT {
+    background: rgb(230, 0, 122);
+    color: white;
+}
+
+.asset-info {
+    flex: 1;
+}
+
+.asset-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.asset-balance {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.asset-price {
+    text-align: right;
+}
+
+.asset-value {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.asset-change {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.asset-change.positive {
+    color: rgb(34, 197, 94);
+}
+
+.asset-change.negative {
+    color: rgb(239, 68, 68);
+}
+
+.transactions-history {
+    background: rgb(30, 41, 59);
+    border: 1px solid rgb(99, 102, 241);
+    border-radius: 12px;
+    padding: 1rem;
+    height: calc(55% - 1rem);
+    display: flex;
+    flex-direction: column;
+}
+
+.transactions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.transactions-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.transaction-list {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) rgba(255, 255, 255, 0.05);
+}
+
+.transaction-item {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(51, 65, 85, 0.5);
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+.wallet {
     padding: 2rem;
     min-height: calc(100vh - 60px);
     background: rgb(13, 17, 28);
@@ -109,62 +414,69 @@
 }
 
 .portfolio-chart {
-    background: rgb(30, 41, 59);
-    border: 1px solid rgb(99, 102, 241);
+    background: rgb(19, 23, 34);
+    border: 1px solid rgba(30, 41, 59, 0.3);
     border-radius: 12px;
-    padding: 1.5rem;
-    height: 100%;
-    min-height: 400px;
-    display: flex;
-    flex-direction: column;
-}
-
-.chart-header {
+    padding: 1.25rem;
     margin-bottom: 1.5rem;
+    height: auto;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .chart-container {
-    flex: 1;
+    width: 100%;
+    height: 240px;
     position: relative;
-    min-height: 300px;
+    margin-top: 0.75rem;
 }
 
-#portfolioChart {
-    position: absolute;
-    width: 100% !important;
-    height: 100% !important;
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
 .chart-title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: #fff;
+    margin: 0;
 }
 
 .chart-period {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.35rem;
 }
 
 .period-btn {
-    padding: 0.5rem 0.75rem;
-    background: rgb(51, 65, 85);
-    border: 1px solid rgb(99, 102, 241);
+    padding: 0.35rem 0.75rem;
+    border: 1px solid rgba(30, 41, 59, 0.3);
     border-radius: 6px;
-    color: var(--text-secondary);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
     font-size: 0.85rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .period-btn:hover {
-    background: rgb(71, 85, 105);
+    background: rgba(30, 41, 59, 0.5);
+    color: #fff;
 }
 
 .period-btn.active {
-    background: var(--primary-color);
-    border-color: transparent;
-    color: white;
+    background: rgb(56, 97, 251);
+    border-color: rgb(56, 97, 251);
+    color: #fff;
+}
+
+#portfolioChart {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .assets-list {

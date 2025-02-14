@@ -144,7 +144,7 @@ const createSparkline = (containerId, data, isPositive) => {
                 backgroundColor: gradient,
                 tension: 0.3,
                 pointRadius: 0,
-                pointHoverRadius: 0,
+                pointHoverRadius: 3,
                 borderJoinStyle: 'round'
             }]
         },
@@ -153,7 +153,25 @@ const createSparkline = (containerId, data, isPositive) => {
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                tooltip: { enabled: false }
+                tooltip: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgb(24, 29, 42)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(30, 41, 59, 0.5)',
+                    borderWidth: 1,
+                    padding: 8,
+                    displayColors: false,
+                    callbacks: {
+                        title: () => '',
+                        label: (context) => {
+                            const value = context.parsed.y;
+                            return `$${value.toFixed(2)}`;
+                        }
+                    }
+                }
             },
             scales: {
                 x: { 
@@ -183,6 +201,9 @@ const createSparkline = (containerId, data, isPositive) => {
                 line: {
                     borderCapStyle: 'round'
                 }
+            },
+            onHover: (event, elements) => {
+                event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
             }
         }
     });
@@ -472,7 +493,7 @@ function createMoverChart(symbol, priceHistory, isPositive) {
                 backgroundColor: gradient,
                 tension: 0.4,
                 pointRadius: 0,
-                pointHoverRadius: 0
+                pointHoverRadius: 3
             }]
         },
         options: {
@@ -488,7 +509,25 @@ function createMoverChart(symbol, priceHistory, isPositive) {
             },
             plugins: {
                 legend: { display: false },
-                tooltip: { enabled: false }
+                tooltip: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgb(24, 29, 42)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(30, 41, 59, 0.5)',
+                    borderWidth: 1,
+                    padding: 8,
+                    displayColors: false,
+                    callbacks: {
+                        title: () => '',
+                        label: (context) => {
+                            const value = context.parsed.y;
+                            return `$${value.toFixed(2)}`;
+                        }
+                    }
+                }
             },
             scales: {
                 x: { 
@@ -509,6 +548,9 @@ function createMoverChart(symbol, priceHistory, isPositive) {
             interaction: {
                 intersect: false,
                 mode: 'index'
+            },
+            onHover: (event, elements) => {
+                event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
             }
         }
     });

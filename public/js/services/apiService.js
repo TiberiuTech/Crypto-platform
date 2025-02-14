@@ -148,7 +148,7 @@ export class ApiService {
 
             if (data.Response === 'Success') {
                 return data.Data.Data.map(point => ({
-                    timestamp: new Date(point.time * 1000),
+                    timestamp: point.time * 1000, // Convert to milliseconds timestamp
                     open: point.open,
                     high: point.high,
                     low: point.low,
@@ -181,7 +181,7 @@ export class ApiService {
         }
 
         for (let i = numPoints; i > 0; i--) {
-            const timestamp = new Date(now - (i * 3600000)); // 1 hour in milliseconds
+            const timestamp = now - (i * 3600000); // 1 hour in milliseconds
             const variation = (Math.random() * 0.1 - 0.05) * basePrice; // ±5% variație
             const open = basePrice + variation;
             const close = open + (Math.random() * 0.02 - 0.01) * basePrice; // ±1% variație

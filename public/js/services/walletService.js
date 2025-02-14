@@ -15,6 +15,13 @@ export class WalletService {
                 value: 8965.32,
                 priceChange: -1.2
             },
+            'USD': {
+                symbol: 'USD',
+                name: 'US Dollar',
+                amount: 10000.00,
+                value: 10000.00,
+                priceChange: 0
+            },
             'ADA': {
                 symbol: 'ADA',
                 name: 'Cardano',
@@ -139,6 +146,19 @@ export class WalletService {
         return this.assets;
     }
 
+    getBalance(symbol) {
+        console.log('Getting balance for:', symbol);
+        console.log('Available assets:', Object.keys(this.assets));
+        
+        if (!this.assets[symbol]) {
+            console.log('No balance found for:', symbol);
+            return 0;
+        }
+        
+        console.log('Balance found:', this.assets[symbol].amount);
+        return this.assets[symbol].amount;
+    }
+
     getTotalBalance() {
         return Object.values(this.assets).reduce((total, asset) => total + asset.value, 0);
     }
@@ -164,7 +184,7 @@ export class WalletService {
             value = value * (1 + variation);
 
             data.push({
-                x: date,
+                x: date.getTime(),
                 y: value
             });
         }
