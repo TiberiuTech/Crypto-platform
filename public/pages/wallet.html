@@ -75,9 +75,51 @@
                             </h3>
                         </div>
                         
-                        <div class="transactions-container">
-                            <div class="transaction-list">
-                                <!-- Tranzacții -->
+                        <div class="transaction-list">
+                            <!-- Exemplu de tranzacții -->
+                            <div class="transaction-item">
+                                <div class="transaction-icon deposit">
+                                    <i class="fas fa-arrow-down"></i>
+                                </div>
+                                <div class="transaction-info">
+                                    <div class="transaction-type">Depunere BTC</div>
+                                    <div class="transaction-date">15 Feb, 11:30</div>
+                                </div>
+                                <div class="transaction-amount">
+                                    <div class="amount">+0.25 BTC</div>
+                                    <div class="value">$8,750.00</div>
+                                </div>
+                                <div class="transaction-status completed">Completat</div>
+                            </div>
+
+                            <div class="transaction-item">
+                                <div class="transaction-icon withdraw">
+                                    <i class="fas fa-arrow-up"></i>
+                                </div>
+                                <div class="transaction-info">
+                                    <div class="transaction-type">Retragere ETH</div>
+                                    <div class="transaction-date">14 Feb, 15:45</div>
+                                </div>
+                                <div class="transaction-amount">
+                                    <div class="amount">-2.5 ETH</div>
+                                    <div class="value">$4,875.00</div>
+                                </div>
+                                <div class="transaction-status completed">Completat</div>
+                            </div>
+
+                            <div class="transaction-item">
+                                <div class="transaction-icon swap">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                                <div class="transaction-info">
+                                    <div class="transaction-type">Swap BTC → ETH</div>
+                                    <div class="transaction-date">13 Feb, 09:20</div>
+                                </div>
+                                <div class="transaction-amount">
+                                    <div class="amount">0.15 BTC → 2.8 ETH</div>
+                                    <div class="value">$5,250.00</div>
+                                </div>
+                                <div class="transaction-status completed">Completat</div>
                             </div>
                         </div>
                         
@@ -91,16 +133,18 @@
                 <!-- Right Panel -->
                 <div class="right-panel">
                     <!-- Card Sold -->
-                    <div class="wallet-balance">
-                        <h3>Sold Total</h3>
-                        <div class="balance">54.024,07 USD</div>
-                        <div class="balance-change">
-                            <span class="change negative">-0.05%</span>
-                            <span class="period">ultimele 24h</span>
+                    <div class="sold-total">
+                        <div class="sold-total-header">
+                            <h3>Sold Total</h3>
+                            <div class="sold-total-value">$76,189.07</div>
+                            <div class="sold-total-change">
+                                <span class="change positive">+1.07%</span>
+                                <span class="period">ultimele 24h</span>
+                            </div>
                         </div>
                         
                         <!-- Butoane de Acțiune -->
-                        <div class="wallet-actions">
+                        <div class="sold-total-actions">
                             <button class="action-btn deposit">
                                 <i class="fas fa-arrow-down"></i>
                                 Depunere
