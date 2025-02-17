@@ -1,93 +1,37 @@
 export class WalletService {
     constructor() {
-        this.assets = {
-            'BTC': {
-                symbol: 'BTC',
-                name: 'Bitcoin',
-                amount: 0.8942,
-                value: 32420.65,
-                priceChange: -0.05
-            },
-            'ETH': {
-                symbol: 'ETH',
-                name: 'Ethereum',
-                amount: 4.215,
-                value: 8965.32,
-                priceChange: -1.2
-            },
-            'USD': {
-                symbol: 'USD',
-                name: 'US Dollar',
-                amount: 10000.00,
-                value: 10000.00,
-                priceChange: 0
-            },
-            'XRP': {
-                symbol: 'XRP',
-                name: 'Ripple',
-                amount: 5000,
-                value: 2790.00,
-                priceChange: 13.48
-            },
-            'BNB': {
-                symbol: 'BNB',
-                name: 'Binance Coin',
-                amount: 25,
-                value: 7500.00,
-                priceChange: 2.1
-            },
-            'SOL': {
-                symbol: 'SOL',
-                name: 'Solana',
-                amount: 150,
-                value: 4582.34,
-                priceChange: 3.8
-            },
-            'DOGE': {
-                symbol: 'DOGE',
-                name: 'Dogecoin',
-                amount: 15000,
-                value: 1875.00,
-                priceChange: -1.2
-            },
-            'ADA': {
-                symbol: 'ADA',
-                name: 'Cardano',
-                amount: 5000,
-                value: 4875.45,
-                priceChange: 5.7
-            },
-            'DOT': {
-                symbol: 'DOT',
-                name: 'Polkadot',
-                amount: 300,
-                value: 3180.31,
-                priceChange: -0.8
-            }
-        };
+        // Inițializăm cu un obiect gol pentru active
+        this.assets = {};
+
+        // Încărcăm activele din localStorage dacă există
+        const savedAssets = localStorage.getItem('wallet_assets');
+        if (savedAssets) {
+            this.assets = JSON.parse(savedAssets);
+        }
 
         // Încărcăm tranzacțiile din localStorage
         this.transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
 
-        // Generăm date istorice simulate pentru ultimele 7 zile
-        this.historicalData = {};
-        Object.keys(this.assets).forEach(symbol => {
-            this.historicalData[symbol] = this.generateHistoricalData(this.assets[symbol].value);
-        });
-
+        // Cache pentru prețuri
         this.priceCache = new Map();
         this.lastPriceUpdate = new Map();
         
-        // Inițializăm prețurile pentru toate activele
-        this.updateAllPrices();
-        
         // Actualizăm prețurile la fiecare 30 de secunde
+        this.updateAllPrices();
         setInterval(() => this.updateAllPrices(), 30000);
+    }
+
+    // Salvează starea activelor în localStorage
+    saveState() {
+        localStorage.setItem('wallet_assets', JSON.stringify(this.assets));
+        localStorage.setItem('transactions', JSON.stringify(this.transactions));
     }
 
     async updateAllPrices() {
         try {
             const symbols = Object.keys(this.assets).join(',');
+            if (!symbols) return; // Nu avem active de actualizat
+
             const response = await fetch(`https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${symbols}&tsyms=USD`);
             const data = await response.json();
 
@@ -101,11 +45,12 @@ export class WalletService {
                         this.priceCache.set(symbol, price);
                         this.lastPriceUpdate.set(symbol, Date.now());
                         
-                        // Actualizăm și valoarea totală a activului
+                        // Actualizăm valoarea totală a activului
                         asset.value = asset.amount * price;
                         asset.priceChange = priceChange;
                     }
                 }
+                this.saveState();
                 this.notifyUpdate();
             }
         } catch (error) {
@@ -113,32 +58,46 @@ export class WalletService {
         }
     }
 
-    async getPricePerUnit(symbol) {
-        try {
-            // Verificăm dacă avem un preț în cache și dacă este recent (mai puțin de 30 secunde)
-            const lastUpdate = this.lastPriceUpdate.get(symbol);
-            const cachedPrice = this.priceCache.get(symbol);
-            
-            if (cachedPrice && lastUpdate && Date.now() - lastUpdate < 30000) {
-                return cachedPrice;
-            }
-
-            // Dacă nu avem un preț în cache sau este expirat, facem o nouă cerere
-            const response = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=USD`);
-            const data = await response.json();
-
-            if (data.USD) {
-                this.priceCache.set(symbol, data.USD);
-                this.lastPriceUpdate.set(symbol, Date.now());
-                return data.USD;
-            }
-
-            throw new Error(`Nu s-a putut obține prețul pentru ${symbol}`);
-        } catch (error) {
-            console.error(`Eroare la obținerea prețului pentru ${symbol}:`, error);
-            // Returnăm prețul din cache dacă există, altfel un preț predefinit
-            return this.priceCache.get(symbol) || this.getDefaultPrice(symbol);
+    // Metodă pentru adăugarea unui nou activ
+    async addAsset(symbol, name) {
+        if (this.assets[symbol]) {
+            throw new Error(`Activul ${symbol} există deja în portofoliu`);
         }
+
+        try {
+            // Verificăm dacă putem obține prețul pentru acest activ
+            const price = await this.getPricePerUnit(symbol);
+            
+            this.assets[symbol] = {
+                symbol,
+                name: name || symbol,
+                amount: 0,
+                value: 0,
+                priceChange: 0
+            };
+
+            this.saveState();
+            this.notifyUpdate();
+            return true;
+        } catch (error) {
+            throw new Error(`Nu s-a putut adăuga activul ${symbol}. Verificați dacă simbolul este valid.`);
+        }
+    }
+
+    // Metodă pentru eliminarea unui activ
+    removeAsset(symbol) {
+        if (!this.assets[symbol]) {
+            throw new Error(`Activul ${symbol} nu există în portofoliu`);
+        }
+
+        if (this.assets[symbol].amount > 0) {
+            throw new Error(`Nu puteți elimina un activ care are un sold pozitiv`);
+        }
+
+        delete this.assets[symbol];
+        this.saveState();
+        this.notifyUpdate();
+        return true;
     }
 
     // Metodă pentru adăugarea unei tranzacții în istoric
@@ -153,6 +112,7 @@ export class WalletService {
             timestamp: new Date()
         };
         this.transactions.unshift(transaction);
+        this.saveState();
         this.notifyUpdate();
     }
 
@@ -168,95 +128,38 @@ export class WalletService {
         }
 
         try {
-            // Dacă este USD, folosim direct suma
             if (asset === 'USD') {
                 if (!this.assets['USD']) {
-                    this.assets['USD'] = {
-                        symbol: 'USD',
-                        name: 'US Dollar',
-                        amount: 0,
-                        value: 0,
-                        priceChange: 0
-                    };
+                    await this.addAsset('USD', 'US Dollar');
                 }
                 this.assets['USD'].amount += amount;
                 this.assets['USD'].value = this.assets['USD'].amount;
                 this.addTransaction('deposit', null, 'USD', amount, amount);
             } else {
-                // Pentru crypto, obținem prețul curent și calculăm cantitatea
                 const currentPrice = await this.getPricePerUnit(asset);
                 if (!currentPrice) {
                     throw new Error(`Nu s-a putut obține prețul pentru ${asset}`);
                 }
 
-                // Calculăm cantitatea de crypto (suma în USD / preț per unitate)
                 const cryptoAmount = parseFloat((amount / currentPrice).toFixed(8));
 
-                // Dacă activul nu există, îl inițializăm
                 if (!this.assets[asset]) {
-                    this.assets[asset] = {
-                        symbol: asset,
-                        name: this.getAssetName(asset),
-                        amount: 0,
-                        value: 0,
-                        priceChange: 0
-                    };
+                    await this.addAsset(asset);
                 }
 
-                // Actualizăm cantitatea și valoarea
                 this.assets[asset].amount = parseFloat((this.assets[asset].amount + cryptoAmount).toFixed(8));
                 this.assets[asset].value = parseFloat((this.assets[asset].amount * currentPrice).toFixed(2));
 
-                console.log(`Depunere ${asset}:`, {
-                    amountUSD: amount,
-                    currentPrice,
-                    cryptoAmount,
-                    totalAmount: this.assets[asset].amount,
-                    totalValue: this.assets[asset].value
-                });
-
-                // Adăugăm tranzacția în istoric
                 this.addTransaction('deposit', null, asset, cryptoAmount, amount);
             }
 
+            this.saveState();
             this.notifyUpdate();
             return true;
         } catch (error) {
             console.error('Eroare la depunere:', error);
             throw new Error('Nu s-a putut efectua depunerea. Încercați din nou.');
         }
-    }
-
-    // Metodă helper pentru a obține numele complet al activului
-    getAssetName(symbol) {
-        const assetNames = {
-            'BTC': 'Bitcoin',
-            'ETH': 'Ethereum',
-            'USD': 'US Dollar',
-            'XRP': 'Ripple',
-            'BNB': 'Binance Coin',
-            'SOL': 'Solana',
-            'DOGE': 'Dogecoin',
-            'ADA': 'Cardano',
-            'DOT': 'Polkadot'
-        };
-        return assetNames[symbol] || symbol;
-    }
-
-    // Metodă helper pentru a obține prețul predefinit pentru active noi
-    getDefaultPrice(symbol) {
-        const defaultPrices = {
-            'BTC': 68000,
-            'ETH': 3500,
-            'USD': 1,
-            'XRP': 0.58,
-            'BNB': 400,
-            'SOL': 140,
-            'DOGE': 0.12,
-            'ADA': 0.70,
-            'DOT': 15
-        };
-        return defaultPrices[symbol] || 1;
     }
 
     // Metodă pentru retragere
@@ -307,15 +210,12 @@ export class WalletService {
 
     // Metodă pentru notificarea UI-ului despre schimbări
     notifyUpdate() {
-        // Salvăm tranzacțiile în localStorage
-        localStorage.setItem('transactions', JSON.stringify(this.transactions));
-        
         // Emitem un eveniment custom pentru actualizarea UI-ului
         window.dispatchEvent(new CustomEvent('wallet-update'));
     }
 
     getAssets() {
-        return this.assets;
+        return Object.values(this.assets);
     }
 
     getBalance(symbol) {
@@ -367,6 +267,32 @@ export class WalletService {
     getAssetHistory(symbol) {
         return this.historicalData[symbol] || [];
     }
+
+    async getPricePerUnit(symbol) {
+        try {
+            const lastUpdate = this.lastPriceUpdate.get(symbol);
+            const cachedPrice = this.priceCache.get(symbol);
+            
+            if (cachedPrice && lastUpdate && Date.now() - lastUpdate < 30000) {
+                return cachedPrice;
+            }
+
+            const response = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=USD`);
+            const data = await response.json();
+
+            if (data.USD) {
+                this.priceCache.set(symbol, data.USD);
+                this.lastPriceUpdate.set(symbol, Date.now());
+                return data.USD;
+            }
+
+            throw new Error(`Nu s-a putut obține prețul pentru ${symbol}`);
+        } catch (error) {
+            console.error(`Eroare la obținerea prețului pentru ${symbol}:`, error);
+            return this.priceCache.get(symbol) || null;
+        }
+    }
 }
 
-export default new WalletService(); 
+const walletService = new WalletService();
+export default walletService; 

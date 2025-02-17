@@ -250,32 +250,75 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    font-size: 1rem;
+    background: rgb(19, 23, 34);
+    overflow: hidden;
+    padding: 6px;
 }
 
-.asset-icon.BTC {
-    background: rgb(247, 147, 26);
-    color: white;
+.crypto-icon {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-.asset-icon.ETH {
-    background: rgb(98, 126, 234);
-    color: white;
+.asset-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
-.asset-icon.ADA {
-    background: rgb(0, 51, 173);
-    color: white;
-}
+.asset-icon.btc .crypto-icon { background-image: url('/assets/images/crypto-icons/btc.svg'); }
+.asset-icon.eth .crypto-icon { background-image: url('/assets/images/crypto-icons/eth.svg'); }
+.asset-icon.usdt .crypto-icon { background-image: url('/assets/images/crypto-icons/usdt.svg'); }
+.asset-icon.bnb .crypto-icon { background-image: url('/assets/images/crypto-icons/bnb.svg'); }
+.asset-icon.xrp .crypto-icon { background-image: url('/assets/images/crypto-icons/xrp.svg'); }
+.asset-icon.ada .crypto-icon { background-image: url('/assets/images/crypto-icons/ada.svg'); }
+.asset-icon.doge .crypto-icon { background-image: url('/assets/images/crypto-icons/doge.svg'); }
+.asset-icon.sol .crypto-icon { background-image: url('/assets/images/crypto-icons/sol.svg'); }
+.asset-icon.dot .crypto-icon { background-image: url('/assets/images/crypto-icons/dot.svg'); }
+.asset-icon.wbtc .crypto-icon { background-image: url('/assets/images/crypto-icons/wbtc.svg'); }
+.asset-icon.avax .crypto-icon { background-image: url('/assets/images/crypto-icons/avax.svg'); }
+.asset-icon.matic .crypto-icon { background-image: url('/assets/images/crypto-icons/matic.svg'); }
+.asset-icon.ltc .crypto-icon { background-image: url('/assets/images/crypto-icons/ltc.svg'); }
+.asset-icon.link .crypto-icon { background-image: url('/assets/images/crypto-icons/link.svg'); }
+.asset-icon.uni .crypto-icon { background-image: url('/assets/images/crypto-icons/uni.svg'); }
+.asset-icon.atom .crypto-icon { background-image: url('/assets/images/crypto-icons/atom.svg'); }
+.asset-icon.etc .crypto-icon { background-image: url('/assets/images/crypto-icons/etc.svg'); }
+.asset-icon.xlm .crypto-icon { background-image: url('/assets/images/crypto-icons/xlm.svg'); }
+.asset-icon.near .crypto-icon { background-image: url('/assets/images/crypto-icons/near.svg'); }
+.asset-icon.algo .crypto-icon { background-image: url('/assets/images/crypto-icons/algo.svg'); }
+.asset-icon.vet .crypto-icon { background-image: url('/assets/images/crypto-icons/vet.svg'); }
+.asset-icon.icp .crypto-icon { background-image: url('/assets/images/crypto-icons/icp.svg'); }
+.asset-icon.fil .crypto-icon { background-image: url('/assets/images/crypto-icons/fil.svg'); }
+.asset-icon.hbar .crypto-icon { background-image: url('/assets/images/crypto-icons/hbar.svg'); }
+.asset-icon.apt .crypto-icon { background-image: url('/assets/images/crypto-icons/apt.svg'); }
+.asset-icon.sand .crypto-icon { background-image: url('/assets/images/crypto-icons/sand.svg'); }
+.asset-icon.mana .crypto-icon { background-image: url('/assets/images/crypto-icons/mana.svg'); }
+.asset-icon.aave .crypto-icon { background-image: url('/assets/images/crypto-icons/aave.svg'); }
+.asset-icon.qnt .crypto-icon { background-image: url('/assets/images/crypto-icons/qnt.svg'); }
+.asset-icon.eos .crypto-icon { background-image: url('/assets/images/crypto-icons/eos.svg'); }
+.asset-icon.theta .crypto-icon { background-image: url('/assets/images/crypto-icons/theta.svg'); }
+.asset-icon.xtz .crypto-icon { background-image: url('/assets/images/crypto-icons/xtz.svg'); }
+.asset-icon.grt .crypto-icon { background-image: url('/assets/images/crypto-icons/grt.svg'); }
+.asset-icon.flow .crypto-icon { background-image: url('/assets/images/crypto-icons/flow.svg'); }
+.asset-icon.imx .crypto-icon { background-image: url('/assets/images/crypto-icons/imx.svg'); }
+.asset-icon.neo .crypto-icon { background-image: url('/assets/images/crypto-icons/neo.svg'); }
+.asset-icon.zec .crypto-icon { background-image: url('/assets/images/crypto-icons/zec.svg'); }
+.asset-icon.bat .crypto-icon { background-image: url('/assets/images/crypto-icons/bat.svg'); }
+.asset-icon.waves .crypto-icon { background-image: url('/assets/images/crypto-icons/waves.svg'); }
+.asset-icon.dash .crypto-icon { background-image: url('/assets/images/crypto-icons/dash.svg'); }
+.asset-icon.zil .crypto-icon { background-image: url('/assets/images/crypto-icons/zil.svg'); }
+.asset-icon.iota .crypto-icon { background-image: url('/assets/images/crypto-icons/iota.svg'); }
+.asset-icon.xem .crypto-icon { background-image: url('/assets/images/crypto-icons/xem.svg'); }
+.asset-icon.qtum .crypto-icon { background-image: url('/assets/images/crypto-icons/qtum.svg'); }
 
-.asset-icon.SOL {
-    background: rgb(220, 31, 255);
-    color: white;
-}
-
-.asset-icon.DOT {
-    background: rgb(230, 0, 122);
-    color: white;
+/* Stiluri pentru iconițe în dark mode */
+@media (prefers-color-scheme: dark) {
+    .asset-icon {
+        background: rgb(30, 41, 59);
+    }
 }
 
 .asset-info {
@@ -602,6 +645,8 @@
     width: 100% !important;
     cursor: pointer !important;
     display: block !important;
+    appearance: menulist !important;
+    -webkit-appearance: menulist !important;
 }
 
 .form-group select option,
@@ -610,7 +655,6 @@
     color: #fff !important;
     padding: 0.75rem !important;
     font-size: 0.9rem !important;
-    display: block !important;
 }
 
 .form-group select:focus,
@@ -620,35 +664,20 @@
     box-shadow: 0 0 0 2px rgba(56, 97, 251, 0.1) !important;
 }
 
-/* Eliminăm toate stilurile vechi pentru select */
-.transaction-form select,
+/* Eliminăm stilurile pentru elementele custom care nu mai sunt folosite */
 .crypto-select,
 .crypto-dropdown-container,
-.crypto-dropdown-list,
-.form-group select {
-    display: none !important;
+.crypto-dropdown-list {
+    display: none;
 }
 
-.transaction-form select option,
-.form-group select option {
-    background-color: #1E293B !important;
-    color: #E2E8F0 !important;
-    padding: 8px 12px !important;
-    font-size: 14px !important;
-    border-bottom: 1px solid rgba(56, 97, 251, 0.1) !important;
-    cursor: pointer !important;
-}
-
-.transaction-form select option:hover,
-.transaction-form select option:focus,
-.form-group select option:hover,
-.form-group select option:focus {
-    background-color: rgba(56, 97, 251, 0.1) !important;
-}
-
-.transaction-form select option:checked,
-.form-group select option:checked {
-    background-color: rgba(56, 97, 251, 0.2) !important;
+/* Eliminăm stilurile pentru selectul personalizat */
+.custom-select,
+.selected-option,
+.crypto-text,
+.options-list,
+.option {
+    display: none;
 }
 
 .amount-info {
@@ -1140,11 +1169,4 @@
 .modal-content select option:checked,
 .transaction-form select option:checked {
     background-color: rgba(56, 97, 251, 0.2);
-}
-
-/* Eliminăm doar stilurile pentru elementele custom care nu mai sunt folosite */
-.crypto-select,
-.crypto-dropdown-container,
-.crypto-dropdown-list {
-    display: none;
 }
