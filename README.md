@@ -2,6 +2,16 @@
 
 A modern cryptocurrency trading and portfolio management platform, developed with JavaScript and modern web technologies.
 
+## Screenshots
+
+### Trading Interface
+![Trading Interface](https://i.imgur.com/YQGkGWp.png)
+*Advanced trading interface featuring real-time price charts, order book, and trading functionality for BTC/USD with a clean, dark-themed design*
+
+### Wallet Interface
+![Wallet Interface](https://i.imgur.com/Hy4Iqxj.png)
+*Digital wallet interface showing portfolio balance, transaction history, and asset management with a modern dark theme*
+
 ## Key Features
 
 ### 1. Digital Wallet
@@ -52,6 +62,8 @@ A modern cryptocurrency trading and portfolio management platform, developed wit
   - State management
 
 ## Installation & Setup
+
+1. Clone the repository:
 
 1. Clone the repository:
 ```bash
@@ -105,21 +117,9 @@ Crypto-platform/
 - Protection against duplicate transactions
 - Secure user data management
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/FeatureName`
-3. Commit your changes: `git commit -m 'Add new feature'`
-4. Push to the branch: `git push origin feature/FeatureName`
-5. Open a Pull Request
-
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
-## Contact
-
-For questions and support, contact us at: [your-email@example.com]
 
 ## Acknowledgments
 
