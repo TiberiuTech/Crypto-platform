@@ -5,7 +5,7 @@ A modern cryptocurrency trading and portfolio management platform, developed wit
 ## Screenshots
 
 ### Trading Interface
-![Trading Interface]([https://i.imgur.com/trade.png](https://github.com/TiberiuTech/Crypto-platform/blob/main/trade.png)
+![Trading Interface](https://github.com/TiberiuTech/Crypto-platform/blob/main/trade.png)
 *Advanced trading interface featuring real-time price charts, order book, and trading functionality for BTC/USD with a clean, dark-themed design*
 
 ### Wallet Interface
