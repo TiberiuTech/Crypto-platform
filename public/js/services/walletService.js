@@ -117,8 +117,11 @@ export class WalletService {
     }
 
     // Metodă pentru obținerea istoricului tranzacțiilor
-    getTransactions() {
-        return this.transactions;
+    getTransactions(limit = null) {
+        // Folosim același limit ca la active dacă nu este specificat altul
+        const activeLimit = Object.values(this.assets).length;
+        const effectiveLimit = limit || activeLimit;
+        return this.transactions.slice(0, effectiveLimit);
     }
 
     // Metodă pentru depunere
@@ -214,8 +217,8 @@ export class WalletService {
         window.dispatchEvent(new CustomEvent('wallet-update'));
     }
 
-    getAssets() {
-        return Object.values(this.assets);
+    getAssets(limit = 5) {
+        return Object.values(this.assets).slice(0, limit);
     }
 
     getBalance(symbol) {
