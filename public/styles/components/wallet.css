@@ -250,9 +250,16 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgb(19, 23, 34);
+    background: transparent;
     overflow: hidden;
-    padding: 6px;
+    padding: 4px;
+}
+
+.asset-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
 }
 
 .crypto-icon {
@@ -261,12 +268,6 @@
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-}
-
-.asset-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
 }
 
 .asset-icon.btc .crypto-icon { background-image: url('/assets/images/crypto-icons/btc.svg'); }
@@ -317,7 +318,7 @@
 /* Stiluri pentru iconițe în dark mode */
 @media (prefers-color-scheme: dark) {
     .asset-icon {
-        background: rgb(30, 41, 59);
+        background: transparent;
     }
 }
 

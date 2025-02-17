@@ -63,6 +63,58 @@ const COINGECKO_IDS = {
     'QTUM': '1684'     // qtum
 };
 
+// Adăugăm maparea pentru ID-urile CryptoCompare
+const CRYPTOCOMPARE_IDS = {
+    'BTC': 'btc',
+    'ETH': 'eth',
+    'USDT': 'usdt',
+    'BNB': 'bnb',
+    'XRP': 'xrp',
+    'USDC': 'usdc',
+    'SOL': 'sol',
+    'ADA': 'ada',
+    'DOGE': 'doge',
+    'TRX': 'trx',
+    'MATIC': 'matic',
+    'DOT': 'dot',
+    'WBTC': 'wbtc',
+    'DAI': 'dai',
+    'LINK': 'link',
+    'LTC': 'ltc',
+    'BCH': 'bch',
+    'ATOM': 'atom',
+    'UNI': 'uni',
+    'XMR': 'xmr',
+    'ETC': 'etc',
+    'XLM': 'xlm',
+    'NEAR': 'near',
+    'ALGO': 'algo',
+    'VET': 'vet',
+    'ICP': 'icp',
+    'FIL': 'fil',
+    'HBAR': 'hbar',
+    'APT': 'apt',
+    'SAND': 'sand',
+    'MANA': 'mana',
+    'AAVE': 'aave',
+    'QNT': 'qnt',
+    'EOS': 'eos',
+    'THETA': 'theta',
+    'XTZ': 'xtz',
+    'GRT': 'grt',
+    'FLOW': 'flow',
+    'IMX': 'imx',
+    'NEO': 'neo',
+    'ZEC': 'zec',
+    'BAT': 'bat',
+    'WAVES': 'waves',
+    'DASH': 'dash',
+    'ZIL': 'zil',
+    'IOTA': 'iota',
+    'XEM': 'xem',
+    'QTUM': 'qtum'
+};
+
 // Funcție pentru formatarea valorilor în USD
 function formatUSD(value) {
     if (typeof value !== 'number' || isNaN(value)) return '$0.00';
@@ -123,8 +175,8 @@ function updateAssetsList() {
         return `
         <div class="asset-item">
             <div class="asset-icon">
-                <img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@latest/32/color/${symbol}.png" 
-                     onerror="this.src='https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@latest/32/color/generic.png'"
+                <img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/${symbol}.png"
+                     onerror="this.src='https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/btc.png'"
                      alt="${asset.symbol}">
             </div>
             <div class="asset-info">
