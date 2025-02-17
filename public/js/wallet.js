@@ -1,5 +1,15 @@
 import walletService from './services/walletService.js';
 
+// Lista de monede din prices.js
+const CURRENCIES = [
+    'BTC', 'ETH', 'USDT', 'XRP', 'BNB', 'SOL', 'DOGE', 'USDC', 'ADA', 'TRX',
+    'MATIC', 'DOT', 'LINK', 'AVAX', 'UNI', 'WBTC', 'LTC', 'DAI', 'BCH', 'ATOM',
+    'LEO', 'ETC', 'OKB', 'XMR', 'TON', 'XLM', 'FIL', 'HBAR', 'APT', 'NEAR',
+    'CRO', 'ARB', 'VET', 'SHIB', 'ICP', 'GRT', 'AAVE', 'QNT', 'ALGO', 'STX',
+    'EGLD', 'SAND', 'EOS', 'THETA', 'XTZ', 'IMX', 'FLOW', 'NEO', 'MANA', 'ZEC',
+    'CAKE', 'CHZ', 'BAT', 'ENJ', 'DASH', 'WAVES', 'IOTA', 'XEM', 'ZIL', 'QTUM'
+];
+
 // Funcție pentru formatarea valorilor în USD
 function formatUSD(value) {
     if (typeof value !== 'number' || isNaN(value)) return '$0.00';
@@ -574,21 +584,27 @@ function initializeSwapForm(modal) {
 
 // Funcții pentru crearea formularelor
 function createDepositForm() {
-    const assets = walletService.getAssets();
-    const form = `
+    return `
         <form class="transaction-form">
             <div class="form-group">
                 <label>Selectează moneda</label>
                 <select name="asset" required>
-                    ${Object.values(assets).map(asset => {
-                        const currentPrice = walletService.getPricePerUnit(asset.symbol);
-                        return `<option value="${asset.symbol}" 
-                            data-price="${currentPrice}" 
-                            data-change="${asset.priceChange}">
-                            ${asset.name} (${asset.symbol})
-                        </option>`;
-                    }).join('')}
+                    ${CURRENCIES.map(currency => `
+                        <option value="${currency}">${currency}</option>
+                    `).join('')}
                 </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Sumă de depus (USD)</label>
+                <input 
+                    type="number" 
+                    name="amount" 
+                    min="10" 
+                    step="any" 
+                    required 
+                    placeholder="Introdu suma în USD (min. $10)"
+                >
             </div>
             
             <div class="price-info">
@@ -602,47 +618,22 @@ function createDepositForm() {
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Sumă de depus (USD)</label>
-                <input 
-                    type="number" 
-                    name="amount" 
-                    step="0.01" 
-                    min="10" 
-                    required 
-                    placeholder="Introdu suma în USD (min. $10)"
-                >
-                <div class="amount-info">
-                    <span class="min-amount">Suma minimă: $10.00</span>
-                    <span class="crypto-amount">Vei primi: 0.00</span>
-                </div>
-            </div>
-
             <button type="submit" class="submit-btn">
                 Confirmă depunerea
             </button>
         </form>
     `;
-
-    return form;
 }
 
 function createWithdrawForm() {
-    const assets = walletService.getAssets();
     return `
         <form class="transaction-form">
             <div class="form-group">
                 <label>Selectează moneda</label>
                 <select name="asset" required>
-                    ${Object.values(assets).map(asset => {
-                        const currentPrice = walletService.getPricePerUnit(asset.symbol);
-                        return `<option value="${asset.symbol}" 
-                            data-price="${currentPrice}" 
-                            data-change="${asset.priceChange}"
-                            data-balance="${asset.amount}">
-                            ${asset.name} (${asset.symbol})
-                        </option>`;
-                    }).join('')}
+                    ${CURRENCIES.map(currency => `
+                        <option value="${currency}">${currency}</option>
+                    `).join('')}
                 </select>
             </div>
             
@@ -660,10 +651,10 @@ function createWithdrawForm() {
             <div class="form-group">
                 <label>Sumă de retras</label>
                 <input 
-                    type="text" 
+                    type="number" 
                     name="amount" 
-                    pattern="[0-9]*[.,]?[0-9]*"
-                    inputmode="decimal"
+                    min="10" 
+                    step="any" 
                     required 
                     placeholder="Introdu suma de retras"
                 >
