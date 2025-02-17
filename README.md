@@ -5,11 +5,11 @@ A modern cryptocurrency trading and portfolio management platform, developed wit
 ## Screenshots
 
 ### Trading Interface
-![Trading Interface](https://i.imgur.com/YQGkGWp.png)
+![Trading Interface](https://i.imgur.com/trade.png)
 *Advanced trading interface featuring real-time price charts, order book, and trading functionality for BTC/USD with a clean, dark-themed design*
 
 ### Wallet Interface
-![Wallet Interface](https://i.imgur.com/Hy4Iqxj.png)
+![Wallet Interface](https://i.imgur.com/wallet.png)
 *Digital wallet interface showing portfolio balance, transaction history, and asset management with a modern dark theme*
 
 ## Key Features
