@@ -6,7 +6,7 @@ const CURRENCIES = [
     'MATIC', 'DOT', 'LINK', 'AVAX', 'UNI', 'WBTC', 'LTC', 'DAI', 'BCH', 'ATOM',
     'LEO', 'ETC', 'OKB', 'XMR', 'TON', 'XLM', 'FIL', 'HBAR', 'APT', 'NEAR',
     'CRO', 'ARB', 'VET', 'SHIB', 'ICP', 'GRT', 'AAVE', 'QNT', 'ALGO', 'STX',
-    'EGLD', 'SAND', 'EOS', 'THETA', 'XTZ', 'IMX', 'FLOW', 'NEO', 'MANA', 'ZEC',
+    'EGLD', 'SAND', 'EOS', 'THETA', 'XTZ', 'IMX', 'NEO', 'MANA', 'ZEC',
     'CAKE', 'CHZ', 'BAT', 'ENJ', 'DASH', 'WAVES', 'IOTA', 'XEM', 'ZIL', 'QTUM'
 ];
 
@@ -50,7 +50,6 @@ const COINGECKO_IDS = {
     'THETA': '2416',   // theta-token
     'XTZ': '2011',     // tezos
     'GRT': '6719',     // the-graph
-    'FLOW': '4558',    // flow
     'IMX': '10603',    // immutable-x
     'NEO': '1376',     // neo
     'ZEC': '1437',     // zcash
@@ -102,7 +101,6 @@ const CRYPTOCOMPARE_IDS = {
     'THETA': 'theta',
     'XTZ': 'xtz',
     'GRT': 'grt',
-    'FLOW': 'flow',
     'IMX': 'imx',
     'NEO': 'neo',
     'ZEC': 'zec',
@@ -168,15 +166,18 @@ function updateAssetsList() {
     const assetsList = document.querySelector('.assets-list');
     if (!assetsList) return;
 
-    const assets = walletService.getAssets();
-    const assetsContent = assets.length > 0 ? assets.filter(asset => asset.amount > 0).map(asset => {
+    const assets = Object.values(walletService.assets)
+        .filter(asset => asset.amount > 0)
+        .sort((a, b) => b.value - a.value);
+
+    const assetsContent = assets.length > 0 ? assets.map(asset => {
         const symbol = asset.symbol.toLowerCase();
         
         return `
         <div class="asset-item">
             <div class="asset-icon">
                 <img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/${symbol}.png"
-                     onerror="this.src='https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/btc.png'"
+                     onerror="this.src='https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/generic.png'"
                      alt="${asset.symbol}">
             </div>
             <div class="asset-info">
@@ -186,7 +187,7 @@ function updateAssetsList() {
             <div class="asset-price">
                 <div class="asset-value">${formatUSD(asset.value)}</div>
                 <div class="asset-change ${asset.priceChange >= 0 ? 'positive' : 'negative'}">
-                    ${asset.priceChange >= 0 ? '+' : ''}${asset.priceChange.toFixed(2)}%
+                    ${asset.priceChange >= 0 ? '+' : ''}${asset.priceChange?.toFixed(2) || '0.00'}%
                 </div>
             </div>
         </div>
@@ -198,6 +199,13 @@ function updateAssetsList() {
         </div>
         ${assetsContent}
     `;
+
+    // Actualizăm și soldul total afișat în header
+    const totalBalanceElement = document.querySelector('.balance');
+    if (totalBalanceElement) {
+        const totalBalance = walletService.getTotalBalance();
+        totalBalanceElement.textContent = formatUSD(totalBalance);
+    }
 }
 
 // Funcție pentru actualizarea istoricului tranzacțiilor
@@ -266,7 +274,10 @@ async function handleDeposit(asset, amount) {
     try {
         await walletService.deposit(asset, parseFloat(amount));
         showNotification('Depunere efectuată cu succes!', 'success');
-        updateUI();
+        // Actualizăm toate componentele UI-ului
+        updateBalanceDisplay();
+        updateAssetsList();
+        updateTransactionHistory();
     } catch (error) {
         showNotification(error.message, 'error');
     }
@@ -277,7 +288,10 @@ async function handleWithdraw(asset, amount) {
     try {
         await walletService.withdraw(asset, parseFloat(amount));
         showNotification('Retragere efectuată cu succes!', 'success');
-        updateUI();
+        // Actualizăm toate componentele UI-ului
+        updateBalanceDisplay();
+        updateAssetsList();
+        updateTransactionHistory();
     } catch (error) {
         showNotification(error.message, 'error');
     }
@@ -314,56 +328,184 @@ function showNotification(message, type = 'info') {
 
 // Funcție pentru actualizarea întregului UI
 async function updateUI() {
-    updateBalanceDisplay();
-    updateAssetsList();
-    updateTransactionHistory();
+    if (!window.updateInProgress) {
+        window.updateInProgress = true;
+        try {
+            updateBalanceDisplay();
+            updateAssetsList();
+            
+            // Actualizăm istoricul doar dacă nu suntem în timpul unei tranzacții
+            if (!window.transactionInProgress) {
+                updateTransactionHistory();
+            }
+            
+            // Actualizăm graficul doar dacă există și nu este în proces de actualizare
+            const chartCanvas = document.getElementById('portfolioChart');
+            if (chartCanvas) {
+                const chart = Chart.getChart(chartCanvas);
+                if (chart && !chart.updating) {
+                    chart.updating = true;
+                    const totalBalance = walletService.getTotalBalance();
+                    const newData = generateHistoricalData(totalBalance, 30);
+                    chart.data.datasets[0].data = newData;
+                    await chart.update('none'); // Folosim 'none' pentru animații mai rapide
+                    chart.updating = false;
+                }
+            }
+        } catch (error) {
+            console.error('Eroare la actualizarea UI:', error);
+        } finally {
+            window.updateInProgress = false;
+        }
+    }
 }
 
 // Event listener pentru actualizări de la walletService
 window.addEventListener('wallet-update', updateUI);
 
-// Inițializare
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const chartCanvas = document.getElementById('portfolioChart');
-        if (!chartCanvas) {
-            console.error('Nu s-a găsit elementul canvas pentru grafic');
-            return;
+// Event listener pentru actualizări de sold
+window.addEventListener('balance-update', (event) => {
+    if (!event?.detail) return;
+    
+    const { newBalance, lastTransaction } = event.detail;
+    
+    // Actualizăm afișarea soldului doar dacă avem o valoare validă
+    if (typeof newBalance === 'number') {
+        const balanceElement = document.querySelector('.sold-total-value');
+        if (balanceElement) {
+            balanceElement.textContent = formatUSD(newBalance);
         }
+    }
+    
+    // Actualizăm UI-ul folosind debounce
+    if (!window.updateUITimeout) {
+        window.updateUITimeout = setTimeout(() => {
+            requestAnimationFrame(updateUI);
+            window.updateUITimeout = null;
+        }, 100);
+    }
+    
+    // Afișăm notificarea doar dacă avem o tranzacție validă
+    if (lastTransaction?.type && lastTransaction?.amount && lastTransaction?.asset) {
+        const message = lastTransaction.type === 'deposit' 
+            ? `Depunere de ${formatCrypto(lastTransaction.amount)} ${lastTransaction.asset} efectuată cu succes`
+            : `Retragere de ${formatCrypto(lastTransaction.amount)} ${lastTransaction.asset} efectuată cu succes`;
+        
+        showNotification(message, 'success');
+    }
+});
 
+// Inițializare
+document.addEventListener('DOMContentLoaded', () => {
+    // Inițializăm doar componentele esențiale imediat
+    initializeEssentialComponents();
+    
+    // Amânăm operațiunile non-critice
+    requestAnimationFrame(() => {
+        initializeNonEssentialComponents();
+    });
+});
+
+// Funcție pentru inițializarea componentelor esențiale
+function initializeEssentialComponents() {
+    try {
+        // Actualizăm doar afișarea soldului și lista de active
+        updateBalanceDisplay();
+        updateAssetsList();
+        
+        // Adăugăm event listeners pentru butoanele principale
+        const depositBtn = document.querySelector('.action-btn.deposit');
+        const withdrawBtn = document.querySelector('.action-btn.withdraw');
+        const swapBtn = document.querySelector('.action-btn.swap');
+
+        if (depositBtn) depositBtn.addEventListener('click', () => showTransactionModal('deposit'));
+        if (withdrawBtn) withdrawBtn.addEventListener('click', () => showTransactionModal('withdraw'));
+        if (swapBtn) swapBtn.addEventListener('click', () => showTransactionModal('swap'));
+    } catch (error) {
+        console.error('Eroare la inițializarea componentelor esențiale:', error);
+    }
+}
+
+// Funcție pentru inițializarea componentelor non-esențiale
+function initializeNonEssentialComponents() {
+    try {
+        // Împărțim inițializarea în mai multe frame-uri pentru performanță mai bună
+        requestAnimationFrame(() => {
+            // Prima etapă: Inițializăm graficul
+            initializeChart();
+            
+            // A doua etapă: Actualizăm istoricul și adăugăm event listeners
+            requestAnimationFrame(() => {
+                updateTransactionHistory();
+                
+                // Adăugăm event listeners pentru actualizări
+                window.addEventListener('wallet-update', () => {
+                    if (!window.updateUITimeout) {
+                        window.updateUITimeout = setTimeout(() => {
+                            requestAnimationFrame(updateUI);
+                            window.updateUITimeout = null;
+                        }, 100);
+                    }
+                });
+                
+                window.addEventListener('balance-update', handleBalanceUpdate);
+                
+                // A treia etapă: Actualizăm prețurile
+                requestAnimationFrame(async () => {
+                    try {
+                        await walletService.updateAllPrices();
+                    } catch (error) {
+                        console.error('Eroare la actualizarea prețurilor:', error);
+                    }
+                });
+            });
+        });
+    } catch (error) {
+        console.error('Eroare la inițializarea componentelor non-esențiale:', error);
+    }
+}
+
+// Funcție separată pentru inițializarea graficului
+function initializeChart() {
+    const chartCanvas = document.getElementById('portfolioChart');
+    if (chartCanvas) {
         console.log('Inițializare grafic...');
         const chart = initializePortfolioChart();
         console.log('Grafic inițializat cu succes');
-
-        // Actualizare UI
-        await updateUI();
-    } catch (error) {
-        console.error('Eroare la inițializarea paginii:', error);
     }
+}
 
-    // Event listeners pentru butoane
-    const depositBtn = document.querySelector('.action-btn.deposit');
-    const withdrawBtn = document.querySelector('.action-btn.withdraw');
-    const swapBtn = document.querySelector('.action-btn.swap');
-
-    if (depositBtn) {
-        depositBtn.addEventListener('click', () => {
-            showTransactionModal('deposit');
-        });
+// Funcție pentru gestionarea evenimentului de actualizare a soldului
+function handleBalanceUpdate(event) {
+    if (!event?.detail) return;
+    
+    const { newBalance, lastTransaction } = event.detail;
+    
+    // Actualizăm afișarea soldului doar dacă avem o valoare validă
+    if (typeof newBalance === 'number') {
+        const balanceElement = document.querySelector('.sold-total-value');
+        if (balanceElement) {
+            balanceElement.textContent = formatUSD(newBalance);
+        }
     }
-
-    if (withdrawBtn) {
-        withdrawBtn.addEventListener('click', () => {
-            showTransactionModal('withdraw');
-        });
+    
+    // Actualizăm UI-ul folosind debounce
+    if (!window.updateUITimeout) {
+        window.updateUITimeout = setTimeout(() => {
+            requestAnimationFrame(updateUI);
+            window.updateUITimeout = null;
+        }, 100);
     }
-
-    if (swapBtn) {
-        swapBtn.addEventListener('click', () => {
-            showTransactionModal('swap');
-        });
+    
+    // Afișăm notificarea doar dacă avem o tranzacție validă și completă
+    if (lastTransaction?.type && lastTransaction?.amount && lastTransaction?.asset) {
+        const message = lastTransaction.type === 'deposit' 
+            ? `Depunere de ${formatCrypto(lastTransaction.amount)} ${lastTransaction.asset} efectuată cu succes`
+            : `Retragere de ${formatCrypto(lastTransaction.amount)} ${lastTransaction.asset} efectuată cu succes`;
+        
+        showNotification(message, 'success');
     }
-});
+}
 
 // Funcție pentru afișarea modalului de tranzacție
 function showTransactionModal(type) {
@@ -500,18 +642,29 @@ function initializeDepositForm(modal) {
 
 // Funcție pentru inițializarea formularului de retragere
 function initializeWithdrawForm(modal) {
+    const form = modal.querySelector('.transaction-form');
     const assetSelect = modal.querySelector('select[name="asset"]');
     const amountInput = modal.querySelector('input[name="amount"]');
     const balanceDisplay = modal.querySelector('.available-balance');
     const priceValue = modal.querySelector('.price-value');
-    const priceChange = modal.querySelector('.price-change');
-    const changeValue = modal.querySelector('.change-value');
     const usdValue = modal.querySelector('.usd-value');
 
-    if (!assetSelect || !amountInput) {
+    if (!assetSelect || !amountInput || !form) {
         console.error('Nu s-au găsit elementele necesare pentru formularul de retragere');
         return;
     }
+
+    // Funcție pentru parsarea valorii din input
+    const parseAmount = (value) => {
+        if (!value) return 0;
+        // Înlocuim virgula cu punct și eliminăm spațiile
+        value = value.replace(',', '.').replace(/\s/g, '');
+        // Verificăm dacă este în format științific
+        if (value.toLowerCase().includes('e')) {
+            return Number(value);
+        }
+        return parseFloat(value);
+    };
 
     const updateWithdrawInfo = async () => {
         try {
@@ -520,26 +673,22 @@ function initializeWithdrawForm(modal) {
 
             const symbol = selectedOption.value;
             const price = await walletService.getPricePerUnit(symbol);
-            const change = parseFloat(selectedOption.dataset.change || '0');
             const availableBalance = parseFloat(selectedOption.dataset.balance || '0');
             
             if (priceValue) {
                 priceValue.textContent = formatUSD(price);
-            }
-            
-            if (priceChange && changeValue) {
-                priceChange.className = `price-change ${change >= 0 ? 'positive' : 'negative'}`;
-                changeValue.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
             }
 
             if (balanceDisplay) {
                 balanceDisplay.textContent = `${formatCrypto(availableBalance)} ${symbol}`;
             }
 
-            const amount = parseFloat(amountInput.value || '0');
-            if (!isNaN(amount) && amount > 0 && price > 0 && usdValue) {
+            const amount = parseAmount(amountInput.value);
+            if (!isNaN(amount) && amount > 0) {
                 const valueInUSD = amount * price;
-                usdValue.textContent = `Valoare: ${formatUSD(valueInUSD)}`;
+                if (usdValue) {
+                    usdValue.textContent = `Valoare: ${formatUSD(valueInUSD)}`;
+                }
 
                 if (amount > availableBalance) {
                     amountInput.setCustomValidity('Suma depășește soldul disponibil');
@@ -551,18 +700,48 @@ function initializeWithdrawForm(modal) {
                 usdValue.textContent = 'Valoare: $0.00';
             }
 
-            if (amountInput) {
-                amountInput.placeholder = `Maxim: ${formatCrypto(availableBalance)} ${symbol}`;
-                amountInput.max = availableBalance;
-            }
+            // Setăm placeholder
+            amountInput.placeholder = `Maxim: ${formatCrypto(availableBalance)} ${symbol}`;
         } catch (error) {
             console.error('Eroare la actualizarea informațiilor de retragere:', error);
             showNotification('Eroare la actualizarea informațiilor. Încercați din nou.', 'error');
         }
     };
 
+    // Adăugăm event listener pentru submit
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const asset = assetSelect.value;
+        const amount = parseAmount(amountInput.value);
+        const availableBalance = parseFloat(assetSelect.options[assetSelect.selectedIndex].dataset.balance || '0');
+
+        // Validări suplimentare
+        if (isNaN(amount) || amount <= 0) {
+            showNotification('Introduceți o sumă validă', 'error');
+            return;
+        }
+
+        if (amount > availableBalance) {
+            showNotification('Suma depășește soldul disponibil', 'error');
+            return;
+        }
+
+        try {
+            await handleWithdraw(asset, amount);
+            document.body.removeChild(modal);
+            showNotification('Retragere efectuată cu succes!', 'success');
+        } catch (error) {
+            console.error('Eroare la retragere:', error);
+            showNotification(error.message, 'error');
+        }
+    });
+
+    // Event listeners pentru actualizări
     assetSelect.addEventListener('change', updateWithdrawInfo);
     amountInput.addEventListener('input', updateWithdrawInfo);
+    
+    // Actualizare inițială
     updateWithdrawInfo();
 }
 
@@ -696,8 +875,8 @@ function createDepositForm() {
     return `
         <form class="transaction-form">
             <div class="form-group">
-                <label>Selectează moneda</label>
-                <select name="asset" required>
+                <label for="deposit-asset">Selectează moneda</label>
+                <select name="asset" id="deposit-asset" required>
                     ${CURRENCIES.map(currency => `
                         <option value="${currency}">${currency}</option>
                     `).join('')}
@@ -705,10 +884,11 @@ function createDepositForm() {
             </div>
             
             <div class="form-group">
-                <label>Sumă de depus (USD)</label>
+                <label for="deposit-amount">Sumă de depus (USD)</label>
                 <input 
                     type="number" 
                     name="amount" 
+                    id="deposit-amount"
                     min="10" 
                     step="any" 
                     required 
@@ -735,14 +915,33 @@ function createDepositForm() {
 }
 
 function createWithdrawForm() {
-    const assets = Object.keys(walletService.assets);
+    // Filtrăm activele pentru a include doar cele cu sold pozitiv
+    const assets = Object.entries(walletService.assets)
+        .filter(([_, asset]) => asset.amount > 0)
+        .map(([symbol, asset]) => ({
+            symbol,
+            balance: asset.amount
+        }));
+
+    if (assets.length === 0) {
+        return `
+            <form class="transaction-form">
+                <div class="no-assets">
+                    Nu aveți active disponibile pentru retragere.
+                </div>
+            </form>
+        `;
+    }
+
     return `
         <form class="transaction-form">
             <div class="form-group">
-                <label>Selectează moneda</label>
-                <select name="asset" required>
-                    ${assets.map(currency => `
-                        <option value="${currency}">${currency}</option>
+                <label for="withdraw-asset">Selectează moneda</label>
+                <select name="asset" id="withdraw-asset" required>
+                    ${assets.map(asset => `
+                        <option value="${asset.symbol}" data-balance="${asset.balance}">
+                            ${asset.symbol} (Disponibil: ${formatCrypto(asset.balance)} ${asset.symbol})
+                        </option>
                     `).join('')}
                 </select>
             </div>
@@ -759,12 +958,13 @@ function createWithdrawForm() {
             </div>
 
             <div class="form-group">
-                <label>Sumă de retras</label>
+                <label for="withdraw-amount">Sumă de retras</label>
                 <input 
-                    type="number" 
+                    type="text" 
                     name="amount" 
-                    min="10" 
-                    step="any" 
+                    id="withdraw-amount"
+                    pattern="[0-9]*\.?[0-9]*"
+                    inputmode="decimal"
                     required 
                     placeholder="Introdu suma de retras"
                 >
@@ -786,8 +986,8 @@ function createSwapForm() {
     const form = `
         <form class="transaction-form">
             <div class="form-group">
-                <label>De la</label>
-                <select name="fromAsset" required>
+                <label for="swap-from-asset">De la</label>
+                <select name="fromAsset" id="swap-from-asset" required>
                     ${Object.values(assets).map(asset => {
                         const decimals = asset.symbol === 'BTC' ? 8 : 
                                        asset.symbol === 'ETH' ? 6 : 4;
@@ -799,10 +999,11 @@ function createSwapForm() {
             </div>
 
             <div class="form-group">
-                <label>Sumă</label>
+                <label for="swap-amount">Sumă</label>
                 <input 
                     type="text" 
                     name="amount" 
+                    id="swap-amount"
                     pattern="[0-9]*[.,]?[0-9]*"
                     inputmode="decimal"
                     required 
@@ -815,8 +1016,8 @@ function createSwapForm() {
             </div>
 
             <div class="form-group">
-                <label>La</label>
-                <select name="toAsset" required>
+                <label for="swap-to-asset">La</label>
+                <select name="toAsset" id="swap-to-asset" required>
                     ${Object.values(assets).map(asset => {
                         return `<option value="${asset.symbol}">
                             ${asset.name} (${asset.symbol})

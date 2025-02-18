@@ -15,16 +15,18 @@ export class WalletService {
         // Cache pentru prețuri
         this.priceCache = new Map();
         this.lastPriceUpdate = new Map();
-        
-        // Actualizăm prețurile la fiecare 30 de secunde
-        this.updateAllPrices();
-        setInterval(() => this.updateAllPrices(), 30000);
+    }
+
+    // Metodă pentru obținerea listei de tranzacții
+    getTransactions() {
+        return this.transactions;
     }
 
     // Salvează starea activelor în localStorage
     saveState() {
         localStorage.setItem('wallet_assets', JSON.stringify(this.assets));
         localStorage.setItem('transactions', JSON.stringify(this.transactions));
+        this.notifyUpdate();
     }
 
     async updateAllPrices() {
@@ -36,6 +38,8 @@ export class WalletService {
             const data = await response.json();
 
             if (data.DISPLAY) {
+                let totalValue = 0;
+
                 for (const [symbol, asset] of Object.entries(this.assets)) {
                     if (data.DISPLAY[symbol] && data.DISPLAY[symbol].USD) {
                         const priceData = data.RAW[symbol].USD;
@@ -46,12 +50,27 @@ export class WalletService {
                         this.lastPriceUpdate.set(symbol, Date.now());
                         
                         // Actualizăm valoarea totală a activului
-                        asset.value = asset.amount * price;
+                        asset.value = parseFloat((asset.amount * price).toFixed(2));
                         asset.priceChange = priceChange;
+                        
+                        totalValue += asset.value;
                     }
                 }
+
+                // Actualizăm soldul total în localStorage
+                localStorage.setItem('total_balance', totalValue.toString());
+
+                // Salvăm starea și notificăm UI-ul
                 this.saveState();
                 this.notifyUpdate();
+
+                // Emitem evenimentul de actualizare a soldului
+                window.dispatchEvent(new CustomEvent('balance-update', {
+                    detail: { 
+                        newBalance: totalValue,
+                        lastTransaction: null
+                    }
+                }));
             }
         } catch (error) {
             console.error('Eroare la actualizarea prețurilor:', error);
@@ -109,19 +128,74 @@ export class WalletService {
             toAsset,
             amount,
             value,
-            timestamp: new Date()
+            timestamp: new Date(),
+            status: 'completed'
         };
+
+        // Adăugăm tranzacția la început pentru a o vedea prima
         this.transactions.unshift(transaction);
+        
+        // Salvăm starea
         this.saveState();
-        this.notifyUpdate();
     }
 
-    // Metodă pentru obținerea istoricului tranzacțiilor
-    getTransactions(limit = null) {
-        // Folosim același limit ca la active dacă nu este specificat altul
-        const activeLimit = Object.values(this.assets).length;
-        const effectiveLimit = limit || activeLimit;
-        return this.transactions.slice(0, effectiveLimit);
+    // Metodă pentru retragere
+    async withdraw(asset, amount) {
+        if (!this.assets[asset]) {
+            throw new Error(`Nu aveți ${asset} în portofel`);
+        }
+        if (amount <= 0) {
+            throw new Error('Suma trebuie să fie pozitivă');
+        }
+
+        const currentBalance = this.assets[asset].amount;
+        console.log(`Retragere ${asset}: Sold curent = ${currentBalance}, Suma cerută = ${amount}`);
+
+        if (currentBalance < amount) {
+            throw new Error('Sold insuficient');
+        }
+
+        try {
+            const currentPrice = await this.getPricePerUnit(asset);
+            if (!currentPrice) {
+                throw new Error(`Nu s-a putut obține prețul pentru ${asset}`);
+            }
+
+            // Calculăm valoarea în USD
+            const valueInUSD = parseFloat((amount * currentPrice).toFixed(2));
+
+            // Actualizăm soldul și valoarea activului
+            const newAmount = parseFloat((currentBalance - amount).toFixed(8));
+            this.assets[asset] = {
+                ...this.assets[asset],
+                amount: newAmount,
+                value: parseFloat((newAmount * currentPrice).toFixed(2))
+            };
+
+            // Adăugăm tranzacția
+            this.addTransaction('withdraw', asset, null, amount, valueInUSD);
+
+            // Salvăm starea
+            this.saveState();
+            
+            // Emitem evenimentul de actualizare a soldului
+            const newBalance = this.getTotalBalance();
+            window.dispatchEvent(new CustomEvent('balance-update', {
+                detail: { 
+                    newBalance,
+                    lastTransaction: {
+                        type: 'withdraw',
+                        asset,
+                        amount
+                    }
+                }
+            }));
+            
+            return true;
+        } catch (error) {
+            console.error('Eroare la retragere:', error);
+            throw new Error('Nu s-a putut efectua retragerea. Încercați din nou.');
+        }
     }
 
     // Metodă pentru depunere
@@ -131,11 +205,19 @@ export class WalletService {
         }
 
         try {
+            // Inițializăm USD dacă nu există
+            if (!this.assets['USD']) {
+                this.assets['USD'] = {
+                    symbol: 'USD',
+                    name: 'US Dollar',
+                    amount: 0,
+                    value: 0
+                };
+            }
+
             if (asset === 'USD') {
-                if (!this.assets['USD']) {
-                    await this.addAsset('USD', 'US Dollar');
-                }
-                this.assets['USD'].amount += amount;
+                // Pentru depuneri USD, adăugăm direct la sold
+                this.assets['USD'].amount = parseFloat((this.assets['USD'].amount + amount).toFixed(2));
                 this.assets['USD'].value = this.assets['USD'].amount;
                 this.addTransaction('deposit', null, 'USD', amount, amount);
             } else {
@@ -144,8 +226,22 @@ export class WalletService {
                     throw new Error(`Nu s-a putut obține prețul pentru ${asset}`);
                 }
 
+                // Verificăm dacă avem suficient USD
+                if (this.assets['USD'].amount < amount) {
+                    // Dacă nu avem suficient USD, îl depunem automat
+                    this.assets['USD'].amount = parseFloat((this.assets['USD'].amount + amount).toFixed(2));
+                    this.assets['USD'].value = this.assets['USD'].amount;
+                    this.addTransaction('deposit', null, 'USD', amount, amount);
+                }
+
+                // Calculăm suma în crypto
                 const cryptoAmount = parseFloat((amount / currentPrice).toFixed(8));
 
+                // Scădem din USD
+                this.assets['USD'].amount = parseFloat((this.assets['USD'].amount - amount).toFixed(2));
+                this.assets['USD'].value = this.assets['USD'].amount;
+
+                // Adăugăm crypto
                 if (!this.assets[asset]) {
                     await this.addAsset(asset);
                 }
@@ -153,35 +249,32 @@ export class WalletService {
                 this.assets[asset].amount = parseFloat((this.assets[asset].amount + cryptoAmount).toFixed(8));
                 this.assets[asset].value = parseFloat((this.assets[asset].amount * currentPrice).toFixed(2));
 
+                // Adăugăm tranzacțiile în istoric
+                this.addTransaction('withdraw', 'USD', null, amount, amount);
                 this.addTransaction('deposit', null, asset, cryptoAmount, amount);
             }
 
+            // Salvăm starea
             this.saveState();
-            this.notifyUpdate();
+            
+            // Emitem evenimentul de actualizare a soldului
+            const newBalance = this.getTotalBalance();
+            window.dispatchEvent(new CustomEvent('balance-update', {
+                detail: { 
+                    newBalance,
+                    lastTransaction: {
+                        type: 'deposit',
+                        asset,
+                        amount
+                    }
+                }
+            }));
+            
             return true;
         } catch (error) {
             console.error('Eroare la depunere:', error);
-            throw new Error('Nu s-a putut efectua depunerea. Încercați din nou.');
+            throw new Error(error.message || 'Nu s-a putut efectua depunerea. Încercați din nou.');
         }
-    }
-
-    // Metodă pentru retragere
-    withdraw(asset, amount) {
-        if (!this.assets[asset]) {
-            throw new Error(`Nu aveți ${asset} în portofel`);
-        }
-        if (amount <= 0) {
-            throw new Error('Suma trebuie să fie pozitivă');
-        }
-        if (this.assets[asset].amount < amount) {
-            throw new Error('Sold insuficient');
-        }
-
-        this.assets[asset].amount -= amount;
-        const value = amount * (this.assets[asset].value / this.assets[asset].amount);
-        this.addTransaction('withdraw', asset, null, amount, value);
-        this.notifyUpdate();
-        return true;
     }
 
     // Metodă pentru swap
@@ -235,7 +328,20 @@ export class WalletService {
     }
 
     getTotalBalance() {
-        return Object.values(this.assets).reduce((total, asset) => total + asset.value, 0);
+        let total = 0;
+        
+        // Calculăm suma valorilor tuturor activelor
+        for (const [symbol, asset] of Object.entries(this.assets)) {
+            if (asset.value !== undefined) {
+                if (symbol === 'USD') {
+                    total += asset.amount; // Pentru USD folosim direct suma
+                } else {
+                    total += asset.value; // Pentru crypto folosim valoarea în USD
+                }
+            }
+        }
+        
+        return parseFloat(total.toFixed(2));
     }
 
     getTotalChange() {
@@ -298,4 +404,4 @@ export class WalletService {
 }
 
 const walletService = new WalletService();
-export default walletService; 
+export default walletService;
