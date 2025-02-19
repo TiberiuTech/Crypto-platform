@@ -145,17 +145,39 @@ function formatDate(date) {
 }
 
 // Funcție pentru actualizarea UI-ului
+function updateUI() {
+    if (!window.updateInProgress && walletService.isInitialized) {
+        window.updateInProgress = true;
+        try {
+            updateBalanceDisplay();
+            updateAssetsList();
+            
+            if (!window.transactionInProgress) {
+                updateTransactionHistory();
+            }
+        } catch (error) {
+            console.error('Eroare la actualizarea UI:', error);
+        } finally {
+            window.updateInProgress = false;
+        }
+    }
+}
+
+// Funcție pentru actualizarea afișării soldului
 function updateBalanceDisplay() {
+    if (!walletService.isInitialized) return;
+
     const balanceElement = document.querySelector('.balance');
     const changeElement = document.querySelector('.balance-change .change');
     
     if (balanceElement) {
-        const totalBalance = walletService.getTotalBalance() || 0;
+        const totalBalance = walletService.getTotalBalance();
         balanceElement.textContent = formatUSD(totalBalance);
+        balanceElement.style.visibility = 'visible';
     }
     
     if (changeElement) {
-        const totalChange = walletService.getTotalChange() || 0;
+        const totalChange = walletService.getTotalChange();
         changeElement.textContent = `${totalChange >= 0 ? '+' : ''}${totalChange.toFixed(2)}%`;
         changeElement.className = `change ${totalChange >= 0 ? 'positive' : 'negative'}`;
     }
@@ -269,15 +291,70 @@ function updateTransactionHistory() {
     historyContainer.innerHTML = historyHTML;
 }
 
+// Funcție pentru actualizarea automată a prețurilor și balanței
+function startPriceUpdates() {
+    let lastTotalBalance = null;
+    let updateCount = 0;
+
+    // Actualizăm prețurile la fiecare 3 secunde pentru fluctuații mai vizibile
+    const updateInterval = setInterval(async () => {
+        try {
+            await walletService.updateAllPrices();
+            updateCount++;
+            
+            // Obținem soldul total direct din walletService
+            const totalBalance = walletService.getTotalBalance();
+
+            // Actualizăm UI-ul cu noile valori
+            const balanceElement = document.querySelector('.sold-total-value');
+            if (balanceElement) {
+                balanceElement.textContent = formatUSD(totalBalance);
+
+                // Calculăm și afișăm procentul de schimbare
+                if (lastTotalBalance !== null) {
+                    const changePercent = ((totalBalance - lastTotalBalance) / lastTotalBalance * 100);
+                    const changeElement = document.querySelector('.change');
+                    if (changeElement) {
+                        changeElement.textContent = `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`;
+                        changeElement.className = `change ${changePercent >= 0 ? 'positive' : 'negative'}`;
+                        
+                        // Adăugăm o animație pentru a evidenția schimbarea
+                        changeElement.style.animation = 'none';
+                        changeElement.offsetHeight; // Forțăm un reflow
+                        changeElement.style.animation = 'pulse 0.5s';
+                    }
+
+                    // Adăugăm o animație și pentru valoarea totală
+                    balanceElement.style.animation = 'none';
+                    balanceElement.offsetHeight;
+                    balanceElement.style.animation = 'pulse 0.5s';
+                }
+                lastTotalBalance = totalBalance;
+            }
+
+            // Actualizăm lista de active cu noile valori
+            updateAssetsList();
+            
+        } catch (error) {
+            console.error('Eroare la actualizarea prețurilor:', error);
+        }
+    }, 3000);
+
+    // Salvăm intervalul pentru a-l putea opri mai târziu
+    window.priceUpdateInterval = updateInterval;
+}
+
 // Funcție pentru procesarea depunerii
 async function handleDeposit(asset, amount) {
     try {
         await walletService.deposit(asset, parseFloat(amount));
         showNotification('Depunere efectuată cu succes!', 'success');
-        // Actualizăm toate componentele UI-ului
         updateBalanceDisplay();
         updateAssetsList();
         updateTransactionHistory();
+        if (document.getElementById('portfolioChart')) {
+            updatePortfolioChart();
+        }
     } catch (error) {
         showNotification(error.message, 'error');
     }
@@ -288,10 +365,12 @@ async function handleWithdraw(asset, amount) {
     try {
         await walletService.withdraw(asset, parseFloat(amount));
         showNotification('Retragere efectuată cu succes!', 'success');
-        // Actualizăm toate componentele UI-ului
         updateBalanceDisplay();
         updateAssetsList();
         updateTransactionHistory();
+        if (document.getElementById('portfolioChart')) {
+            updatePortfolioChart();
+        }
     } catch (error) {
         showNotification(error.message, 'error');
     }
@@ -302,8 +381,14 @@ async function handleSwap(fromAsset, toAsset, amount) {
     try {
         await walletService.swap(fromAsset, toAsset, parseFloat(amount));
         showNotification('Swap efectuat cu succes!', 'success');
-        updateUI();
+        updateBalanceDisplay();
+        updateAssetsList();
+        updateTransactionHistory();
+        if (document.getElementById('portfolioChart')) {
+            updatePortfolioChart();
+        }
     } catch (error) {
+        console.error('Eroare la swap:', error);
         showNotification(error.message, 'error');
     }
 }
@@ -324,40 +409,6 @@ function showNotification(message, type = 'info') {
         notification.classList.remove('show');
         setTimeout(() => document.body.removeChild(notification), 3000);
     }, 3000);
-}
-
-// Funcție pentru actualizarea întregului UI
-async function updateUI() {
-    if (!window.updateInProgress) {
-        window.updateInProgress = true;
-        try {
-            updateBalanceDisplay();
-            updateAssetsList();
-            
-            // Actualizăm istoricul doar dacă nu suntem în timpul unei tranzacții
-            if (!window.transactionInProgress) {
-                updateTransactionHistory();
-            }
-            
-            // Actualizăm graficul doar dacă există și nu este în proces de actualizare
-            const chartCanvas = document.getElementById('portfolioChart');
-            if (chartCanvas) {
-                const chart = Chart.getChart(chartCanvas);
-                if (chart && !chart.updating) {
-                    chart.updating = true;
-                    const totalBalance = walletService.getTotalBalance();
-                    const newData = generateHistoricalData(totalBalance, 30);
-                    chart.data.datasets[0].data = newData;
-                    await chart.update('none'); // Folosim 'none' pentru animații mai rapide
-                    chart.updating = false;
-                }
-            }
-        } catch (error) {
-            console.error('Eroare la actualizarea UI:', error);
-        } finally {
-            window.updateInProgress = false;
-        }
-    }
 }
 
 // Event listener pentru actualizări de la walletService
@@ -396,15 +447,36 @@ window.addEventListener('balance-update', (event) => {
 });
 
 // Inițializare
-document.addEventListener('DOMContentLoaded', () => {
-    // Inițializăm doar componentele esențiale imediat
-    initializeEssentialComponents();
-    
-    // Amânăm operațiunile non-critice
-    requestAnimationFrame(() => {
-        initializeNonEssentialComponents();
-    });
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Actualizăm prețurile și așteptăm să se termine
+        await walletService.updateAllPrices();
+        
+        // Verificăm dacă serviciul este inițializat cu succes
+        if (walletService.isInitialized) {
+            // Inițializăm componentele
+            initializeEssentialComponents();
+            requestAnimationFrame(() => {
+                initializeNonEssentialComponents();
+            });
+        } else {
+            throw new Error('Nu s-au putut actualiza prețurile');
+        }
+    } catch (error) {
+        console.error('Eroare la inițializare:', error);
+        showNotification('Eroare la încărcarea datelor. Reîncărcați pagina.', 'error');
+    }
 });
+
+// Adăugăm animația de fade in
+const fadeInStyle = document.createElement('style');
+fadeInStyle.textContent = `
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+`;
+document.head.appendChild(fadeInStyle);
 
 // Funcție pentru inițializarea componentelor esențiale
 function initializeEssentialComponents() {
@@ -426,52 +498,213 @@ function initializeEssentialComponents() {
     }
 }
 
-// Funcție pentru inițializarea componentelor non-esențiale
-function initializeNonEssentialComponents() {
-    try {
-        // Împărțim inițializarea în mai multe frame-uri pentru performanță mai bună
-        requestAnimationFrame(() => {
-            // Prima etapă: Inițializăm graficul
-            initializeChart();
-            
-            // A doua etapă: Actualizăm istoricul și adăugăm event listeners
-            requestAnimationFrame(() => {
-                updateTransactionHistory();
-                
-                // Adăugăm event listeners pentru actualizări
-                window.addEventListener('wallet-update', () => {
-                    if (!window.updateUITimeout) {
-                        window.updateUITimeout = setTimeout(() => {
-                            requestAnimationFrame(updateUI);
-                            window.updateUITimeout = null;
-                        }, 100);
-                    }
-                });
-                
-                window.addEventListener('balance-update', handleBalanceUpdate);
-                
-                // A treia etapă: Actualizăm prețurile
-                requestAnimationFrame(async () => {
-                    try {
-                        await walletService.updateAllPrices();
-                    } catch (error) {
-                        console.error('Eroare la actualizarea prețurilor:', error);
-                    }
-                });
+// Adăugăm stilurile pentru animație
+const style = document.createElement('style');
+style.textContent = `
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.sold-total-value, .change {
+    transition: color 0.3s ease;
+}
+
+.change.positive {
+    color: #4CAF50;
+}
+
+.change.negative {
+    color: #f44336;
+}
+`;
+document.head.appendChild(style);
+
+// Funcție pentru inițializarea graficului
+function initializeChart() {
+    const chartCanvas = document.getElementById('portfolioChart');
+    if (!chartCanvas) {
+        console.log('Elementul canvas pentru grafic nu este prezent în pagină');
+        return;
+    }
+
+    updatePortfolioChart();
+    
+    const periodButtons = document.querySelectorAll('.period-btn');
+    if (periodButtons.length > 0) {
+        periodButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const activeBtn = document.querySelector('.period-btn.active');
+                if (activeBtn) {
+                    activeBtn.classList.remove('active');
+                }
+                button.classList.add('active');
+                updatePortfolioChart();
             });
         });
-    } catch (error) {
-        console.error('Eroare la inițializarea componentelor non-esențiale:', error);
     }
 }
 
-// Funcție separată pentru inițializarea graficului
-function initializeChart() {
+function generateHistoricalData(currentBalance, days) {
+    const data = [];
+    const baseValue = currentBalance;
+    let currentValue = baseValue;
+    
+    // Reducem semnificativ volatilitatea
+    const volatility = 0.0005; // 0.05% volatilitate
+    
+    for (let i = days; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        
+        // Adăugăm o mică variație aleatoare
+        const variation = baseValue * volatility * (Math.random() - 0.5);
+        currentValue = currentValue + variation;
+        
+        data.push({
+            x: date,
+            y: currentValue
+        });
+    }
+    
+    return data;
+}
+
+// Funcție simplificată pentru actualizarea graficului
+function updatePortfolioChart() {
     const chartCanvas = document.getElementById('portfolioChart');
-    if (chartCanvas) {
-        console.log('Inițializare grafic...');
-        const chart = initializePortfolioChart();
-        console.log('Grafic inițializat cu succes');
+    if (!chartCanvas) {
+        console.log('Elementul canvas pentru grafic nu este prezent în pagină');
+        return;
+    }
+
+    // Verificăm dacă există un grafic anterior și îl distrugem corect
+    if (window.portfolioChart && typeof window.portfolioChart.destroy === 'function') {
+        window.portfolioChart.destroy();
+        window.portfolioChart = null;
+    }
+
+    const ctx = chartCanvas.getContext('2d');
+    if (!ctx) {
+        console.log('Nu s-a putut obține contextul pentru canvas');
+        return;
+    }
+
+    const totalBalance = walletService.getTotalBalance();
+    const activePeriodBtn = document.querySelector('.period-btn.active');
+    const period = activePeriodBtn ? activePeriodBtn.dataset.period : '1L';
+    
+    const days = {
+        '1L': 30,
+        '3L': 90,
+        '6L': 180,
+        '1A': 365,
+        'Tot': 730
+    }[period] || 30;
+
+    const chartData = generateHistoricalData(totalBalance, days);
+    const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+    gradient.addColorStop(0, 'rgba(56, 97, 251, 0.15)');
+    gradient.addColorStop(1, 'rgba(56, 97, 251, 0)');
+
+    try {
+        window.portfolioChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    data: chartData,
+                    borderColor: 'rgb(56, 97, 251)',
+                    borderWidth: 2,
+                    fill: true,
+                    backgroundColor: gradient,
+                    tension: 0.1,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(56, 97, 251)',
+                    pointHoverBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'nearest'
+                },
+                plugins: {
+                    tooltip: {
+                        enabled: true,
+                        mode: 'nearest',
+                        intersect: false
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        },
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 6,
+                            color: '#94A3B8'
+                        }
+                    },
+                    y: {
+                        position: 'right',
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.03)'
+                        },
+                        ticks: {
+                            maxTicksLimit: 6,
+                            color: '#94A3B8',
+                            callback: function(value) {
+                                return formatUSD(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Eroare la crearea graficului:', error);
+        window.portfolioChart = null;
+    }
+}
+
+// Modificăm inițializarea componentelor non-esențiale
+function initializeNonEssentialComponents() {
+    try {
+        // Prima etapă: Inițializăm graficul
+        initializeChart();
+        
+        // A doua etapă: Actualizăm istoricul și adăugăm event listeners
+        updateTransactionHistory();
+        
+        // Adăugăm event listeners pentru actualizări
+        window.addEventListener('wallet-update', () => {
+            if (!window.updateUITimeout) {
+                window.updateUITimeout = setTimeout(() => {
+                    requestAnimationFrame(updateUI);
+                    window.updateUITimeout = null;
+                }, 100);
+            }
+        });
+        
+        window.addEventListener('balance-update', handleBalanceUpdate);
+        
+        // Pornim actualizarea automată a prețurilor
+        startPriceUpdates();
+    } catch (error) {
+        console.error('Eroare la inițializarea componentelor non-esențiale:', error);
     }
 }
 
@@ -747,6 +980,7 @@ function initializeWithdrawForm(modal) {
 
 // Funcție pentru inițializarea formularului de swap
 function initializeSwapForm(modal) {
+    const form = modal.querySelector('.transaction-form');
     const fromAssetSelect = modal.querySelector('select[name="fromAsset"]');
     const toAssetSelect = modal.querySelector('select[name="toAsset"]');
     const amountInput = modal.querySelector('input[name="amount"]');
@@ -798,6 +1032,42 @@ function initializeSwapForm(modal) {
             showNotification('Eroare la actualizarea informațiilor. Încercați din nou.', 'error');
         }
     };
+
+    // Adăugăm event listener pentru submit
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const fromAsset = fromAssetSelect.value;
+        const toAsset = toAssetSelect.value;
+        const amount = parseFloat(amountInput.value);
+        const balance = walletService.getBalance(fromAsset);
+
+        // Validări
+        if (isNaN(amount) || amount <= 0) {
+            showNotification('Introduceți o sumă validă', 'error');
+            return;
+        }
+
+        if (amount > balance) {
+            showNotification('Suma depășește soldul disponibil', 'error');
+            return;
+        }
+
+        if (fromAsset === toAsset) {
+            showNotification('Nu puteți face swap între aceeași monedă', 'error');
+            return;
+        }
+
+        try {
+            await walletService.swap(fromAsset, toAsset, amount);
+            document.body.removeChild(modal);
+            showNotification('Swap efectuat cu succes!', 'success');
+            updateUI(); // Actualizăm UI-ul după swap
+        } catch (error) {
+            console.error('Eroare la swap:', error);
+            showNotification(error.message, 'error');
+        }
+    });
 
     // Event listeners pentru actualizări
     fromAssetSelect.addEventListener('change', () => {
@@ -1038,228 +1308,9 @@ function createSwapForm() {
     return form;
 }
 
-// Inițializare grafic portofoliu
-function initializePortfolioChart() {
-    const ctx = document.getElementById('portfolioChart').getContext('2d');
-    const totalBalance = walletService.getTotalBalance();
-    
-    // Generăm date istorice pentru ultima lună (implicit)
-    const chartData = generateHistoricalData(totalBalance, 30);
-
-    const gradient = ctx.createLinearGradient(0, 0, 0, 240);
-    gradient.addColorStop(0, 'rgba(56, 97, 251, 0.15)');
-    gradient.addColorStop(1, 'rgba(56, 97, 251, 0)');
-
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            datasets: [{
-                data: chartData,
-                borderColor: 'rgb(56, 97, 251)',
-                borderWidth: 1.5,
-                fill: true,
-                backgroundColor: gradient,
-                tension: 0.4,
-                pointRadius: 0,
-                pointHoverRadius: 3,
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(56, 97, 251)',
-                pointHoverBorderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    enabled: true,
-                    mode: 'index',
-                    intersect: false,
-                    backgroundColor: 'rgb(24, 29, 42)',
-                    titleColor: '#94A3B8',
-                    bodyColor: '#fff',
-                    borderColor: 'rgba(30, 41, 59, 0.5)',
-                    borderWidth: 1,
-                    padding: 8,
-                    displayColors: false,
-                    callbacks: {
-                        title: function(context) {
-                            return formatDate(context[0].raw.x);
-                        },
-                        label: function(context) {
-                            const value = context.raw.y;
-                            const previousValue = context.dataset.data[context.dataIndex - 1]?.y;
-                            const change = previousValue ? ((value - previousValue) / previousValue * 100) : 0;
-                            
-                            return [
-                                formatUSD(value),
-                                `${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}%`
-                            ];
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    type: 'time',
-                    time: {
-                        unit: 'day',
-                        displayFormats: {
-                            day: 'd MMM'
-                        }
-                    },
-                    grid: {
-                        display: false
-                    },
-                    border: {
-                        display: false
-                    },
-                    ticks: {
-                        color: '#94A3B8',
-                        font: {
-                            size: 11
-                        },
-                        maxRotation: 0,
-                        maxTicksLimit: 6
-                    }
-                },
-                y: {
-                    position: 'right',
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.03)'
-                    },
-                    border: {
-                        display: false
-                    },
-                    ticks: {
-                        color: '#94A3B8',
-                        font: {
-                            size: 11
-                        },
-                        callback: function(value) {
-                            return formatUSD(value);
-                        },
-                        maxTicksLimit: 6
-                    }
-                }
-            }
-        }
-    });
-
-    // Adăugăm event listeners pentru butoanele de perioadă
-    document.querySelectorAll('.period-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            document.querySelector('.period-btn.active').classList.remove('active');
-            button.classList.add('active');
-            updateChartPeriod(chart, button.dataset.period);
-        });
-    });
-
-    return chart;
-}
-
-function generateHistoricalData(currentBalance, days) {
-    const data = [];
-    let currentValue = currentBalance;
-    
-    // Calculăm volatilitatea în funcție de perioada selectată
-    const baseVolatility = 0.02; // 2% volatilitate de bază
-    const volatility = baseVolatility * Math.sqrt(1 / days); // Ajustăm volatilitatea în funcție de perioadă
-    
-    // Generăm o tendință generală (trend)
-    const trend = (Math.random() - 0.5) * 0.001 * days; // +/- 0.1% per zi în medie
-    
-    for (let i = days; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        
-        // Adăugăm variație zilnică cu trend
-        const dailyChange = (Math.random() - 0.5) * volatility + trend / days;
-        currentValue = currentValue * (1 + dailyChange);
-        
-        // Adăugăm și un element de sezonalitate (variație ciclică)
-        const seasonality = Math.sin(i / days * Math.PI * 2) * 0.001 * currentValue;
-        currentValue += seasonality;
-        
-        data.push({
-            x: date,
-            y: currentValue
-        });
-    }
-    
-    return data;
-}
-
-function updateChartPeriod(chart, period) {
-    const totalBalance = walletService.getTotalBalance();
-    const days = {
-        '1L': 30,
-        '3L': 90,
-        '6L': 180,
-        '1A': 365,
-        'Tot': 730
-    }[period] || 30;
-
-    const newData = generateHistoricalData(totalBalance, days);
-    chart.data.datasets[0].data = newData;
-    chart.update();
-}
-
-// Funcție pentru inițializarea selecturilor personalizate
-function initializeCustomSelects(modal) {
-    const customSelects = modal.querySelectorAll('.custom-select');
-    customSelects.forEach(customSelect => {
-        const select = customSelect.querySelector('select');
-        const selectedOption = customSelect.querySelector('.selected-option');
-        const optionsList = customSelect.querySelector('.options-list');
-        const options = customSelect.querySelectorAll('.option');
-
-        // Event listener pentru deschiderea/închiderea listei
-        selectedOption.addEventListener('click', () => {
-            optionsList.style.display = optionsList.style.display === 'none' ? 'block' : 'none';
-        });
-
-        // Event listener pentru selectarea unei opțiuni
-        options.forEach(option => {
-            option.addEventListener('click', () => {
-                const value = option.dataset.value;
-                const icon = option.querySelector('img').src;
-                const text = option.querySelector('.crypto-text').textContent;
-
-                // Actualizăm opțiunea selectată vizual
-                selectedOption.querySelector('img').src = icon;
-                selectedOption.querySelector('.crypto-text').textContent = text;
-
-                // Actualizăm valoarea select-ului
-                select.value = value;
-
-                // Declanșăm evenimentul change
-                const event = new Event('change', { bubbles: true });
-                select.dispatchEvent(event);
-
-                // Închidem lista
-                optionsList.style.display = 'none';
-            });
-        });
-
-        // Închide lista când se face click în afara ei
-        document.addEventListener('click', (e) => {
-            if (!customSelect.contains(e.target)) {
-                optionsList.style.display = 'none';
-            }
-        });
-    });
-}
-
 // Export funcții necesare
 window.showTransactionModal = showTransactionModal;
 window.formatUSD = formatUSD;
 window.formatCrypto = formatCrypto;
-window.formatDate = formatDate; 
+window.formatDate = formatDate;
+window.updatePortfolioChart = updatePortfolioChart; 

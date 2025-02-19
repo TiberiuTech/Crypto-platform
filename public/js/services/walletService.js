@@ -1,20 +1,82 @@
 export class WalletService {
     constructor() {
-        // Inițializăm cu un obiect gol pentru active
-        this.assets = {};
-
-        // Încărcăm activele din localStorage dacă există
-        const savedAssets = localStorage.getItem('wallet_assets');
-        if (savedAssets) {
-            this.assets = JSON.parse(savedAssets);
-        }
-
-        // Încărcăm tranzacțiile din localStorage
-        this.transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
-
-        // Cache pentru prețuri
+        // Inițializăm cache-ul pentru prețuri și timestamp-uri
         this.priceCache = new Map();
         this.lastPriceUpdate = new Map();
+        this.isInitialized = false;
+        this.lastTotalBalance = 0;
+        
+        // Inițializăm cu un obiect gol pentru active și tranzacții
+        this.assets = {};
+        this.transactions = [];
+        
+        // Flag pentru a ști dacă datele au fost încărcate
+        this.dataLoaded = false;
+    }
+
+    // Metodă nouă pentru încărcarea datelor din localStorage
+    async loadStoredData() {
+        // Dacă datele au fost deja încărcate, nu le mai încărcăm din nou
+        if (this.dataLoaded) return;
+
+        // Ștergem datele existente
+        this.assets = {};
+        this.transactions = [];
+        this.priceCache.clear();
+        this.lastPriceUpdate.clear();
+        this.isInitialized = false;
+        
+        const savedAssets = localStorage.getItem('wallet_assets');
+        if (savedAssets) {
+            try {
+                this.assets = JSON.parse(savedAssets);
+            } catch (error) {
+                console.error('Eroare la parsarea activelor:', error);
+                localStorage.removeItem('wallet_assets');
+            }
+        }
+        
+        const savedTransactions = localStorage.getItem('transactions');
+        if (savedTransactions) {
+            try {
+                this.transactions = JSON.parse(savedTransactions);
+            } catch (error) {
+                console.error('Eroare la parsarea tranzacțiilor:', error);
+                localStorage.removeItem('transactions');
+            }
+        }
+
+        this.dataLoaded = true;
+    }
+
+    calculateTotalBalance() {
+        // Dacă nu suntem inițializați sau nu avem prețuri, returnăm 0
+        if (!this.isInitialized || this.priceCache.size === 0) {
+            return 0;
+        }
+
+        let total = 0;
+        for (const [symbol, asset] of Object.entries(this.assets)) {
+            if (symbol === 'USD') {
+                total += parseFloat(asset.amount || 0);
+            } else if (asset.amount > 0) {
+                const price = this.priceCache?.get(symbol) || 0;
+                const value = asset.amount * price;
+                total += value;
+            }
+        }
+        return parseFloat(total.toFixed(2));
+    }
+
+    getTotalBalance() {
+        // Dacă nu suntem inițializați, returnăm 0
+        if (!this.isInitialized) {
+            return 0;
+        }
+        
+        const currentBalance = this.calculateTotalBalance();
+        this.lastTotalBalance = currentBalance;
+        return currentBalance;
     }
 
     // Metodă pentru obținerea listei de tranzacții
@@ -31,17 +93,28 @@ export class WalletService {
 
     async updateAllPrices() {
         try {
-            const symbols = Object.keys(this.assets).join(',');
-            if (!symbols) return; // Nu avem active de actualizat
+            // Mai întâi încărcăm datele stocate
+            await this.loadStoredData();
+
+            const symbols = Object.keys(this.assets).filter(symbol => symbol !== 'USD').join(',');
+            
+            // Dacă nu avem simboluri, setăm doar USD
+            if (!symbols) {
+                this.assets = { 'USD': { symbol: 'USD', name: 'US Dollar', amount: 0, value: 0 } };
+                this.isInitialized = true;
+                return;
+            }
 
             const response = await fetch(`https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${symbols}&tsyms=USD`);
             const data = await response.json();
 
-            if (data.DISPLAY) {
-                let totalValue = 0;
+            if (data.RAW) {
+                let totalValue = this.assets['USD']?.amount || 0;
 
                 for (const [symbol, asset] of Object.entries(this.assets)) {
-                    if (data.DISPLAY[symbol] && data.DISPLAY[symbol].USD) {
+                    if (symbol === 'USD') continue;
+                    
+                    if (data.RAW[symbol] && data.RAW[symbol].USD) {
                         const priceData = data.RAW[symbol].USD;
                         const price = priceData.PRICE;
                         const priceChange = priceData.CHANGEPCT24HOUR;
@@ -49,31 +122,31 @@ export class WalletService {
                         this.priceCache.set(symbol, price);
                         this.lastPriceUpdate.set(symbol, Date.now());
                         
-                        // Actualizăm valoarea totală a activului
-                        asset.value = parseFloat((asset.amount * price).toFixed(2));
+                        const value = asset.amount * price;
+                        asset.value = parseFloat(value.toFixed(2));
                         asset.priceChange = priceChange;
                         
-                        totalValue += asset.value;
+                        totalValue += value;
                     }
                 }
 
-                // Actualizăm soldul total în localStorage
-                localStorage.setItem('total_balance', totalValue.toString());
-
-                // Salvăm starea și notificăm UI-ul
-                this.saveState();
-                this.notifyUpdate();
-
-                // Emitem evenimentul de actualizare a soldului
+                this.isInitialized = true;
+                
                 window.dispatchEvent(new CustomEvent('balance-update', {
                     detail: { 
-                        newBalance: totalValue,
+                        newBalance: parseFloat(totalValue.toFixed(2)),
                         lastTransaction: null
                     }
                 }));
+
+                this.saveState();
             }
         } catch (error) {
             console.error('Eroare la actualizarea prețurilor:', error);
+            this.assets = { 'USD': { symbol: 'USD', name: 'US Dollar', amount: 0, value: 0 } };
+            this.isInitialized = false;
+            this.priceCache.clear();
+            this.lastPriceUpdate.clear();
         }
     }
 
@@ -278,7 +351,7 @@ export class WalletService {
     }
 
     // Metodă pentru swap
-    swap(fromAsset, toAsset, amount) {
+    async swap(fromAsset, toAsset, amount) {
         if (!this.assets[fromAsset] || !this.assets[toAsset]) {
             throw new Error('Unul dintre active nu există');
         }
@@ -289,19 +362,54 @@ export class WalletService {
             throw new Error('Sold insuficient');
         }
 
-        // Calculăm valoarea în USD a activului sursă
-        const fromValue = amount * (this.assets[fromAsset].value / this.assets[fromAsset].amount);
-        
-        // Calculăm cantitatea de activ destinație bazată pe valoarea USD
-        const toAmount = fromValue / (this.assets[toAsset].value / this.assets[toAsset].amount);
+        try {
+            // Obținem prețurile actuale
+            const fromPrice = await this.getPricePerUnit(fromAsset);
+            const toPrice = await this.getPricePerUnit(toAsset);
 
-        // Actualizăm soldurile
-        this.assets[fromAsset].amount -= amount;
-        this.assets[toAsset].amount += toAmount;
+            if (!fromPrice || !toPrice) {
+                throw new Error('Nu s-au putut obține prețurile pentru active');
+            }
 
-        this.addTransaction('swap', fromAsset, toAsset, amount, fromValue);
-        this.notifyUpdate();
-        return true;
+            // Calculăm valoarea în USD a activului sursă
+            const fromValue = amount * fromPrice;
+            
+            // Calculăm cantitatea de activ destinație bazată pe prețul actual
+            const toAmount = fromValue / toPrice;
+
+            // Actualizăm soldurile
+            this.assets[fromAsset].amount = parseFloat((this.assets[fromAsset].amount - amount).toFixed(8));
+            this.assets[toAsset].amount = parseFloat((this.assets[toAsset].amount + toAmount).toFixed(8));
+
+            // Actualizăm valorile activelor
+            this.assets[fromAsset].value = parseFloat((this.assets[fromAsset].amount * fromPrice).toFixed(2));
+            this.assets[toAsset].value = parseFloat((this.assets[toAsset].amount * toPrice).toFixed(2));
+
+            // Adăugăm tranzacția în istoric
+            this.addTransaction('swap', fromAsset, toAsset, amount, fromValue);
+
+            // Salvăm starea și notificăm UI-ul
+            this.saveState();
+
+            // Emitem evenimentul de actualizare a soldului
+            window.dispatchEvent(new CustomEvent('balance-update', {
+                detail: { 
+                    newBalance: this.getTotalBalance(),
+                    lastTransaction: {
+                        type: 'swap',
+                        fromAsset,
+                        toAsset,
+                        amount,
+                        toAmount
+                    }
+                }
+            }));
+
+            return true;
+        } catch (error) {
+            console.error('Eroare la swap:', error);
+            throw new Error(error.message || 'Nu s-a putut efectua swap-ul. Încercați din nou.');
+        }
     }
 
     // Metodă pentru notificarea UI-ului despre schimbări
@@ -325,23 +433,6 @@ export class WalletService {
         
         console.log('Balance found:', this.assets[symbol].amount);
         return this.assets[symbol].amount;
-    }
-
-    getTotalBalance() {
-        let total = 0;
-        
-        // Calculăm suma valorilor tuturor activelor
-        for (const [symbol, asset] of Object.entries(this.assets)) {
-            if (asset.value !== undefined) {
-                if (symbol === 'USD') {
-                    total += asset.amount; // Pentru USD folosim direct suma
-                } else {
-                    total += asset.value; // Pentru crypto folosim valoarea în USD
-                }
-            }
-        }
-        
-        return parseFloat(total.toFixed(2));
     }
 
     getTotalChange() {
