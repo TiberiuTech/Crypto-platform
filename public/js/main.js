@@ -106,7 +106,53 @@ const formatVolume = (volume) => {
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     updateCryptoCards();
+    
+    const text = [
+        "Orionix este o criptomonedă inovatoare care combină tehnologia",
+        "blockchain cu soluții de plată moderne. Dezvoltată cu focus pe",
+        "scalabilitate și eficiență energetică, Orionix oferă tranzacții",
+        "rapide și costuri reduse."
+    ];
+    
+    const typingText = document.querySelector('.typing-text');
+    
+    if (typingText) {
+        typingText.textContent = '';
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    typeWriter(text, typingText);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        observer.observe(typingText);
+    }
 });
+
+function typeWriter(textArray, element, lineIndex = 0, charIndex = 0) {
+    if (lineIndex >= textArray.length) return;
+
+    const currentLine = textArray[lineIndex];
+    
+    function typeLine() {
+        if (charIndex < currentLine.length) {
+            const previousLines = textArray.slice(0, lineIndex).join('\n');
+            const currentText = currentLine.slice(0, charIndex + 1);
+            element.textContent = previousLines + (previousLines ? '\n' : '') + currentText;
+            charIndex++;
+            setTimeout(typeLine, 30);
+        } else {
+            setTimeout(() => {
+                typeWriter(textArray, element, lineIndex + 1, 0);
+            }, 500);
+        }
+    }
+    
+    typeLine();
+}
 
 // Actualizare periodică a datelor (simulare)
 setInterval(() => {
