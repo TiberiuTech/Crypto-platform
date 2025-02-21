@@ -311,4 +311,119 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('resize', () => {
         portfolioChart.resize();
     });
+
+    // Funcție pentru generarea etichetelor de timp
+    function generateTimeLabels() {
+        const labels = [];
+        const date = new Date();
+        for (let i = 0; i < 8; i++) {
+            labels.push('12/15');
+        }
+        return labels;
+    }
+
+    // Opțiuni comune pentru grafice
+    function getChartOptions() {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: true,
+                        color: 'rgba(255, 255, 255, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#64748b',
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                y: {
+                    grid: {
+                        display: true,
+                        color: 'rgba(255, 255, 255, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#64748b',
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    // Configurare pentru graficul Bitcoin
+    const bitcoinCtx = document.getElementById('bitcoinChart').getContext('2d');
+    const bitcoinChart = new Chart(bitcoinCtx, {
+        type: 'line',
+        data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+                data: [2050, 2030, 2035, 1995, 2010, 2000, 2015, 2060],
+                borderColor: '#4a90e2',
+                backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: getChartOptions()
+    });
+
+    // Configurare pentru graficul Orionix
+    const orionixCtx = document.getElementById('orionixChart').getContext('2d');
+    const orionixChart = new Chart(orionixCtx, {
+        type: 'line',
+        data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+                data: [1.45, 1.46, 1.44, 1.43, 1.45, 1.46, 1.47, 1.47],
+                borderColor: '#4a90e2',
+                backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: getChartOptions()
+    });
+
+    // Configurare pentru graficul USDC
+    const usdcCtx = document.getElementById('usdcChart').getContext('2d');
+    const usdcChart = new Chart(usdcCtx, {
+        type: 'line',
+        data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+                data: [1, 1, 1, 1, 1, 1, 1, 1],
+                borderColor: '#67b0ff',
+                backgroundColor: 'rgba(103, 176, 255, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0,
+                pointRadius: 0
+            }]
+        },
+        options: getChartOptions()
+    });
 }); 

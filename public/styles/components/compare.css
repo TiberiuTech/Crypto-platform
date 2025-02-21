@@ -1,71 +1,276 @@
 .compare {
-    padding: var(--spacing-xl) 0;
-    background-color: var(--background-color);
+    padding: 80px 0;
+    background: #1a1f2c;
 }
 
 .compare h2 {
     text-align: center;
-    margin-bottom: var(--spacing-xl);
+    font-size: 2.5rem;
+    color: #fff;
+    margin-bottom: 50px;
+    background: linear-gradient(90deg, #4a90e2, #67b0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .compare-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-xl);
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 var(--spacing-lg);
+    padding: 0 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 40px;
 }
 
-.compare-card {
+.crypto-compare-card {
     flex: 1;
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-lg);
-    min-width: 300px;
+    background: #1e2330;
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 500px;
+    position: relative;
 }
 
-.compare-card h3 {
-    margin-bottom: var(--spacing-md);
-    color: var(--text-primary);
+/* Eliminăm regula care ascunde imaginile */
+/* .compare img:not(.crypto-icon),
+.about-image img,
+.crypto-cards img:not(.crypto-icon) {
+    display: none !important;
+} */
+
+.crypto-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 0;
 }
 
-#cryptoSelect {
-    width: 100%;
-    padding: var(--spacing-sm);
-    background-color: var(--surface-color);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--border-radius-md);
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-md);
-    cursor: pointer;
+.crypto-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
 }
 
-.vs {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    text-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+/* Stil specific pentru imaginile mari din cardurile de comparare */
+.compare .orionix .crypto-icon,
+.compare #rightCoinIcon {
+    width: 90px !important;
+    height: 90px !important;
 }
 
-.compare-chart {
-    margin-top: var(--spacing-lg);
-    height: 200px;
+.crypto-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.crypto-title h3 {
+    color: #fff;
+    font-size: 1.25rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+.crypto-symbol {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-top: 4px;
+}
+
+.crypto-stats {
+    display: flex;
+    flex-direction: column;
+    padding: 0 16px;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-value-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-label {
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.stat-value {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.stat-change {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+    min-width: 70px;
+    text-align: center;
+    margin-left: 12px;
+}
+
+.stat-change.positive {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.stat-change.negative {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.vs-badge {
+    color: #64748b;
+    font-size: 1.5rem;
+    font-weight: 500;
+    align-self: center;
+}
+
+.chart-container {
+    height: 180px;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
 }
 
 @media (max-width: 768px) {
     .compare-container {
         flex-direction: column;
-        gap: var(--spacing-lg);
     }
 
-    .compare-card {
+    .crypto-compare-card {
         width: 100%;
     }
 
-    .vs {
+    .vs-badge {
         transform: rotate(90deg);
     }
+}
+
+/* Eliminăm toate stilurile specifice pentru Orionix */
+.compare .orionix .crypto-icon,
+.compare .orionix .crypto-header,
+.compare .orionix .crypto-icon:hover {
+    position: static;
+    transform: none;
+    margin-left: 0;
+    box-shadow: none;
+}
+
+.coin-list-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(30, 35, 48, 0.98);
+    border-radius: 16px 16px 0 0;
+    z-index: 100;
+    padding: 15px;
+    max-height: 320px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.coin-list-overlay.active {
+    display: block;
+}
+
+.coin-list-container {
+    width: 100%;
+    max-height: 300px;
+}
+
+.coin-list-container h3 {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.coin-list {
+    max-height: 250px;
+    overflow-y: auto;
+    background: #2a2f3d;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.coin-list-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.coin-list-item:hover {
+    background: #353b4d;
+}
+
+.coin-list-item img {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    object-fit: contain;
+}
+
+.coin-list-item .coin-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.coin-list-item .coin-name {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.coin-list-item .coin-symbol {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
+
+/* Adăugăm cursor pointer pentru iconița monedei din dreapta */
+#rightCoinHeader .crypto-icon {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#rightCoinHeader .crypto-icon:hover {
+    transform: scale(1.05);
+}
+
+/* Stilizare pentru scrollbar în lista de monede */
+.coin-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.coin-list::-webkit-scrollbar-track {
+    background: #1e2330;
+    border-radius: 3px;
+}
+
+.coin-list::-webkit-scrollbar-thumb {
+    background: #4a90e2;
+    border-radius: 3px;
+}
+
+.coin-list::-webkit-scrollbar-thumb:hover {
+    background: #357abd;
 } 
