@@ -1,96 +1,114 @@
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcrypt';
 
-const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'Elefant20!',
-    database: 'crypto_platform',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+// Simulăm o bază de date în memorie pentru dezvoltare
+const users = new Map();
+let nextUserId = 1;
 
-export async function createUser(name, email, password) {
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const [result] = await pool.execute(
-            'INSERT INTO users (name, email, password_hash, created_at) VALUES (?, ?, ?, NOW())',
-            [name, email, hashedPassword]
-        );
-        return result.insertId;
-    } catch (error) {
-        console.error('Error creating user:', error);
-        throw new Error('Eroare la crearea contului');
-    }
+export async function getUserByEmail(email) {
+    if (!email) return null;
+    
+    const normalizedEmail = email.toLowerCase();
+    console.log('Checking for user with email:', normalizedEmail);
+    console.log('Current users in database:', Array.from(users.values()));
+    
+    const user = Array.from(users.values()).find(u => u.email.toLowerCase() === normalizedEmail);
+    console.log('Found user:', user);
+    return user || null;
 }
 
-export async function loginUser(email, password) {
-    try {
-        const [rows] = await pool.execute(
-            'SELECT * FROM users WHERE email = ?',
-            [email]
-        );
-        
-        if (rows.length === 0) {
-            throw new Error('Email sau parolă incorectă');
-        }
-
-        const user = rows[0];
-        const isValid = await bcrypt.compare(password, user.password_hash);
-        
-        if (!isValid) {
-            throw new Error('Email sau parolă incorectă');
-        }
-
-        return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            created_at: user.created_at
-        };
-    } catch (error) {
-        console.error('Error logging in:', error);
-        throw error;
-    }
+export async function getUserById(id) {
+    return users.get(id) || null;
 }
 
-export async function getUserById(userId) {
-    try {
-        const [rows] = await pool.execute(
-            'SELECT id, name, email, created_at FROM users WHERE id = ?',
-            [userId]
-        );
-        return rows[0] || null;
-    } catch (error) {
-        console.error('Error getting user:', error);
-        throw new Error('Eroare la obținerea datelor utilizatorului');
+export async function createUser(name, email, password = null, options = {}) {
+    if (!email) throw new Error('Email-ul este obligatoriu');
+    
+    const normalizedEmail = email.toLowerCase();
+    console.log('Creating new user:', { name, email: normalizedEmail, isGoogleAuth: options.isGoogleAuth });
+    
+    // Verificăm mai întâi dacă există deja un utilizator cu acest email
+    const existingUser = await getUserByEmail(normalizedEmail);
+    if (existingUser) {
+        console.log('User already exists:', existingUser);
+        
+        // Verificăm dacă încercăm să creăm un cont Google pentru un email existent
+        if (options.isGoogleAuth && !existingUser.isGoogleAuth) {
+            throw new Error('Acest email este deja înregistrat cu o metodă tradițională');
+        }
+        // Verificăm dacă încercăm să creăm un cont tradițional pentru un email Google
+        if (!options.isGoogleAuth && existingUser.isGoogleAuth) {
+            throw new Error('Acest email este deja înregistrat cu Google');
+        }
+        
+        throw new Error('Acest email este deja înregistrat');
     }
+
+    const userId = nextUserId++;
+    const user = {
+        id: userId,
+        name,
+        email: normalizedEmail,
+        password,
+        isGoogleAuth: !!options.isGoogleAuth,
+        picture: options.picture || null,
+        created_at: new Date().toISOString()
+    };
+    
+    users.set(userId, user);
+    console.log('Created new user:', user);
+    return userId;
+}
+
+export async function checkEmailExists(email) {
+    if (!email) return false;
+    
+    const normalizedEmail = email.toLowerCase();
+    const exists = await getUserByEmail(normalizedEmail) !== null;
+    console.log('Checking if email exists:', normalizedEmail, 'Result:', exists);
+    return exists;
 }
 
 export async function updateUserProfile(userId, name, email) {
-    try {
-        await pool.execute(
-            'UPDATE users SET name = ?, email = ? WHERE id = ?',
-            [name, email, userId]
-        );
-        return true;
-    } catch (error) {
-        console.error('Error updating user:', error);
-        throw new Error('Eroare la actualizarea profilului');
+    const user = users.get(userId);
+    if (!user) {
+        throw new Error('User not found');
     }
+    
+    if (email && email !== user.email) {
+        // Verificăm dacă noul email există deja
+        const existingUser = await getUserByEmail(email.toLowerCase());
+        if (existingUser && existingUser.id !== userId) {
+            throw new Error('Acest email este deja folosit de alt cont');
+        }
+    }
+    
+    user.name = name;
+    if (email) {
+        user.email = email.toLowerCase();
+    }
+    return true;
 }
 
-// Funcție pentru verificarea dacă emailul există deja
-export async function checkEmailExists(email) {
-    try {
-        const [rows] = await pool.execute(
-            'SELECT COUNT(*) as count FROM users WHERE email = ?',
-            [email]
-        );
-        return rows[0].count > 0;
-    } catch (error) {
-        console.error('Error checking email:', error);
-        throw new Error('Eroare la verificarea emailului');
+export async function loginUser(email, password) {
+    if (!email) throw new Error('Email-ul este obligatoriu');
+    
+    const normalizedEmail = email.toLowerCase();
+    const user = await getUserByEmail(normalizedEmail);
+    
+    if (!user) {
+        throw new Error('Utilizatorul nu a fost găsit');
     }
+    
+    // Verificăm dacă este un cont Google
+    if (user.isGoogleAuth) {
+        throw new Error('Acest cont a fost creat cu Google. Vă rugăm să folosiți butonul de Google Sign-In');
+    }
+    
+    // Verificăm parola pentru conturi tradiționale
+    if (!user.password || user.password !== password) {
+        throw new Error('Parolă incorectă');
+    }
+    
+    return user;
 } 

@@ -4,27 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up | Crypto-Impact</title>
-    <link rel="stylesheet" href="../styles/main.css">
-    <link rel="stylesheet" href="../styles/components/navbar.css">
-    <link rel="stylesheet" href="../styles/components/auth.css">
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/components/navbar.css">
+    <link rel="stylesheet" href="/styles/components/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="../js/auth.js" type="module" defer></script>
+    <script src="/js/auth.js" type="module" defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-left">
-            <a href="../../index.html" class="logo">Crypto-Impact</a>
+            <a href="/" class="logo">Crypto-Impact</a>
         </div>
         <div class="nav-center">
-            <a href="news.html" class="nav-link">News</a>
-            <a href="prices.html" class="nav-link">Prices</a>
-            <a href="wallet.html" class="nav-link">Wallet</a>
-            <a href="trade.html" class="nav-link">Trade</a>
+            <a href="/pages/news.html" class="nav-link">News</a>
+            <a href="/pages/prices.html" class="nav-link">Prices</a>
+            <a href="/pages/wallet.html" class="nav-link">Wallet</a>
+            <a href="/pages/trade.html" class="nav-link">Trade</a>
         </div>
         <div class="nav-right">
-            <a href="login.html" class="auth-btn login">Login</a>
-            <a href="signup.html" class="auth-btn signup active">Sign Up</a>
+            <div class="notification-bell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count">0</span>
+            </div>
+            <div class="auth-buttons">
+                <a href="/pages/login.html" class="auth-btn">Login</a>
+                <a href="/pages/signup.html" class="auth-btn active">Sign Up</a>
+            </div>
         </div>
     </nav>
 
@@ -87,10 +94,141 @@
                 </button>
             </form>
 
+            <div class="auth-separator">
+                <span>sau</span>
+            </div>
+
+            <div class="social-auth">
+                <div id="g_id_onload"
+                     data-client_id="62500980792-eq63dgg91pplggdlhq17r4lfds75kb8v.apps.googleusercontent.com"
+                     data-context="signup"
+                     data-callback="handleGoogleSignIn"
+                     data-auto_select="false"
+                     data-close_on_tap_outside="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-size="large"
+                     data-theme="filled_blue"
+                     data-text="signup_with"
+                     data-shape="rectangular"
+                     data-logo_alignment="left"
+                     data-width="300">
+                </div>
+            </div>
+
             <div class="auth-footer">
-                <p>Ai deja cont? <a href="login.html">Autentifică-te</a></p>
+                <p>Ai deja cont? <a href="/pages/login.html">Autentifică-te</a></p>
             </div>
         </div>
     </div>
+
+    <script>
+        // Funcție pentru afișarea alertei
+        function showAlert(message) {
+            const overlay = document.createElement('div');
+            overlay.className = 'alert-overlay';
+            overlay.style.display = 'flex';
+            overlay.style.opacity = '1';
+            overlay.style.visibility = 'visible';
+            
+            const alertBox = document.createElement('div');
+            alertBox.className = 'custom-alert';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'alert-message';
+            messageDiv.textContent = message;
+            
+            const button = document.createElement('button');
+            button.className = 'alert-button';
+            button.textContent = 'OK';
+            button.onclick = () => document.body.removeChild(overlay);
+            
+            alertBox.appendChild(messageDiv);
+            alertBox.appendChild(button);
+            overlay.appendChild(alertBox);
+            document.body.appendChild(overlay);
+        }
+
+        // Handler pentru autentificarea cu Google
+        function handleGoogleSignIn(response) {
+            if (response.credential) {
+                fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        credential: response.credential,
+                        isSignup: true
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        window.location.href = '/';
+                    } else {
+                        showAlert(data.error);
+                        if (data.shouldRedirect) {
+                            setTimeout(() => {
+                                window.location.href = data.shouldRedirect;
+                            }, 2000);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Google Sign-In Error:', error);
+                    showAlert('Eroare la înregistrare cu Google');
+                });
+            }
+        }
+
+        // Adăugăm handler pentru formularul de înregistrare
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                showAlert('Parolele nu coincid');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/';
+                } else {
+                    showAlert(data.error || 'Eroare la înregistrare');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showAlert('Eroare la înregistrare. Încercați din nou.');
+            }
+        });
+
+        // Toggle pentru vizibilitatea parolei
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        });
+    </script>
 </body>
 </html> 

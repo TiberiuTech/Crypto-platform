@@ -193,23 +193,24 @@ export class WalletService {
     }
 
     // Metodă pentru adăugarea unei tranzacții în istoric
-    addTransaction(type, fromAsset, toAsset, amount, value) {
+    addTransaction(type, fromAsset, toAsset, amount, valueInUSD, toAmount = null) {
         const transaction = {
             id: Date.now(),
             type,
             fromAsset,
             toAsset,
             amount,
-            value,
-            timestamp: new Date(),
-            status: 'completed'
+            valueInUSD,
+            toAmount,
+            timestamp: new Date().toISOString()
         };
 
-        // Adăugăm tranzacția la început pentru a o vedea prima
         this.transactions.unshift(transaction);
         
-        // Salvăm starea
-        this.saveState();
+        // Limităm numărul de tranzacții stocate la 100
+        if (this.transactions.length > 100) {
+            this.transactions = this.transactions.slice(0, 100);
+        }
     }
 
     // Metodă pentru retragere
@@ -356,7 +357,7 @@ export class WalletService {
             throw new Error('Unul dintre active nu există');
         }
         if (amount <= 0) {
-            throw new Error('Suma trebuie să fie pozitivă');
+            throw new Error('Cantitatea trebuie să fie pozitivă');
         }
         if (this.assets[fromAsset].amount < amount) {
             throw new Error('Sold insuficient');
@@ -376,6 +377,12 @@ export class WalletService {
             
             // Calculăm cantitatea de activ destinație bazată pe prețul actual
             const toAmount = fromValue / toPrice;
+            
+            // Calculăm valoarea în USD a activului destinație
+            const toValue = toAmount * toPrice;
+            
+            // Calculăm diferența de valoare (profit/pierdere)
+            const valueDiff = toValue - fromValue;
 
             // Actualizăm soldurile
             this.assets[fromAsset].amount = parseFloat((this.assets[fromAsset].amount - amount).toFixed(8));
@@ -386,7 +393,7 @@ export class WalletService {
             this.assets[toAsset].value = parseFloat((this.assets[toAsset].amount * toPrice).toFixed(2));
 
             // Adăugăm tranzacția în istoric
-            this.addTransaction('swap', fromAsset, toAsset, amount, fromValue);
+            this.addTransaction('swap', fromAsset, toAsset, amount, fromValue, toAmount);
 
             // Salvăm starea și notificăm UI-ul
             this.saveState();
@@ -399,13 +406,21 @@ export class WalletService {
                         type: 'swap',
                         fromAsset,
                         toAsset,
-                        amount,
-                        toAmount
+                        fromAmount: amount,
+                        toAmount: toAmount,
+                        valueInUSD: fromValue,
+                        valueDiff: valueDiff
                     }
                 }
             }));
 
-            return true;
+            return {
+                success: true,
+                fromAmount: amount,
+                toAmount: toAmount,
+                valueInUSD: fromValue,
+                valueDiff: valueDiff
+            };
         } catch (error) {
             console.error('Eroare la swap:', error);
             throw new Error(error.message || 'Nu s-a putut efectua swap-ul. Încercați din nou.');
@@ -473,23 +488,45 @@ export class WalletService {
             const lastUpdate = this.lastPriceUpdate.get(symbol);
             const cachedPrice = this.priceCache.get(symbol);
             
-            if (cachedPrice && lastUpdate && Date.now() - lastUpdate < 30000) {
+            // Folosim cache-ul doar dacă prețul a fost actualizat în ultimele 5 secunde
+            if (cachedPrice && lastUpdate && Date.now() - lastUpdate < 5000) {
+                console.log(`Using cached price for ${symbol}:`, cachedPrice);
                 return cachedPrice;
             }
 
-            const response = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=USD`);
+            // Folosim API-ul CryptoCompare cu mai multe detalii
+            const response = await fetch(`https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${symbol}&tsyms=USD`);
             const data = await response.json();
 
-            if (data.USD) {
-                this.priceCache.set(symbol, data.USD);
-                this.lastPriceUpdate.set(symbol, Date.now());
-                return data.USD;
+            if (data.RAW && data.RAW[symbol] && data.RAW[symbol].USD) {
+                const priceData = data.RAW[symbol].USD;
+                const price = parseFloat(priceData.PRICE);
+                
+                // Verificăm dacă prețul este valid
+                if (!isNaN(price) && price > 0) {
+                    this.priceCache.set(symbol, price);
+                    this.lastPriceUpdate.set(symbol, Date.now());
+                    console.log(`Got new price for ${symbol}:`, price);
+                    return price;
+                }
+            }
+
+            // Dacă nu am putut obține un preț nou valid, dar avem unul în cache, îl folosim pe cel din cache
+            if (cachedPrice) {
+                console.log(`Using fallback cached price for ${symbol}:`, cachedPrice);
+                return cachedPrice;
             }
 
             throw new Error(`Nu s-a putut obține prețul pentru ${symbol}`);
         } catch (error) {
             console.error(`Eroare la obținerea prețului pentru ${symbol}:`, error);
-            return this.priceCache.get(symbol) || null;
+            // Dacă avem un preț în cache, îl folosim ca fallback
+            const cachedPrice = this.priceCache.get(symbol);
+            if (cachedPrice) {
+                console.log(`Using fallback cached price for ${symbol}:`, cachedPrice);
+                return cachedPrice;
+            }
+            throw error;
         }
     }
 }

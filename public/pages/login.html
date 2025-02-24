@@ -8,10 +8,13 @@
     <link rel="stylesheet" href="/styles/components/navbar.css">
     <link rel="stylesheet" href="/styles/components/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
     <nav class="navbar">
-        <a href="/" class="logo">Crypto-Impact</a>
+        <div class="nav-left">
+            <a href="/" class="logo">Crypto-Impact</a>
+        </div>
         <div class="nav-center">
             <a href="/pages/news.html" class="nav-link">News</a>
             <a href="/pages/prices.html" class="nav-link">Prices</a>
@@ -23,17 +26,9 @@
                 <i class="fas fa-bell"></i>
                 <span class="notification-count">0</span>
             </div>
-            <div class="user-profile" style="display: none;">
-                <img src="/assets/images/user-avatar.png" alt="User Avatar" class="user-avatar">
-                <span class="username">User</span>
-                <button class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                </button>
-            </div>
             <div class="auth-buttons">
-                <a href="/pages/login.html" class="auth-btn">Login</a>
-                <a href="/pages/signup.html" class="auth-btn signup">Sign Up</a>
+                <a href="/pages/login.html" class="auth-btn active">Login</a>
+                <a href="/pages/signup.html" class="auth-btn">Sign Up</a>
             </div>
         </div>
     </nav>
@@ -52,26 +47,131 @@
                 </div>
                 <button type="submit" class="submit-btn">Login</button>
             </form>
+            
+            <div class="auth-separator">
+                <span>sau</span>
+            </div>
+
+            <div class="social-auth">
+                <div id="g_id_onload"
+                     data-client_id="62500980792-eq63dgg91pplggdlhq17r4lfds75kb8v.apps.googleusercontent.com"
+                     data-context="signin"
+                     data-callback="handleGoogleSignIn"
+                     data-auto_select="false"
+                     data-close_on_tap_outside="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-size="large"
+                     data-theme="filled_blue"
+                     data-text="signin_with"
+                     data-shape="rectangular"
+                     data-logo_alignment="left"
+                     data-width="300">
+                </div>
+            </div>
+
             <div class="auth-links">
-                <a href="#" class="forgot-password">Ai uitat parola?</a>
-                <span class="divider">|</span>
                 <a href="/pages/signup.html" class="signup-link">Creează cont nou</a>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { showAlert } from '/js/auth.js';
-        
-        // Facem showAlert disponibil global
-        window.showAlert = showAlert;
-        
-        // Verificăm warning-ul imediat după ce scriptul este încărcat
+    <script>
+        // Funcție pentru afișarea alertei
+        function showAlert(message) {
+            const overlay = document.createElement('div');
+            overlay.className = 'alert-overlay';
+            overlay.style.display = 'flex';
+            overlay.style.opacity = '1';
+            overlay.style.visibility = 'visible';
+            
+            const alertBox = document.createElement('div');
+            alertBox.className = 'custom-alert';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'alert-message';
+            messageDiv.textContent = message;
+            
+            const button = document.createElement('button');
+            button.className = 'alert-button';
+            button.textContent = 'OK';
+            button.onclick = () => document.body.removeChild(overlay);
+            
+            alertBox.appendChild(messageDiv);
+            alertBox.appendChild(button);
+            overlay.appendChild(alertBox);
+            document.body.appendChild(overlay);
+        }
+
+        // Handler pentru autentificarea cu Google
+        function handleGoogleSignIn(response) {
+            if (response.credential) {
+                fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        credential: response.credential,
+                        isSignup: false
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        window.location.href = '/';
+                    } else {
+                        showAlert(data.error);
+                        if (data.shouldRedirect) {
+                            setTimeout(() => {
+                                window.location.href = data.shouldRedirect;
+                            }, 2000);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Google Sign-In Error:', error);
+                    showAlert('Eroare la autentificare cu Google');
+                });
+            }
+        }
+
+        // Verificăm warning-ul la încărcarea paginii
         const warning = localStorage.getItem('loginWarning');
         if (warning) {
             showAlert(warning);
             localStorage.removeItem('loginWarning');
         }
+
+        // Adăugăm handler pentru formularul de login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/';
+                } else {
+                    showAlert(data.error || 'Eroare la autentificare');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('Eroare la autentificare. Încercați din nou.');
+            }
+        });
     </script>
 </body>
 </html> 

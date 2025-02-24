@@ -254,19 +254,21 @@ function updateTransactionHistory() {
                 description = `Depunere ${transaction.toAsset}`;
                 icon = '<i class="fas fa-arrow-down"></i>';
                 amount = `+${formatCrypto(transaction.amount)} ${transaction.toAsset}`;
-                value = `+${formatUSD(transaction.value)}`;
+                value = `+${formatUSD(transaction.valueInUSD)}`;
                 break;
             case 'withdraw':
                 description = `Retragere ${transaction.fromAsset}`;
                 icon = '<i class="fas fa-arrow-up"></i>';
                 amount = `-${formatCrypto(transaction.amount)} ${transaction.fromAsset}`;
-                value = `-${formatUSD(transaction.value)}`;
+                value = `-${formatUSD(transaction.valueInUSD)}`;
                 break;
             case 'swap':
                 description = `Swap ${transaction.fromAsset} → ${transaction.toAsset}`;
                 icon = '<i class="fas fa-exchange-alt"></i>';
-                amount = `${formatCrypto(transaction.amount)} ${transaction.fromAsset}`;
-                value = formatUSD(transaction.value);
+                amount = `-${formatCrypto(transaction.amount)} ${transaction.fromAsset}`;
+                const toAmount = transaction.toAmount ? `+${formatCrypto(transaction.toAmount)} ${transaction.toAsset}` : '';
+                value = `${formatUSD(transaction.valueInUSD)}`;
+                amount = `${amount}<br>${toAmount}`;
                 break;
         }
 
@@ -379,13 +381,35 @@ async function handleWithdraw(asset, amount) {
 // Funcție pentru procesarea swap-ului
 async function handleSwap(fromAsset, toAsset, amount) {
     try {
-        await walletService.swap(fromAsset, toAsset, parseFloat(amount));
-        showNotification('Swap efectuat cu succes!', 'success');
-        updateBalanceDisplay();
-        updateAssetsList();
-        updateTransactionHistory();
-        if (document.getElementById('portfolioChart')) {
-            updatePortfolioChart();
+        const result = await walletService.swap(fromAsset, toAsset, parseFloat(amount));
+        if (result.success) {
+            // Forțăm actualizarea prețurilor
+            await walletService.updateAllPrices();
+            
+            // Actualizăm imediat UI-ul
+            updateBalanceDisplay();
+            updateAssetsList();
+            updateTransactionHistory();
+            
+            // Actualizăm și graficul dacă există
+            if (document.getElementById('portfolioChart')) {
+                updatePortfolioChart();
+            }
+
+            // Închidem modalul și afișăm notificarea
+            const modal = document.querySelector('.modal');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+
+            const diffPrefix = result.valueDiff >= 0 ? '+' : '';
+            showNotification(`Swap efectuat cu succes! ${diffPrefix}${formatUSD(result.valueDiff)}`, 'success');
+
+            // Forțăm încă o actualizare după un scurt delay
+            setTimeout(async () => {
+                await walletService.updateAllPrices();
+                updateUI();
+            }, 500);
         }
     } catch (error) {
         console.error('Eroare la swap:', error);
@@ -978,14 +1002,80 @@ function initializeWithdrawForm(modal) {
     updateWithdrawInfo();
 }
 
-// Funcție pentru inițializarea formularului de swap
+// Funcție pentru crearea formularului de swap
+function createSwapForm() {
+    const assets = walletService.getAssets();
+    return `
+        <form class="transaction-form">
+            <div class="form-group">
+                <label for="swap-from-asset">De la</label>
+                <select name="fromAsset" id="swap-from-asset" required>
+                    ${Object.values(assets)
+                        .filter(asset => asset.amount > 0)
+                        .map(asset => {
+                            const decimals = asset.symbol === 'BTC' ? 8 : 
+                                           asset.symbol === 'ETH' ? 6 : 4;
+                            return `<option value="${asset.symbol}" data-balance="${asset.amount}">
+                                ${asset.symbol} - Disponibil: ${formatCrypto(asset.amount, decimals)}
+                            </option>`;
+                        }).join('')}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="swap-amount">Cantitate</label>
+                <input 
+                    type="text" 
+                    name="amount" 
+                    id="swap-amount"
+                    pattern="[0-9]*[.,]?[0-9]*"
+                    inputmode="decimal"
+                    required 
+                    placeholder="Introdu cantitatea"
+                >
+                <div class="amount-info">
+                    <div class="balance-info">Disponibil: <span class="available-balance">0.00</span></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="swap-to-asset">La</label>
+                <select name="toAsset" id="swap-to-asset" required>
+                    ${CURRENCIES
+                        .filter(symbol => symbol !== 'USD')
+                        .map(symbol => {
+                            return `<option value="${symbol}">${symbol}</option>`;
+                        }).join('')}
+                </select>
+            </div>
+
+            <div class="swap-details">
+                <div class="receive-info">
+                    <span class="receive-amount"></span>
+                </div>
+                <div class="value-info">
+                    <span class="value-difference"></span>
+                </div>
+            </div>
+
+            <div class="exchange-rate-info">
+                <span>Rată de schimb:</span>
+                <span class="rate-value"></span>
+            </div>
+
+            <button type="submit" class="submit-btn">Confirmă Swap-ul</button>
+        </form>
+    `;
+}
+
 function initializeSwapForm(modal) {
     const form = modal.querySelector('.transaction-form');
     const fromAssetSelect = modal.querySelector('select[name="fromAsset"]');
     const toAssetSelect = modal.querySelector('select[name="toAsset"]');
     const amountInput = modal.querySelector('input[name="amount"]');
     const availableBalance = modal.querySelector('.available-balance');
-    const usdValue = modal.querySelector('.usd-value');
+    const receiveAmount = modal.querySelector('.receive-amount');
+    const valueDifference = modal.querySelector('.value-difference');
     const rateValue = modal.querySelector('.rate-value');
 
     if (!fromAssetSelect || !toAssetSelect || !amountInput) {
@@ -998,35 +1088,101 @@ function initializeSwapForm(modal) {
             const fromAsset = fromAssetSelect.value;
             const toAsset = toAssetSelect.value;
             
+            // Obținem prețurile actuale pentru ambele monede direct de la API
             const fromPrice = await walletService.getPricePerUnit(fromAsset);
             const toPrice = await walletService.getPricePerUnit(toAsset);
             const balance = walletService.getBalance(fromAsset);
             
+            // Actualizăm soldul disponibil
             if (availableBalance) {
                 availableBalance.textContent = `${formatCrypto(balance)} ${fromAsset}`;
             }
 
+            // Actualizăm rata de schimb
             if (rateValue && fromPrice && toPrice) {
-                const rate = toPrice > 0 ? fromPrice / toPrice : 0;
-                rateValue.textContent = `1 ${fromAsset} = ${formatCrypto(rate)} ${toAsset}`;
+                const rate = fromPrice / toPrice;
+                rateValue.textContent = `1 ${fromAsset} = ${formatCrypto(rate, 6)} ${toAsset}`;
             }
 
             const amount = parseFloat(amountInput.value || '0');
-            if (!isNaN(amount) && amount > 0 && fromPrice) {
-                const valueInUSD = amount * fromPrice;
-                if (usdValue) {
-                    usdValue.textContent = `Valoare: ${formatUSD(valueInUSD)}`;
+            if (!isNaN(amount) && amount > 0) {
+                // Calculăm valoarea în USD pentru moneda trimisă
+                const fromValueUSD = parseFloat((amount * fromPrice).toFixed(2));
+                
+                // Adăugăm un mic spread de 0.1% pentru a simula condițiile reale de piață
+                const spreadMultiplier = 0.999; // 0.1% spread
+                
+                // Calculăm cantitatea estimată de primit, incluzând spread-ul
+                const estimatedReceive = parseFloat((fromValueUSD * spreadMultiplier / toPrice).toFixed(8));
+                
+                // Calculăm valoarea în USD pentru moneda primită
+                const toValueUSD = parseFloat((estimatedReceive * toPrice).toFixed(2));
+                
+                // Calculăm diferența de valoare (profit/pierdere)
+                const valueDiff = parseFloat((toValueUSD - fromValueUSD).toFixed(2));
+
+                // Debug pentru verificare
+                console.log('Debug Swap Values:', {
+                    fromAsset,
+                    toAsset,
+                    amount,
+                    fromPrice,
+                    toPrice,
+                    fromValueUSD,
+                    estimatedReceive,
+                    toValueUSD,
+                    valueDiff
+                });
+                
+                // Actualizăm interfața cu valorile calculate
+                if (receiveAmount) {
+                    receiveAmount.innerHTML = `
+                        <div class="swap-amounts">
+                            <div class="from-amount">-${formatCrypto(amount, 4)} ${fromAsset} (${formatUSD(fromValueUSD)})</div>
+                            <div class="to-amount">+${formatCrypto(estimatedReceive, 8)} ${toAsset} (${formatUSD(toValueUSD)})</div>
+                        </div>
+                    `;
+                }
+                
+                // Actualizăm diferența
+                if (valueDifference) {
+                    valueDifference.innerHTML = `
+                        <span class="diff-label">Diferență:</span>
+                        <span class="diff-value ${valueDiff >= 0 ? 'positive' : 'negative'}">
+                            ${formatUSD(valueDiff)}
+                        </span>
+                    `;
                 }
 
+                // Verificăm soldul disponibil
                 if (amount > balance) {
-                    amountInput.setCustomValidity('Suma depășește soldul disponibil');
-                    showNotification('Suma depășește soldul disponibil', 'error');
+                    amountInput.setCustomValidity('Cantitatea depășește soldul disponibil');
+                    showNotification('Cantitatea depășește soldul disponibil', 'error');
                 } else {
                     amountInput.setCustomValidity('');
                 }
-            } else if (usdValue) {
-                usdValue.textContent = 'Valoare: $0.00';
+            } else {
+                // Resetăm valorile dacă nu avem o sumă validă
+                if (receiveAmount) {
+                    receiveAmount.innerHTML = `
+                        <div class="swap-amounts">
+                            <div class="from-amount">-0.0000 ${fromAsset} ($0.00)</div>
+                            <div class="to-amount">+0.0000 ${toAsset} ($0.00)</div>
+                        </div>
+                    `;
+                }
+                if (valueDifference) {
+                    valueDifference.innerHTML = `
+                        <span class="diff-label">Diferență:</span>
+                        <span class="diff-value">$0.00</span>
+                    `;
+                }
             }
+
+            // Forțăm un reflow pentru a asigura actualizarea UI-ului
+            if (receiveAmount) receiveAmount.offsetHeight;
+            if (valueDifference) valueDifference.offsetHeight;
+
         } catch (error) {
             console.error('Eroare la actualizarea informațiilor de swap:', error);
             showNotification('Eroare la actualizarea informațiilor. Încercați din nou.', 'error');
@@ -1044,12 +1200,12 @@ function initializeSwapForm(modal) {
 
         // Validări
         if (isNaN(amount) || amount <= 0) {
-            showNotification('Introduceți o sumă validă', 'error');
+            showNotification('Introduceți o cantitate validă', 'error');
             return;
         }
 
         if (amount > balance) {
-            showNotification('Suma depășește soldul disponibil', 'error');
+            showNotification('Cantitatea depășește soldul disponibil', 'error');
             return;
         }
 
@@ -1059,10 +1215,13 @@ function initializeSwapForm(modal) {
         }
 
         try {
-            await walletService.swap(fromAsset, toAsset, amount);
-            document.body.removeChild(modal);
-            showNotification('Swap efectuat cu succes!', 'success');
-            updateUI(); // Actualizăm UI-ul după swap
+            const result = await walletService.swap(fromAsset, toAsset, amount);
+            if (result.success) {
+                document.body.removeChild(modal);
+                const diffPrefix = result.valueDiff >= 0 ? '+' : '';
+                showNotification(`Swap efectuat cu succes! ${diffPrefix}${formatUSD(result.valueDiff)}`, 'success');
+                updateUI(); // Actualizăm UI-ul după swap
+            }
         } catch (error) {
             console.error('Eroare la swap:', error);
             showNotification(error.message, 'error');
@@ -1140,177 +1299,146 @@ function initializeAddAssetForm(modal) {
     });
 }
 
-// Funcții pentru crearea formularelor
-function createDepositForm() {
-    return `
-        <form class="transaction-form">
-            <div class="form-group">
-                <label for="deposit-asset">Selectează moneda</label>
-                <select name="asset" id="deposit-asset" required>
-                    ${CURRENCIES.map(currency => `
-                        <option value="${currency}">${currency}</option>
-                    `).join('')}
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="deposit-amount">Sumă de depus (USD)</label>
-                <input 
-                    type="number" 
-                    name="amount" 
-                    id="deposit-amount"
-                    min="10" 
-                    step="any" 
-                    required 
-                    placeholder="Introdu suma în USD (min. $10)"
-                >
-            </div>
-            
-            <div class="price-info">
-                <div class="current-price">
-                    <span>Preț curent:</span>
-                    <span class="price-value">$0.00</span>
-                </div>
-                <div class="price-change">
-                    <div class="change-value">0.00%</div>
-                    <div class="period">ultimele 24h</div>
-                </div>
-            </div>
-
-            <button type="submit" class="submit-btn">
-                Confirmă depunerea
-            </button>
-        </form>
-    `;
+// Adăugăm stilurile necesare
+const swapStyles = document.createElement('style');
+swapStyles.textContent = `
+.swap-details {
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
 }
 
-function createWithdrawForm() {
-    // Filtrăm activele pentru a include doar cele cu sold pozitiv
-    const assets = Object.entries(walletService.assets)
-        .filter(([_, asset]) => asset.amount > 0)
-        .map(([symbol, asset]) => ({
-            symbol,
-            balance: asset.amount
-        }));
-
-    if (assets.length === 0) {
-        return `
-            <form class="transaction-form">
-                <div class="no-assets">
-                    Nu aveți active disponibile pentru retragere.
-                </div>
-            </form>
-        `;
-    }
-
-    return `
-        <form class="transaction-form">
-            <div class="form-group">
-                <label for="withdraw-asset">Selectează moneda</label>
-                <select name="asset" id="withdraw-asset" required>
-                    ${assets.map(asset => `
-                        <option value="${asset.symbol}" data-balance="${asset.balance}">
-                            ${asset.symbol} (Disponibil: ${formatCrypto(asset.balance)} ${asset.symbol})
-                        </option>
-                    `).join('')}
-                </select>
-            </div>
-            
-            <div class="price-info">
-                <div class="current-price">
-                    <span>Preț curent:</span>
-                    <span class="price-value">$0.00</span>
-                </div>
-                <div class="price-change">
-                    <div class="change-value">0.00%</div>
-                    <div class="period">ultimele 24h</div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="withdraw-amount">Sumă de retras</label>
-                <input 
-                    type="text" 
-                    name="amount" 
-                    id="withdraw-amount"
-                    pattern="[0-9]*\.?[0-9]*"
-                    inputmode="decimal"
-                    required 
-                    placeholder="Introdu suma de retras"
-                >
-                <div class="amount-info">
-                    <span class="balance-info">Sold disponibil: <span class="available-balance">0.00</span></span>
-                    <span class="usd-value">Valoare: $0.00</span>
-                </div>
-            </div>
-
-            <button type="submit" class="submit-btn">
-                Confirmă retragerea
-            </button>
-        </form>
-    `;
+.receive-info, .value-info {
+    margin: 5px 0;
 }
 
-function createSwapForm() {
-    const assets = walletService.getAssets();
-    const form = `
-        <form class="transaction-form">
-            <div class="form-group">
-                <label for="swap-from-asset">De la</label>
-                <select name="fromAsset" id="swap-from-asset" required>
-                    ${Object.values(assets).map(asset => {
-                        const decimals = asset.symbol === 'BTC' ? 8 : 
-                                       asset.symbol === 'ETH' ? 6 : 4;
-                        return `<option value="${asset.symbol}">
-                            ${asset.name} (${asset.symbol}) - Disponibil: ${formatCrypto(asset.amount, decimals)}
-                        </option>`;
-                    }).join('')}
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="swap-amount">Sumă</label>
-                <input 
-                    type="text" 
-                    name="amount" 
-                    id="swap-amount"
-                    pattern="[0-9]*[.,]?[0-9]*"
-                    inputmode="decimal"
-                    required 
-                    placeholder="Introdu suma"
-                >
-                <div class="amount-info">
-                    <span class="balance-info">Sold disponibil: <span class="available-balance">0.00</span></span>
-                    <span class="usd-value">Valoare: $0.00</span>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="swap-to-asset">La</label>
-                <select name="toAsset" id="swap-to-asset" required>
-                    ${Object.values(assets).map(asset => {
-                        return `<option value="${asset.symbol}">
-                            ${asset.name} (${asset.symbol})
-                        </option>`;
-                    }).join('')}
-                </select>
-            </div>
-
-            <div class="exchange-rate-info">
-                <span>Rată de schimb:</span>
-                <span class="rate-value"></span>
-            </div>
-
-            <button type="submit" class="submit-btn">Confirmă Swap-ul</button>
-        </form>
-    `;
-
-    return form;
+.swap-amounts {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
+
+.from-amount {
+    color: #f44336;
+}
+
+.to-amount {
+    color: #4CAF50;
+}
+
+.diff-label {
+    color: #94A3B8;
+    margin-right: 8px;
+}
+
+.diff-value {
+    font-weight: 500;
+}
+
+.diff-value.positive {
+    color: #4CAF50;
+}
+
+.diff-value.negative {
+    color: #f44336;
+}
+`;
+document.head.appendChild(swapStyles);
 
 // Export funcții necesare
 window.showTransactionModal = showTransactionModal;
 window.formatUSD = formatUSD;
 window.formatCrypto = formatCrypto;
 window.formatDate = formatDate;
-window.updatePortfolioChart = updatePortfolioChart; 
+window.updatePortfolioChart = updatePortfolioChart;
+
+// Funcție pentru crearea formularului de depunere
+function createDepositForm() {
+    return `
+        <form class="transaction-form">
+            <div class="form-group">
+                <label for="deposit-asset">Monedă</label>
+                <select name="asset" id="deposit-asset" required>
+                    <option value="USD">US Dollar (USD)</option>
+                    ${CURRENCIES.map(symbol => {
+                        return `<option value="${symbol}">${symbol}</option>`;
+                    }).join('')}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="deposit-amount">Sumă (USD)</label>
+                <input 
+                    type="text" 
+                    name="amount" 
+                    id="deposit-amount"
+                    pattern="[0-9]*[.,]?[0-9]*"
+                    inputmode="decimal"
+                    required 
+                    placeholder="Introdu suma în USD"
+                >
+            </div>
+
+            <div class="price-info">
+                <div class="current-price">
+                    <span>Preț curent:</span>
+                    <span class="price-value">$1.00</span>
+                    <span class="price-change">
+                        <span class="change-value">+0.00%</span>
+                    </span>
+                </div>
+                <div class="crypto-amount">Vei primi: 0.00</div>
+            </div>
+
+            <button type="submit" class="submit-btn">Confirmă Depunerea</button>
+        </form>
+    `;
+}
+
+// Funcție pentru crearea formularului de retragere
+function createWithdrawForm() {
+    const assets = walletService.getAssets();
+    return `
+        <form class="transaction-form">
+            <div class="form-group">
+                <label for="withdraw-asset">Monedă</label>
+                <select name="asset" id="withdraw-asset" required>
+                    ${Object.values(assets)
+                        .filter(asset => asset.amount > 0)
+                        .map(asset => {
+                            return `<option value="${asset.symbol}" data-balance="${asset.amount}">
+                                ${asset.symbol} - Disponibil: ${formatCrypto(asset.amount)}
+                            </option>`;
+                        }).join('')}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="withdraw-amount">Cantitate</label>
+                <input 
+                    type="text" 
+                    name="amount" 
+                    id="withdraw-amount"
+                    pattern="[0-9]*[.,]?[0-9]*"
+                    inputmode="decimal"
+                    required 
+                    placeholder="Introdu cantitatea"
+                >
+                <div class="amount-info">
+                    <div class="balance-info">Disponibil: <span class="available-balance">0.00</span></div>
+                    <div class="usd-value">Valoare: $0.00</div>
+                </div>
+            </div>
+
+            <div class="price-info">
+                <div class="current-price">
+                    <span>Preț curent:</span>
+                    <span class="price-value">$0.00</span>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Confirmă Retragerea</button>
+        </form>
+    `;
+} 
