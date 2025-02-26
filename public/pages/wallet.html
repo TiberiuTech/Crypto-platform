@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../styles/components/navbar.css">
     <link rel="stylesheet" href="../styles/components/wallet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Chart.js -->
+  
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="../js/services/authService.js" type="module"></script>
@@ -16,7 +16,7 @@
     <script src="../js/wallet.js" type="module" defer></script>
 </head>
 <body>
-    <!-- Navbar -->
+  
     <nav class="navbar auth-loading">
         <div class="nav-left">
             <a href="/" class="logo">Crypto-Impact</a>
@@ -47,18 +47,17 @@
     <div class="wallet">
         <div class="wallet-content">
             <div class="main-section">
-                <!-- Left Panel -->
+        
                 <div class="left-panel">
-                    <!-- Grafic Portofoliu -->
                     <div class="portfolio-chart">
                         <div class="chart-header">
-                            <h2 class="chart-title">Evoluție Portofel</h2>
+                            <h2 class="chart-title">Portfolio Evolution</h2>
                             <div class="chart-period">
-                                <button class="period-btn active" data-period="1L">1 Lună</button>
-                                <button class="period-btn" data-period="3L">3 Luni</button>
-                                <button class="period-btn" data-period="6L">6 Luni</button>
-                                <button class="period-btn" data-period="1A">1 An</button>
-                                <button class="period-btn" data-period="Tot">Tot</button>
+                                <button class="period-btn active" data-period="1L">1 Month</button>
+                                <button class="period-btn" data-period="3L">3 Months</button>
+                                <button class="period-btn" data-period="6L">6 Months</button>
+                                <button class="period-btn" data-period="1A">1 Year</button>
+                                <button class="period-btn" data-period="All">All</button>
                             </div>
                         </div>
                         <div class="chart-container">
@@ -66,43 +65,43 @@
                         </div>
                     </div>
 
-                    <!-- Istoric Tranzacții -->
+          
                     <div class="transactions-history">
                         <div class="transactions-header">
                             <h3 class="transactions-title">
                                 <i class="fas fa-history"></i>
-                                Istoric Tranzacții
+                                Transactions History
                             </h3>
                         </div>
                         
                         <div class="transaction-list">
-                            <!-- Tranzacțiile vor fi populate dinamic aici -->
+                           
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Panel -->
+                
                 <div class="right-panel">
-                    <!-- Card Sold -->
+                 
                     <div class="sold-total">
                         <div class="sold-total-header">
                             <h3>Sold Total</h3>
                             <div class="sold-total-value">$0.00</div>
                             <div class="sold-total-change">
                                 <span class="change positive">+1.07%</span>
-                                <span class="period">ultimele 24h</span>
+                                <span class="period">last 24 hours</span>
                             </div>
                         </div>
                         
-                        <!-- Butoane de Acțiune -->
+                    
                         <div class="sold-total-actions">
                             <button class="action-btn deposit">
                                 <i class="fas fa-arrow-down"></i>
-                                Depunere
+                                Deposit
                             </button>
                             <button class="action-btn withdraw">
                                 <i class="fas fa-arrow-up"></i>
-                                Retragere
+                                Withdraw
                             </button>
                             <button class="action-btn swap">
                                 <i class="fas fa-exchange-alt"></i>
@@ -111,13 +110,13 @@
                         </div>
                     </div>
 
-                    <!-- Lista de Active -->
+                   
                     <div class="assets-list">
                         <div class="assets-header">
                             <h3 class="assets-title">Active (5)</h3>
                         </div>
                         
-                        <!-- Lista de active va fi populată dinamic -->
+                    
                     </div>
                 </div>
             </div>

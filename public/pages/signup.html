@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,7 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <!-- Navbar -->
+ 
     <nav class="navbar">
         <div class="nav-left">
             <a href="/" class="logo">Crypto-Impact</a>
@@ -38,16 +38,16 @@
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
-                <h2>Înregistrare</h2>
-                <p>Creează-ți un cont nou pentru a începe să tranzacționezi.</p>
+                <h2>Sign Up</h2>
+                <p>Create an account to start trading.</p>
             </div>
             
             <form id="signupForm" class="auth-form">
                 <div class="form-group">
-                    <label for="name">Nume complet</label>
+                    <label for="name">Full Name</label>
                     <div class="input-group">
                         <i class="fas fa-user"></i>
-                        <input type="text" id="name" name="name" autocomplete="name" required placeholder="Introdu numele tău complet">
+                        <input type="text" id="name" name="name" autocomplete="name" required placeholder="Enter your full name">
                     </div>
                 </div>
 
@@ -55,15 +55,15 @@
                     <label for="email">Email</label>
                     <div class="input-group">
                         <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" name="email" autocomplete="username" required placeholder="Introdu adresa de email">
+                        <input type="email" id="email" name="email" autocomplete="username" required placeholder="Enter your email">
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="password">Parolă</label>
+                    <label for="password">Password</label>
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" name="password" autocomplete="new-password" required placeholder="Creează o parolă">
+                        <input type="password" id="password" name="password" autocomplete="new-password" required placeholder="Create a password">
                         <button type="button" class="toggle-password">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -71,10 +71,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="confirmPassword">Confirmă parola</label>
+                    <label for="confirmPassword">Confirm Password</label>
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required placeholder="Confirmă parola">
+                        <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required placeholder="Confirm Password">
                         <button type="button" class="toggle-password">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -84,12 +84,12 @@
                 <div class="form-options">
                     <label class="terms">
                         <input type="checkbox" name="terms" required>
-                        <span>Sunt de acord cu <a href="#">Termenii și Condițiile</a></span>
+                        <span>I agree to <a href="#">Terms and Conditions</a></span>
                     </label>
                 </div>
 
                 <button type="submit" class="submit-btn">
-                    <span>Creează cont</span>
+                    <span>Create account</span>
                     <i class="fas fa-arrow-right"></i>
                 </button>
             </form>
@@ -118,13 +118,13 @@
             </div>
 
             <div class="auth-footer">
-                <p>Ai deja cont? <a href="/pages/login.html">Autentifică-te</a></p>
+                <p>Already have an account? <a href="/pages/login.html">Login</a></p>
             </div>
         </div>
     </div>
 
     <script>
-        // Funcție pentru afișarea alertei
+
         function showAlert(message) {
             const overlay = document.createElement('div');
             overlay.className = 'alert-overlay';
@@ -150,7 +150,7 @@
             document.body.appendChild(overlay);
         }
 
-        // Handler pentru autentificarea cu Google
+
         function handleGoogleSignIn(response) {
             if (response.credential) {
                 fetch('/api/auth/google', {
@@ -179,12 +179,11 @@
                 })
                 .catch(error => {
                     console.error('Google Sign-In Error:', error);
-                    showAlert('Eroare la înregistrare cu Google');
+                    showAlert('Error during Google registration');
                 });
             }
         }
 
-        // Adăugăm handler pentru formularul de înregistrare
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('name').value;
@@ -193,7 +192,7 @@
             const confirmPassword = document.getElementById('confirmPassword').value;
 
             if (password !== confirmPassword) {
-                showAlert('Parolele nu coincid');
+                showAlert('Passwords do not match');
                 return;
             }
 
@@ -211,15 +210,15 @@
                     localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = '/';
                 } else {
-                    showAlert(data.error || 'Eroare la înregistrare');
+                    showAlert(data.error || 'Registration error');
                 }
             } catch (error) {
                 console.error('Signup error:', error);
-                showAlert('Eroare la înregistrare. Încercați din nou.');
+                showAlert('Registration error. Please try again.');
             }
         });
 
-        // Toggle pentru vizibilitatea parolei
+        
         document.querySelectorAll('.toggle-password').forEach(button => {
             button.addEventListener('click', function() {
                 const input = this.previousElementSibling;

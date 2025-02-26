@@ -6,7 +6,7 @@ class TradeService {
         this.initializeTradeHistory();
     }
 
-    // Inițializare istoric tranzacții
+   
     initializeTradeHistory() {
         const trades = localStorage.getItem('trades');
         if (!trades) {
@@ -14,7 +14,7 @@ class TradeService {
         }
     }
 
-    // Obține prețul curent pentru o pereche de monede
+  
     async getCurrentPrice(fromCoin, toCoin) {
         try {
             const prices = await apiService.getPrices();
@@ -22,7 +22,7 @@ class TradeService {
             const toCoinInfo = apiService.SUPPORTED_COINS[toCoin];
 
             if (!fromCoinInfo || !toCoinInfo) {
-                throw new Error('Pereche de trading nesuportată');
+                throw new Error('Unsupported trading pair');
             }
 
             const fromPrice = prices[fromCoinInfo.id].price;
@@ -34,44 +34,36 @@ class TradeService {
                 rate: toPrice / fromPrice
             };
         } catch (error) {
-            console.error('Eroare la obținerea prețului:', error);
-            throw new Error('Nu s-a putut obține prețul curent');
+            console.error('Error obtaining the current price:', error);
+            throw new Error('Current price could not be obtained');
         }
     }
 
-    // Calculează suma primită pentru un trade
     async calculateTradeAmount(fromCoin, toCoin, amount) {
         const { rate } = await this.getCurrentPrice(fromCoin, toCoin);
         return amount * rate;
     }
 
-    // Execută un trade
     async executeTrade(fromCoin, toCoin, amount) {
         if (!apiService.isSupportedCoin(fromCoin) || !apiService.isSupportedCoin(toCoin)) {
-            throw new Error('Monedă nesuportată');
+            throw new Error('Unsupported coin');
         }
 
-        // Verifică balanța
         const balance = walletService.getBalance(fromCoin);
         if (balance < amount) {
-            throw new Error('Fonduri insuficiente');
+            throw new Error('Insufficient funds');
         }
 
-        // Calculează suma primită
         const receiveAmount = await this.calculateTradeAmount(fromCoin, toCoin, amount);
         
-        // Aplică comisionul de trade (0.1%)
         const fee = receiveAmount * 0.001;
         const finalAmount = receiveAmount - fee;
 
         try {
-            // Scade din moneda sursă
             await walletService.processWithdraw(fromCoin, amount, 'TRADE', 'internal');
             
-            // Adaugă în moneda destinație
             await walletService.processDeposit(toCoin, finalAmount, 'TRADE');
 
-            // Salvează tranzacția
             const trade = {
                 fromCoin,
                 toCoin,
@@ -85,24 +77,21 @@ class TradeService {
             this.saveTradeToHistory(trade);
             return trade;
         } catch (error) {
-            console.error('Eroare la executarea trade-ului:', error);
-            throw new Error('Nu s-a putut executa trade-ul');
+            console.error('Error executing the trade:', error);
+            throw new Error('Trade could not be executed');
         }
     }
 
-    // Obține istoricul de trade-uri
     getTradeHistory() {
         return JSON.parse(localStorage.getItem('trades')) || [];
     }
 
-    // Salvează un trade în istoric
     saveTradeToHistory(trade) {
         const trades = this.getTradeHistory();
         trades.unshift(trade);
         localStorage.setItem('trades', JSON.stringify(trades));
     }
 
-    // Obține perechile de trading disponibile
     getTradingPairs() {
         const coins = Object.keys(apiService.SUPPORTED_COINS);
         const pairs = [];
@@ -121,14 +110,13 @@ class TradeService {
         return pairs;
     }
 
-    // Obține informații despre piață pentru o pereche
     async getMarketInfo(fromCoin, toCoin) {
         try {
             const fromCoinInfo = apiService.SUPPORTED_COINS[fromCoin];
             const toCoinInfo = apiService.SUPPORTED_COINS[toCoin];
 
             if (!fromCoinInfo || !toCoinInfo) {
-                throw new Error('Pereche de trading nesuportată');
+                throw new Error('Unsupported trading pair');
             }
 
             const symbol = `${fromCoinInfo.id}${toCoinInfo.id}`;
@@ -148,47 +136,44 @@ class TradeService {
                 volume24h: marketData.volume24h
             };
         } catch (error) {
-            console.error('Eroare la obținerea informațiilor de piață:', error);
-            throw new Error('Nu s-au putut obține informațiile de piață');
+            console.error('Error obtaining market information:', error);
+            throw new Error('Market information could not be obtained');
         }
     }
 
-    // Obține orderbook pentru o pereche
     async getOrderBook(fromCoin, toCoin) {
         try {
             const fromCoinInfo = apiService.SUPPORTED_COINS[fromCoin];
             const toCoinInfo = apiService.SUPPORTED_COINS[toCoin];
 
             if (!fromCoinInfo || !toCoinInfo) {
-                throw new Error('Pereche de trading nesuportată');
+                throw new Error('Unsupported trading pair');
             }
 
             const symbol = `${fromCoinInfo.id}${toCoinInfo.id}`;
             return await apiService.getOrderBook(symbol);
         } catch (error) {
-            console.error('Eroare la obținerea orderbook-ului:', error);
-            throw new Error('Nu s-a putut obține orderbook-ul');
+            console.error('Error obtaining orderbook:', error);
+            throw new Error('Orderbook could not be obtained');
         }
     }
 
-    // Obține tranzacțiile recente pentru o pereche
     async getRecentTrades(fromCoin, toCoin) {
         try {
             const fromCoinInfo = apiService.SUPPORTED_COINS[fromCoin];
             const toCoinInfo = apiService.SUPPORTED_COINS[toCoin];
 
             if (!fromCoinInfo || !toCoinInfo) {
-                throw new Error('Pereche de trading nesuportată');
+                throw new Error('Unsupported trading pair');
             }
 
             const symbol = `${fromCoinInfo.id}${toCoinInfo.id}`;
             return await apiService.getRecentTrades(symbol);
         } catch (error) {
-            console.error('Eroare la obținerea tranzacțiilor recente:', error);
-            throw new Error('Nu s-au putut obține tranzacțiile recente');
+            console.error('Error obtaining recent trades:', error);
+            throw new Error('Recent trades could not be obtained');
         }
     }
 }
 
-// Export singleton
 export const tradeService = new TradeService(); 

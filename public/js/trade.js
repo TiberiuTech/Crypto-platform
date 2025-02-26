@@ -9,7 +9,6 @@ class TradingPage {
         console.log('WalletService initialized:', this.walletService);
         console.log('Available assets:', this.walletService.getAssets());
         
-        // Elemente DOM
         this.pairSelector = document.querySelector('.pair-selector');
         this.currentPrice = document.querySelector('.current-price');
         this.priceChange = document.querySelector('.price-change');
@@ -25,10 +24,8 @@ class TradingPage {
         this.priceHeader = document.querySelector('.current-price');
         this.priceChangeElement = document.querySelector('.price-change');
         
-        // Adăugăm URL-ul de bază pentru API
         this.baseUrl = 'https://min-api.cryptocompare.com/data';
         
-        // Inițializăm starea din localStorage sau folosim valori default
         const savedState = localStorage.getItem('tradingState');
         const defaultState = {
             activeOrders: [],
@@ -40,7 +37,6 @@ class TradingPage {
         
         const state = savedState ? JSON.parse(savedState) : defaultState;
         
-        // State
         this.activeOrders = state.activeOrders;
         this.recentTrades = state.recentTrades;
         this.currentPair = state.currentPair;
@@ -51,7 +47,6 @@ class TradingPage {
         this.selectedTimeframe = '4H';
         this.lastPrice = null;
         
-        // Salvăm starea la fiecare modificare
         this.saveState = () => {
             const state = {
                 activeOrders: this.activeOrders,
@@ -63,25 +58,20 @@ class TradingPage {
             localStorage.setItem('tradingState', JSON.stringify(state));
         };
         
-        // Adăugăm interval pentru verificarea ordinelor
         setInterval(() => this.checkPendingOrders(), 5000);
         
-        // În constructor, după inițializarea altor variabile
         this.orderbook = {
             asks: [],
             bids: []
         };
         
-        // Inițializăm event listeners
         this.initializeEventListeners();
         
-        // Inițializăm graficul
         this.initializeChart().then(() => {
-            // Începem actualizările de preț doar după ce graficul este inițializat
             this.startPriceUpdates();
         }).catch(error => {
             console.error('Error in initial chart setup:', error);
-            this.showNotification('Eroare la inițializarea graficului', 'error');
+            this.showNotification('Error in initial chart setup', 'error');
         });
     }
     
@@ -91,7 +81,6 @@ class TradingPage {
     }
     
     initializeEventListeners() {
-        // Event listeners pentru selectorul de perechi
         const pairOptions = document.querySelectorAll('.pair-option');
         pairOptions.forEach(option => {
             option.addEventListener('click', async () => {
@@ -101,14 +90,12 @@ class TradingPage {
             });
         });
         
-        // Event listeners pentru butoanele de timeframe
         this.timeframeButtons.forEach(button => {
             button.addEventListener('click', async () => {
                 this.timeframeButtons.forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
                 this.selectedTimeframe = button.dataset.timeframe;
                 
-                // Ne asigurăm că graficul existent este distrus înainte de a crea unul nou
                 if (this.chart) {
                     this.chart.destroy();
                     this.chart = null;
@@ -117,7 +104,6 @@ class TradingPage {
             });
         });
         
-        // Event listeners pentru tipul de ordin
         const orderTypeButtons = document.querySelectorAll('.order-type-btn');
         orderTypeButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -128,7 +114,6 @@ class TradingPage {
             });
         });
         
-        // Event listeners pentru tipul de tranzacție
         const tradeTypeButtons = document.querySelectorAll('.trade-type-btn');
         tradeTypeButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -140,7 +125,6 @@ class TradingPage {
             });
         });
         
-        // Event listeners pentru butoanele de sumă rapidă
         const quickAmountButtons = document.querySelectorAll('.quick-amount-btn');
         quickAmountButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -201,7 +185,6 @@ class TradingPage {
             });
         });
         
-        // Input handlers
         this.priceInput.addEventListener('input', () => {
             this.updateTotal();
             this.updateAvailableBalance();
@@ -211,10 +194,8 @@ class TradingPage {
             this.updateAvailableBalance();
         });
         
-        // Submit handler
         this.submitButton.addEventListener('click', () => this.submitTrade());
 
-        // Actualizăm soldul disponibil inițial
         this.updateAvailableBalance();
     }
     
@@ -225,15 +206,12 @@ class TradingPage {
                 throw new Error('Canvas element not found');
             }
 
-            // Distrugem graficul existent dacă există
             if (this.chart) {
                 this.chart.destroy();
                 this.chart = null;
-                // Așteptăm un frame pentru a ne asigura că DOM-ul s-a actualizat
                 await new Promise(resolve => requestAnimationFrame(resolve));
             }
 
-            // Creăm un nou canvas pentru a evita probleme de reutilizare
             const oldCanvas = canvas;
             const newCanvas = document.createElement('canvas');
             newCanvas.id = 'tradingChart';
@@ -246,14 +224,12 @@ class TradingPage {
                 throw new Error('Could not get canvas context');
             }
 
-            // Așteptăm datele istorice
             const data = await this.apiService.getHistoricalData(this.currentPair.split('/')[0], this.selectedTimeframe);
             
             if (!data || data.length === 0) {
                 throw new Error('No historical data available');
             }
 
-            // Configurare pentru graficul de tip candlestick
             this.chart = new Chart(ctx, {
                 type: 'candlestick',
                 data: {
@@ -324,8 +300,8 @@ class TradingPage {
             return this.chart;
         } catch (error) {
             console.error('Error initializing chart:', error);
-            this.showNotification('Eroare la inițializarea graficului', 'error');
-            throw error; // Propagăm eroarea pentru a putea fi gestionată de apelant
+            this.showNotification('Error initializing the chart', 'error');
+            throw error; 
         }
     }
     
@@ -344,15 +320,13 @@ class TradingPage {
             const apiKey = 'da32007c65be52c3e9d98542bebd8906d676d7c0129c31e7ad40c04a927fd4a';
             const response = await fetch(`${this.baseUrl}/price?fsym=${symbol}&tsyms=USD&api_key=${apiKey}`);
             
-            // Verificăm dacă răspunsul este ok
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            // Verificăm Content-Type
             const contentType = response.headers.get("content-type");
             if (!contentType || !contentType.includes("application/json")) {
-                throw new Error("API nu a returnat JSON!");
+                throw new Error("API did not return JSON!");
             }
 
             const data = await response.json();
@@ -360,7 +334,6 @@ class TradingPage {
             if (data.USD) {
                 const currentPrice = data.USD;
                 
-                // Actualizăm prețul în header
                 const priceHeader = document.querySelector('.current-price');
                 if (priceHeader) {
                     priceHeader.textContent = `$${currentPrice.toLocaleString('en-US', {
@@ -369,7 +342,6 @@ class TradingPage {
                     })}`;
                 }
                 
-                // Actualizăm procentul de schimbare
                 const priceChangeElement = document.querySelector('.price-change');
                 if (priceChangeElement && this.lastPrice) {
                     const priceChange = ((currentPrice - this.lastPrice) / this.lastPrice) * 100;
@@ -381,7 +353,6 @@ class TradingPage {
                 this.currentPrice = currentPrice;
                 this.currentPriceValue = currentPrice;
                 
-                // Actualizăm prețul în formular dacă suntem în modul "market"
                 if (this.orderType === 'market') {
                     const priceInput = document.getElementById('priceInput');
                     if (priceInput) {
@@ -392,8 +363,7 @@ class TradingPage {
             }
         } catch (error) {
             console.error('Error updating price:', error);
-            // Adăugăm notificare pentru utilizator
-            this.showNotification('Eroare la actualizarea prețului. Încercăm din nou în curând...', 'error');
+            this.showNotification('Error updating the price. Please try again soon...', 'error');
         }
     }
     
@@ -402,21 +372,17 @@ class TradingPage {
             this.priceInput.value = this.currentPriceValue.toFixed(2);
             this.priceInput.disabled = true;
         } else {
-            // Pentru ordine limit și stop, permitem editarea prețului
-            // și păstrăm valoarea existentă dacă există
             this.priceInput.disabled = false;
             if (!this.priceInput.value) {
                 this.priceInput.value = this.currentPriceValue.toFixed(2);
             }
         }
 
-        // Calculăm totalul doar dacă ambele valori sunt prezente
         if (this.priceInput.value && this.amountInput.value) {
             const total = parseFloat(this.priceInput.value) * parseFloat(this.amountInput.value);
             this.totalInput.value = total.toFixed(2);
         }
         
-        // Actualizăm butonul de submit
         this.updateSubmitButton();
     }
     
@@ -441,7 +407,6 @@ class TradingPage {
         const walletService = (await import('./services/walletService.js')).default;
         const [base, quote] = this.currentPair.split('/');
         
-        // Get the correct balance from walletService
         let availableBalance;
         if (this.tradeType === 'sell') {
             availableBalance = walletService.getBalance(base);
@@ -449,14 +414,12 @@ class TradingPage {
             availableBalance = walletService.getBalance(quote);
         }
 
-        // Update the display
         const balanceElement = document.getElementById('availableBalance');
         if (balanceElement) {
             const symbol = this.tradeType === 'sell' ? base : quote;
             balanceElement.textContent = `${availableBalance.toFixed(8)} ${symbol}`;
         }
 
-        // Update max amount that can be traded
         this.maxAmount = availableBalance;
         return availableBalance;
     }
@@ -474,7 +437,7 @@ class TradingPage {
             const amount = parseFloat(this.amountInput.value);
             
             if (!price || !amount) {
-                this.showNotification('Introduceți prețul și cantitatea', 'error');
+                this.showNotification('Enter the price and quantity', 'error');
                 return;
             }
             
@@ -500,7 +463,7 @@ class TradingPage {
             
         } catch (error) {
             console.error('Error submitting trade:', error);
-            this.showNotification('Eroare la executarea tranzacției', 'error');
+            this.showNotification('Error executing the trade', 'error');
         }
     }
     
@@ -509,16 +472,14 @@ class TradingPage {
             const walletService = (await import('./services/walletService.js')).default;
             const [base, quote] = this.currentPair.split('/');
             
-            // Verify sufficient balance
             const availableBalance = order.side === 'sell' ? 
                 walletService.getBalance(base) : 
                 walletService.getBalance(quote);
                 
             if (order.amount > availableBalance) {
-                throw new Error(`Sold insuficient de ${order.side === 'sell' ? base : quote}`);
+                throw new Error(`Insufficient balance of ${order.side === 'sell' ? base : quote}`);
             }
 
-            // Execute the trade
             if (order.side === 'sell') {
                 await walletService.withdraw(base, order.amount);
                 const quoteAmount = order.amount * this.currentPrice;
@@ -529,7 +490,6 @@ class TradingPage {
                 await walletService.deposit(base, order.amount);
             }
 
-            // Add to recent trades
             this.addToRecentTrades({
                 price: this.currentPrice,
                 amount: order.amount,
@@ -537,7 +497,7 @@ class TradingPage {
                 time: new Date()
             });
 
-            this.showNotification(`${order.side === 'buy' ? 'Cumpărare' : 'Vânzare'} executată cu succes`, 'success');
+            this.showNotification(`${order.side === 'buy' ? 'Purchase' : 'Sale'} completed successfully`, 'success');
             this.resetForm();
             await this.updateAvailableBalance();
         } catch (error) {
@@ -551,28 +511,24 @@ class TradingPage {
             const [baseCurrency, quoteCurrency] = order.pair.split('/');
             const total = order.price * order.amount;
             
-            // Verificăm dacă utilizatorul are fonduri suficiente
             if (order.side === 'buy') {
                 const balance = this.walletService.getBalance(quoteCurrency);
                 if (balance < total) {
-                    this.showNotification('Fonduri insuficiente pentru ordin limit', 'error');
+                    this.showNotification('Insufficient funds for limit order', 'error');
                     return;
                 }
                 
-                // Blocăm fondurile pentru ordin
                 await this.walletService.withdraw(quoteCurrency, total);
             } else {
                 const balance = this.walletService.getBalance(baseCurrency);
                 if (balance < order.amount) {
-                    this.showNotification('Fonduri insuficiente pentru ordin limit', 'error');
+                    this.showNotification('Insufficient funds for limit order', 'error');
                     return;
                 }
                 
-                // Blocăm fondurile pentru ordin
                 await this.walletService.withdraw(baseCurrency, order.amount);
             }
             
-            // Adăugăm ordinul în lista de ordine active
             const limitOrder = {
                 id: Date.now(),
                 type: 'limit',
@@ -587,12 +543,12 @@ class TradingPage {
             
             this.activeOrders.push(limitOrder);
             this.updateActiveOrdersDisplay();
-            this.showNotification('Ordin limit plasat cu succes', 'success');
+            this.showNotification('Order limit placed successfully', 'success');
             this.resetForm();
             
         } catch (error) {
             console.error('Error placing limit order:', error);
-            this.showNotification('Eroare la plasarea ordinului limit', 'error');
+            this.showNotification('Error placing the limit order', 'error');
         }
     }
     
@@ -601,28 +557,24 @@ class TradingPage {
             const [baseCurrency, quoteCurrency] = order.pair.split('/');
             const total = order.price * order.amount;
             
-            // Verificăm dacă utilizatorul are fonduri suficiente
             if (order.side === 'buy') {
                 const balance = this.walletService.getBalance(quoteCurrency);
                 if (balance < total) {
-                    this.showNotification('Fonduri insuficiente pentru ordin stop', 'error');
+                    this.showNotification('Insufficient funds for stop order', 'error');
                     return;
                 }
                 
-                // Blocăm fondurile pentru ordin
                 await this.walletService.withdraw(quoteCurrency, total);
             } else {
                 const balance = this.walletService.getBalance(baseCurrency);
                 if (balance < order.amount) {
-                    this.showNotification('Fonduri insuficiente pentru ordin stop', 'error');
+                    this.showNotification('Insufficient funds for stop order', 'error');
                     return;
                 }
                 
-                // Blocăm fondurile pentru ordin
                 await this.walletService.withdraw(baseCurrency, order.amount);
             }
             
-            // Adăugăm ordinul în lista de ordine active
             const stopOrder = {
                 id: Date.now(),
                 type: 'stop',
@@ -637,12 +589,12 @@ class TradingPage {
             
             this.activeOrders.push(stopOrder);
             this.updateActiveOrdersDisplay();
-            this.showNotification('Ordin stop plasat cu succes', 'success');
+            this.showNotification('Order stop placed successfully', 'success');
             this.resetForm();
             
         } catch (error) {
             console.error('Error placing stop order:', error);
-            this.showNotification('Eroare la plasarea ordinului stop', 'error');
+            this.showNotification('Error placing the stop order', 'error');
         }
     }
     
@@ -670,7 +622,6 @@ class TradingPage {
             if (shouldExecute) {
                 await this.executeOrder(order);
                 this.activeOrders[index].status = 'executed';
-                // Eliminăm doar ordinele executate după ce au fost procesate
                 this.activeOrders = this.activeOrders.filter(o => o.status === 'pending');
                 this.updateActiveOrdersDisplay();
             }
@@ -703,12 +654,12 @@ class TradingPage {
                 });
             }
             
-            this.showNotification(`Ordin ${order.type} executat cu succes`, 'success');
+            this.showNotification(`Order ${order.type} executed successfully`, 'success');
             this.updateAvailableBalance();
             
         } catch (error) {
             console.error('Error executing order:', error);
-            this.showNotification('Eroare la executarea ordinului', 'error');
+            this.showNotification('Error executing the order', 'error');
         }
     }
     
@@ -734,7 +685,6 @@ class TradingPage {
                 </div>
             `).join('');
             
-        // Adăugăm event listeners pentru butoanele de anulare
         ordersList.querySelectorAll('.cancel-order').forEach(button => {
             button.addEventListener('click', () => {
                 this.cancelOrder(parseInt(button.dataset.id));
@@ -749,22 +699,20 @@ class TradingPage {
         const [baseCurrency, quoteCurrency] = order.pair.split('/');
         
         try {
-            // Returnăm fondurile blocate
             if (order.side === 'buy') {
                 await this.walletService.deposit(quoteCurrency, order.total);
             } else {
                 await this.walletService.deposit(baseCurrency, order.amount);
             }
             
-            // Eliminăm ordinul din lista activă
             this.activeOrders = this.activeOrders.filter(o => o.id !== orderId);
             this.updateActiveOrdersDisplay();
             this.updateAvailableBalance();
             
-            this.showNotification('Ordin anulat cu succes', 'success');
+            this.showNotification('Order canceled successfully', 'success');
         } catch (error) {
             console.error('Error canceling order:', error);
-            this.showNotification('Eroare la anularea ordinului', 'error');
+            this.showNotification('Error canceling the order', 'error');
         }
     }
     
@@ -791,12 +739,11 @@ class TradingPage {
 
     addToRecentTrades(trade) {
         this.recentTrades.unshift(trade);
-        // Păstrăm doar ultimele 50 de tranzacții
         if (this.recentTrades.length > 50) {
             this.recentTrades = this.recentTrades.slice(0, 50);
         }
         this.updateRecentTradesDisplay();
-        this.saveState(); // Salvăm starea după adăugarea tranzacției
+        this.saveState(); 
     }
 
     updateRecentTradesDisplay() {
@@ -816,12 +763,10 @@ class TradingPage {
 
     async updateOrderbook() {
         try {
-            // Simulăm date pentru orderbook
             const currentPrice = this.currentPriceValue;
             const asks = [];
             const bids = [];
             
-            // Generăm 10 niveluri de preț pentru vânzări (asks)
             for (let i = 0; i < 10; i++) {
                 const price = currentPrice * (1 + (i + 1) * 0.001);
                 const amount = Math.random() * 2 + 0.1;
@@ -832,7 +777,6 @@ class TradingPage {
                 });
             }
             
-            // Generăm 10 niveluri de preț pentru cumpărări (bids)
             for (let i = 0; i < 10; i++) {
                 const price = currentPrice * (1 - (i + 1) * 0.001);
                 const amount = Math.random() * 2 + 0.1;
@@ -855,7 +799,6 @@ class TradingPage {
         const orderbookElement = document.querySelector('.orderbook');
         if (!orderbookElement) return;
         
-        // Calculăm spread-ul
         const lowestAsk = this.orderbook.asks[0]?.price || 0;
         const highestBid = this.orderbook.bids[0]?.price || 0;
         const spread = lowestAsk - highestBid;
@@ -897,52 +840,42 @@ class TradingPage {
             selectedPair.innerHTML = option.innerHTML;
             this.currentPair = option.dataset.pair;
             
-            // Resetăm lastPrice pentru a calcula corect schimbarea procentuală
             this.lastPrice = null;
 
-            // Distrugem graficul existent și așteptăm finalizarea
             if (this.chart) {
                 this.chart.destroy();
                 this.chart = null;
-                // Așteptăm două frame-uri pentru a ne asigura că DOM-ul și Chart.js s-au actualizat complet
                 await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
             }
 
-            // Actualizăm prețul și orderbook-ul
             await Promise.all([
                 this.updatePrice(),
                 this.updateOrderbook()
             ]);
 
-            // Actualizăm UI-ul
             this.updateForm();
             this.updateAvailableBalance();
             this.resetForm();
 
-            // Inițializăm noul grafic
             await this.initializeChart();
             
-            // Salvăm starea
             this.saveState();
             
         } catch (error) {
             console.error('Error updating selected pair:', error);
-            this.showNotification('Eroare la schimbarea perechii de trading. Vă rugăm încercați din nou.', 'error');
+            this.showNotification('Error updating the trading pair. Please try again.', 'error');
         }
     }
 }
 
-// Inițializare
 document.addEventListener('DOMContentLoaded', () => {
     const tradingPage = new TradingPage();
     
-    // Funcționalitate pentru selectorul de perechi
     const pairSelectorContainer = document.querySelector('.pair-selector-container');
     const selectedPair = pairSelectorContainer.querySelector('.selected-pair');
     const pairDropdown = pairSelectorContainer.querySelector('.pair-dropdown');
     const pairOptions = pairDropdown.querySelectorAll('.pair-option');
 
-    // Adaugă evenimente pentru opțiuni
     pairOptions.forEach(option => {
         option.addEventListener('click', () => {
             tradingPage.updateSelectedPair(option);
@@ -950,14 +883,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Închide dropdown-ul când se face click în afara lui
     document.addEventListener('click', (e) => {
         if (!pairSelectorContainer.contains(e.target)) {
             pairDropdown.style.display = 'none';
         }
     });
 
-    // Deschide dropdown-ul la click pe containerul selector
     selectedPair.addEventListener('click', (e) => {
         e.stopPropagation();
         const isVisible = pairDropdown.style.display === 'block';

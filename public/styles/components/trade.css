@@ -166,7 +166,7 @@
     display: block;
 }
 
-/* Stilizare pentru scrollbar în dropdown */
+
 .pair-dropdown::-webkit-scrollbar {
     width: 8px;
 }
@@ -185,13 +185,13 @@
     background: rgba(99, 102, 241, 0.5);
 }
 
-/* Stilizare pentru Firefox */
+
 .pair-dropdown {
     scrollbar-width: thin;
     scrollbar-color: rgba(99, 102, 241, 0.3) rgba(17, 24, 39, 0.2);
 }
 
-/* Stilizare pentru dropdown deschis */
+
 .pair-selector:focus option:checked {
     background: var(--primary-color);
     color: white;
@@ -355,7 +355,7 @@
     background: rgba(255, 255, 255, 0.02);
 }
 
-/* Adăugăm gradient pentru volume bars */
+
 .orderbook-row {
     position: relative;
 }
@@ -387,7 +387,7 @@
     color: var(--success-color);
 }
 
-/* Right Panel Styles */
+
 .trading-right-panel {
     background: rgba(30, 41, 59, 0.5);
     border: 1px solid rgba(99, 102, 241, 0.2);
@@ -499,6 +499,7 @@
 
 .form-group input[type="number"] {
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .quick-amount {
@@ -624,7 +625,7 @@
     color: var(--error-color);
 }
 
-/* Stiluri pentru Tranzacții Recente */
+
 .trades-list {
     flex: 1;
     overflow-y: auto;
@@ -665,7 +666,7 @@
     color: var(--text-secondary);
 }
 
-/* Adăugăm un mesaj pentru când nu există ordine/tranzacții */
+
 .orders-list:empty::after,
 .trades-list:empty::after {
     content: 'Nu există date';
@@ -676,7 +677,7 @@
     font-style: italic;
 }
 
-/* Responsive Design */
+
 @media (max-width: 1200px) {
     .trading-container {
         grid-template-columns: 1fr;
@@ -708,7 +709,7 @@
     }
 }
 
-/* Notification Styles */
+
 .notification {
     position: fixed;
     bottom: 24px;
@@ -754,7 +755,7 @@
     font-size: 1.2rem;
 }
 
-/* Loading States */
+
 .loading {
     opacity: 0.5;
     pointer-events: none;
@@ -780,7 +781,7 @@
     }
 }
 
-/* Stiluri pentru scrollbar */
+
 .orderbook-content::-webkit-scrollbar,
 .trades-list::-webkit-scrollbar {
     width: 6px;
@@ -803,7 +804,7 @@
     background: rgba(255, 255, 255, 0.3);
 }
 
-/* Stiluri pentru Firefox */
+
 .orderbook-content,
 .trades-list {
     scrollbar-width: thin;

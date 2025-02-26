@@ -316,7 +316,7 @@
 .asset-icon.xem .crypto-icon { background-image: url('/assets/images/crypto-icons/xem.svg'); }
 .asset-icon.qtum .crypto-icon { background-image: url('/assets/images/crypto-icons/qtum.svg'); }
 
-/* Stiluri pentru iconițe în dark mode */
+
 @media (prefers-color-scheme: dark) {
     .asset-icon {
         background: transparent;
@@ -539,7 +539,7 @@
     color: #fff;
 }
 
-/* Modal și formular */
+
 .modal {
     position: fixed;
     top: 0;
@@ -662,14 +662,13 @@
     box-shadow: 0 0 0 2px rgba(56, 97, 251, 0.1) !important;
 }
 
-/* Eliminăm stilurile pentru elementele custom care nu mai sunt folosite */
+
 .crypto-select,
 .crypto-dropdown-container,
 .crypto-dropdown-list {
     display: none;
 }
 
-/* Eliminăm stilurile pentru selectul personalizat */
 .custom-select,
 .selected-option,
 .crypto-text,
@@ -756,7 +755,7 @@
     color: rgba(255, 255, 255, 0.5);
 }
 
-/* Notificări */
+
 .notification {
     position: fixed;
     bottom: 24px;
@@ -837,7 +836,7 @@
     }
 }
 
-/* Stiluri pentru butoanele din header */
+
 .wallet-header-actions {
     display: flex;
     gap: 0.5rem;
@@ -1120,7 +1119,7 @@
     background-color: rgba(56, 97, 251, 0.2) !important;
 }
 
-/* Stiluri pentru select în modal și formular */
+
 .modal-content select,
 .transaction-form select {
     width: 100%;

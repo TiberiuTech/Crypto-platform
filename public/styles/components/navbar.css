@@ -1,4 +1,3 @@
-/* Starea inițială - afișăm butoanele de autentificare în mod implicit */
 .nav-right .auth-buttons {
     visibility: visible;
     opacity: 1;
@@ -12,7 +11,7 @@
     display: none;
 }
 
-/* Starea pentru utilizator autentificat */
+
 .is-authenticated .auth-buttons {
     display: none !important;
     visibility: hidden;
@@ -25,7 +24,6 @@
     opacity: 1;
 }
 
-/* Starea pentru utilizator neautentificat */
 .not-authenticated .auth-buttons {
     display: flex !important;
     visibility: visible;
@@ -38,7 +36,6 @@
     opacity: 0;
 }
 
-/* Navbar principal */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -53,7 +50,6 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Tranziție pentru nav-right */
 .nav-right {
     display: flex;
     align-items: center;
@@ -178,14 +174,12 @@
     background: rgba(99, 102, 241, 0.1);
 }
 
-/* Stiluri pentru butonul Sign Up activ */
 .auth-btn.active.signup,
 .auth-btn.signup:hover {
     background: rgb(99, 102, 241);
     color: white;
 }
 
-/* Stiluri pentru butonul Login activ */
 .auth-btn.active {
     background: rgba(99, 102, 241, 0.1);
     color: var(--text-primary);

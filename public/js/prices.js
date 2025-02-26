@@ -14,14 +14,12 @@ let currentPage = 1;
 let charts = {};
 let moverCharts = {};
 
-// Funcție pentru paginare
 const paginate = (items, page = 1) => {
     const start = (page - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
     return items.slice(start, end);
 };
 
-// Funcție pentru generarea numerelor de pagină
 const generatePageNumbers = (current, total) => {
     const pages = [];
     const range = 2;
@@ -51,7 +49,6 @@ const generatePageNumbers = (current, total) => {
     }).join('');
 };
 
-// Funcție pentru actualizarea paginării
 const updatePagination = (currentPage, totalPages) => {
     const pagination = document.querySelector('.pagination');
     
@@ -75,7 +72,6 @@ const updatePagination = (currentPage, totalPages) => {
     });
 };
 
-// Funcție pentru schimbarea paginii
 const changePage = async (newPage) => {
     if (newPage >= 1 && newPage <= Math.ceil(CURRENCIES.length / ITEMS_PER_PAGE)) {
         currentPage = newPage;
@@ -87,7 +83,7 @@ const changePage = async (newPage) => {
     }
 };
 
-// Funcție pentru obținerea datelor istorice
+
 const fetchHistoricalData = async (crypto) => {
     try {
         const response = await fetch(`${CRYPTO_HISTORY_URL}?fsym=${crypto}&tsym=${CURRENCY}&limit=24`);
@@ -97,12 +93,12 @@ const fetchHistoricalData = async (crypto) => {
         }
         return [];
     } catch (error) {
-        console.error(`Eroare la încărcarea datelor istorice pentru ${crypto}:`, error);
+        console.error(`Error loading historical data for ${crypto}:`, error);
         return [];
     }
 };
 
-// Funcție pentru crearea mini-graficului
+
 const createSparkline = (containerId, data, isPositive) => {
     const canvas = document.getElementById(containerId);
     if (!canvas) {
@@ -116,13 +112,12 @@ const createSparkline = (containerId, data, isPositive) => {
         return;
     }
     
-    // Distruge graficul existent dacă există
+    
     if (charts[containerId]) {
         charts[containerId].destroy();
         delete charts[containerId];
     }
     
-    // Calculăm dacă trendul general este pozitiv sau negativ
     const startPrice = data[0];
     const endPrice = data[data.length - 1];
     const trendIsPositive = endPrice > startPrice;
@@ -208,11 +203,9 @@ const createSparkline = (containerId, data, isPositive) => {
         }
     });
 
-    // Salvăm noul grafic în obiectul charts
     charts[containerId] = newChart;
 };
 
-// Funcție pentru formatarea numerelor mari
 const formatNumber = (number) => {
     if (number >= 1e9) {
         return (number / 1e9).toFixed(2) + 'B';
@@ -224,21 +217,16 @@ const formatNumber = (number) => {
     return number.toFixed(2);
 };
 
-// Funcție pentru formatarea prețului
 const formatPrice = (price) => {
     if (price >= 1) {
-        // Pentru prețuri mai mari sau egale cu 1, afișăm doar partea întreagă
         return `$${Math.floor(price).toLocaleString('en-US')}`;
     } else {
-        // Pentru prețuri sub 1 (ex: $0.341389), păstrăm formatul cu zecimale
         return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
     }
 };
 
-// Funcție pentru actualizarea prețurilor
 const updatePrices = async () => {
     try {
-        // Mai întâi, distrugem toate graficele existente
         for (const chartId in charts) {
             if (charts[chartId]) {
                 charts[chartId].destroy();
@@ -251,7 +239,7 @@ const updatePrices = async () => {
         const data = await response.json();
         
         if (!data.DISPLAY) {
-            throw new Error('Nu s-au putut încărca datele pentru monede');
+            throw new Error('No data found for currencies');
         }
 
         const availableCurrencies = CURRENCIES.filter(crypto => data.DISPLAY[crypto] && data.DISPLAY[crypto][CURRENCY]);
@@ -259,11 +247,10 @@ const updatePrices = async () => {
         
         const pricesContainer = document.querySelector('.prices-container');
         if (!pricesContainer) {
-            console.error('Nu s-a găsit containerul pentru prețuri');
+            console.error('No prices container found');
             return;
         }
 
-        // Generăm HTML-ul pentru tabel
         const tableHTML = `
             <div class="top-movers">
                 <div class="movers-carousel">
@@ -326,10 +313,8 @@ const updatePrices = async () => {
             </table>
         `;
 
-        // Actualizăm DOM-ul o singură dată
         pricesContainer.innerHTML = tableHTML;
 
-        // După ce DOM-ul este actualizat, adăugăm graficele
         for (const crypto of paginatedCurrencies) {
             const historicalData = await fetchHistoricalData(crypto);
             if (historicalData && historicalData.length > 0) {
@@ -338,11 +323,9 @@ const updatePrices = async () => {
             }
         }
 
-        // Actualizare paginare
         const totalPages = Math.ceil(availableCurrencies.length / ITEMS_PER_PAGE);
         updatePagination(currentPage, totalPages);
 
-        // Adăugăm event listeners pentru sortare
         document.querySelectorAll('.table-header span[data-sort]').forEach(header => {
             header.addEventListener('click', () => {
                 const sortBy = header.dataset.sort;
@@ -386,30 +369,27 @@ const updatePrices = async () => {
             });
         });
     } catch (error) {
-        console.error('Eroare la actualizarea prețurilor:', error);
+        console.error('Error updating the prices:', error);
         const pricesContainer = document.querySelector('.prices-container');
         if (pricesContainer) {
             pricesContainer.innerHTML = `
                 <div class="error-message">
                     <i class="fas fa-exclamation-circle"></i>
-                    <p>Ne pare rău, a apărut o eroare la încărcarea prețurilor.</p>
-                    <button onclick="updatePrices()" class="retry-btn">Reîncarcă</button>
+                    <p>sorry, an error occurred while loading the prices.</p>
+                    <button onclick="updatePrices()" class="retry-btn">Reload</button>
                 </div>
             `;
         }
     }
 };
 
-// Expunem funcția changePage global pentru a putea fi folosită de butoanele de paginare
 window.changePage = changePage;
 
-// Top Movers functionality
 async function fetchTopMovers() {
     try {
         const response = await fetch('https://min-api.cryptocompare.com/data/top/totalvolfull?limit=10&tsym=USD');
         const data = await response.json();
         
-        // Obținem datele istorice pentru fiecare monedă
         const moversWithHistory = await Promise.all(
             data.Data.map(async item => {
                 const historyResponse = await fetch(
@@ -469,7 +449,6 @@ function createMoverCard(coin) {
 
 function createMoverChart(symbol, priceHistory, isPositive) {
     const chartId = `chart-${symbol}`;
-    // Distrugem graficul existent dacă există
     if (moverCharts[chartId]) {
         moverCharts[chartId].destroy();
     }
@@ -555,7 +534,6 @@ function createMoverChart(symbol, priceHistory, isPositive) {
         }
     });
 
-    // Salvăm instanța graficului
     moverCharts[chartId] = chart;
     return chart;
 }
@@ -565,7 +543,7 @@ function initializeCarousel() {
     if (!container) return;
     
     let isScrolling = false;
-    const cardWidth = 316; // width + gap
+    const cardWidth = 316; 
     
     const scrollNext = () => {
         if (isScrolling) return;
@@ -575,7 +553,6 @@ function initializeCarousel() {
         const maxScroll = container.scrollWidth - container.clientWidth;
         
         if (currentScroll >= maxScroll) {
-            // Dacă am ajuns la sfârșit, revenim la început
             container.scrollTo({
                 left: 0,
                 behavior: 'auto'
@@ -598,10 +575,8 @@ function initializeCarousel() {
         }, 500);
     };
     
-    // Scroll automat
     let autoScrollInterval = setInterval(scrollNext, 3000);
     
-    // Oprim scroll-ul automat când mouse-ul este deasupra
     container.addEventListener('mouseenter', () => {
         clearInterval(autoScrollInterval);
     });
@@ -615,7 +590,6 @@ async function updateTopMovers() {
     const container = document.querySelector('.movers-container');
     if (!container) return;
     
-    // Distrugem toate graficele existente
     Object.values(moverCharts).forEach(chart => chart.destroy());
     moverCharts = {};
     
@@ -626,28 +600,23 @@ async function updateTopMovers() {
         const card = createMoverCard(coin);
         container.appendChild(card);
         
-        // Creăm graficul după ce cardul este adăugat în DOM
         if (coin.priceHistory && coin.priceHistory.length > 0) {
             createMoverChart(coin.symbol, coin.priceHistory, coin.change24h >= 0);
         }
     });
 }
 
-// Initialize Top Movers
 document.addEventListener('DOMContentLoaded', () => {
     initializeCarousel();
     updateTopMovers();
-    // Update every 30 seconds
     setInterval(updateTopMovers, 30000);
 });
 
-// Inițializare
 document.addEventListener('DOMContentLoaded', () => {
     updatePrices();
     setInterval(updatePrices, 30000);
 });
 
-// Curățăm graficele când pagina este închisă
 window.addEventListener('beforeunload', () => {
     Object.values(charts).forEach(chart => {
         if (chart && typeof chart.destroy === 'function') {

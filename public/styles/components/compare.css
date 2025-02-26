@@ -10,6 +10,7 @@
     margin-bottom: 50px;
     background: linear-gradient(90deg, #4a90e2, #67b0ff);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -32,12 +33,6 @@
     position: relative;
 }
 
-/* Eliminăm regula care ascunde imaginile */
-/* .compare img:not(.crypto-icon),
-.about-image img,
-.crypto-cards img:not(.crypto-icon) {
-    display: none !important;
-} */
 
 .crypto-header {
     display: flex;
@@ -55,7 +50,6 @@
     object-fit: contain;
 }
 
-/* Stil specific pentru imaginile mari din cardurile de comparare */
 .compare .orionix .crypto-icon,
 .compare #rightCoinIcon {
     width: 90px !important;
@@ -160,7 +154,7 @@
     }
 }
 
-/* Eliminăm toate stilurile specifice pentru Orionix */
+
 .compare .orionix .crypto-icon,
 .compare .orionix .crypto-header,
 .compare .orionix .crypto-icon:hover {
@@ -246,7 +240,7 @@
     margin-top: 2px;
 }
 
-/* Adăugăm cursor pointer pentru iconița monedei din dreapta */
+
 #rightCoinHeader .crypto-icon {
     cursor: pointer;
     transition: transform 0.2s;
@@ -256,7 +250,7 @@
     transform: scale(1.05);
 }
 
-/* Stilizare pentru scrollbar în lista de monede */
+
 .coin-list::-webkit-scrollbar {
     width: 6px;
 }

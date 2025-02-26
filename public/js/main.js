@@ -1,4 +1,3 @@
-// Date statice pentru criptomonede
 const staticData = {
     bitcoin: {
         usd: 96550.00,
@@ -17,24 +16,20 @@ const staticData = {
     }
 };
 
-// Funcție pentru actualizarea UI
 const updateCryptoCards = () => {
     try {
-        // Actualizare card Bitcoin
         updateCard('bitcoin', {
             usd: staticData.bitcoin.usd,
             usd_24h_vol: staticData.bitcoin.usd_24h_vol,
             usd_24h_change: staticData.bitcoin.usd_24h_change
         });
 
-        // Actualizare card Ethereum
         updateCard('ethereum', {
             usd: staticData.ethereum.usd,
             usd_24h_vol: staticData.ethereum.usd_24h_vol,
             usd_24h_change: staticData.ethereum.usd_24h_change
         });
 
-        // Actualizare card Orionix
         updateCard('orionix', {
             usd: staticData.orionix.usd,
             usd_24h_vol: staticData.orionix.usd_24h_vol,
@@ -63,7 +58,6 @@ const updateCard = (cryptoId, data) => {
     }
 };
 
-// Funcții utilitare
 const formatPrice = (price) => {
     return new Intl.NumberFormat('ro-RO', {
         style: 'currency',
@@ -103,15 +97,12 @@ const formatVolume = (volume) => {
     return volume.toFixed(1);
 };
 
-// Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     updateCryptoCards();
     
     const text = [
-        "Orionix este o criptomonedă inovatoare care combină tehnologia",
-        "blockchain cu soluții de plată moderne. Dezvoltată cu focus pe",
-        "scalabilitate și eficiență energetică, Orionix oferă tranzacții",
-        "rapide și costuri reduse."
+        "Orionix is an innovative cryptocurrency that combines blockchain technology with modern payment solutions.",
+        "Developed with a focus on scalability and energy efficiency, Orionix offers fast transactions and low costs.",
     ];
     
     const typingText = document.querySelector('.typing-text');
@@ -154,9 +145,7 @@ function typeWriter(textArray, element, lineIndex = 0, charIndex = 0) {
     typeLine();
 }
 
-// Actualizare periodică a datelor (simulare)
 setInterval(() => {
-    // Simulăm mici variații în preț
     Object.keys(staticData).forEach(crypto => {
         staticData[crypto].usd *= (1 + (Math.random() - 0.5) * 0.01);
         staticData[crypto].usd_24h_change = (Math.random() - 0.5) * 10;

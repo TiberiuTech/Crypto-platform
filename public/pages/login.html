@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,7 +42,7 @@
                     <input type="email" id="email" name="email" autocomplete="email" required>
                 </div>
                 <div class="form-group">
-                    <label for="password">Parolă</label>
+                    <label for="password">Password</label>
                     <input type="password" id="password" name="password" autocomplete="current-password" required>
                 </div>
                 <button type="submit" class="submit-btn">Login</button>
@@ -72,13 +72,13 @@
             </div>
 
             <div class="auth-links">
-                <a href="/pages/signup.html" class="signup-link">Creează cont nou</a>
+                <a href="/pages/signup.html" class="signup-link">Create new account</a>
             </div>
         </div>
     </div>
 
     <script>
-        // Funcție pentru afișarea alertei
+       
         function showAlert(message) {
             const overlay = document.createElement('div');
             overlay.className = 'alert-overlay';
@@ -104,7 +104,6 @@
             document.body.appendChild(overlay);
         }
 
-        // Handler pentru autentificarea cu Google
         function handleGoogleSignIn(response) {
             if (response.credential) {
                 fetch('/api/auth/google', {
@@ -133,19 +132,18 @@
                 })
                 .catch(error => {
                     console.error('Google Sign-In Error:', error);
-                    showAlert('Eroare la autentificare cu Google');
+                    showAlert('Error during Google authentication');
                 });
             }
         }
 
-        // Verificăm warning-ul la încărcarea paginii
         const warning = localStorage.getItem('loginWarning');
         if (warning) {
             showAlert(warning);
             localStorage.removeItem('loginWarning');
         }
 
-        // Adăugăm handler pentru formularul de login
+    
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -165,11 +163,11 @@
                     localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = '/';
                 } else {
-                    showAlert(data.error || 'Eroare la autentificare');
+                    showAlert(data.error || 'Authentication error');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showAlert('Eroare la autentificare. Încercați din nou.');
+                showAlert('Authentication error. Please try again.');
             }
         });
     </script>

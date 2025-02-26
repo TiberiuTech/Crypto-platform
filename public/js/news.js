@@ -1,4 +1,3 @@
-// Configurare API
 const NEWS_API_URL = 'https://min-api.cryptocompare.com/data/v2/news/';
 const NEWS_PER_PAGE = 15;
 let currentPage = 1;
@@ -12,7 +11,6 @@ const FILTER_CATEGORIES = [
     { id: 'mining', label: 'Mining', icon: 'fas fa-microchip' }
 ];
 
-// Funcție pentru formatarea datei
 const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('ro-RO', {
         year: 'numeric',
@@ -23,14 +21,13 @@ const formatDate = (dateString) => {
     });
 };
 
-// Funcție pentru încărcarea știrilor
 const loadNews = async (page, searchTerm = '') => {
     const newsContainer = document.querySelector('.news-container');
-    // Adăugăm loading state
+    
     newsContainer.innerHTML = `
         <div class="loading-spinner">
             <i class="fas fa-spinner fa-spin"></i>
-            <p>Se încarcă știrile...</p>
+            <p>Loading news...</p>
         </div>
     `;
 
@@ -41,7 +38,6 @@ const loadNews = async (page, searchTerm = '') => {
         if (data.Data && Array.isArray(data.Data)) {
             let newsData = data.Data;
             
-            // Filtrare după searchTerm și categorie activă
             if (searchTerm || activeFilter !== 'all') {
                 newsData = newsData.filter(item => {
                     const matchesSearch = !searchTerm || 
@@ -61,8 +57,8 @@ const loadNews = async (page, searchTerm = '') => {
                 newsContainer.innerHTML = `
                     <div class="no-results">
                         <i class="fas fa-search"></i>
-                        <h3>Nu au fost găsite rezultate</h3>
-                        <p>Încercați să modificați termenii de căutare sau filtrele aplicate.</p>
+                        <h3>No results found</h3>
+                        <p>Try changing the search terms or applied filters.</p>
                     </div>
                 `;
                 return;
@@ -70,7 +66,6 @@ const loadNews = async (page, searchTerm = '') => {
 
             newsContainer.classList.remove('empty');
 
-            // Paginare
             const startIndex = (page - 1) * NEWS_PER_PAGE;
             const endIndex = startIndex + NEWS_PER_PAGE;
             const paginatedNews = newsData.slice(startIndex, endIndex);
@@ -101,32 +96,29 @@ const loadNews = async (page, searchTerm = '') => {
                 </div>
             `).join('');
 
-            // Actualizare paginare
             const totalPages = Math.ceil(newsData.length / NEWS_PER_PAGE);
             updatePagination(page, totalPages);
 
-            // Animații
             document.querySelectorAll('.news-card').forEach((card, index) => {
                 card.style.animation = `fadeIn 0.5s ease forwards ${index * 0.1}s`;
             });
         } else {
-            throw new Error('Nu s-au putut încărca știrile');
+            throw new Error('No news found');
         }
     } catch (error) {
-        console.error('Eroare la încărcarea știrilor:', error);
+        console.error('Error loading news:', error);
         newsContainer.innerHTML = `
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i>
-                <p>Ne pare rău, a apărut o eroare la încărcarea știrilor. Vă rugăm să încercați din nou mai târziu.</p>
+                <p>sorry, an error occurred while loading the news. Please try again later.</p>
                 <button class="retry-btn" onclick="loadNews(currentPage)">
-                    <i class="fas fa-redo"></i> Încearcă din nou
+                    <i class="fas fa-redo"></i> Try again
                 </button>
             </div>
         `;
     }
 };
 
-// Funcție pentru actualizarea paginării
 const updatePagination = (currentPage, totalPages) => {
     const pagination = document.querySelector('.pagination');
     
@@ -152,7 +144,6 @@ const updatePagination = (currentPage, totalPages) => {
     });
 };
 
-// Funcție pentru generarea numerelor de pagină
 const generatePageNumbers = (current, total) => {
     const pages = [];
     const range = 2;
@@ -182,7 +173,6 @@ const generatePageNumbers = (current, total) => {
     }).join('');
 };
 
-// Adaugă funcționalitate de căutare
 const setupSearch = () => {
     const searchInput = document.querySelector('.news-search');
     if (!searchInput) return;
@@ -197,18 +187,15 @@ const setupSearch = () => {
     });
 };
 
-// Funcție pentru setarea filtrelor
 const setupFilters = () => {
     const filterButtons = document.querySelectorAll('.filter-btn');
     if (!filterButtons.length) return;
 
     filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Actualizăm stilurile butoanelor
             filterButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            // Actualizăm filtrul activ și reîncărcăm știrile
             activeFilter = btn.dataset.filter;
             const searchTerm = document.querySelector('.news-search').value;
             loadNews(1, searchTerm);
@@ -216,12 +203,10 @@ const setupFilters = () => {
     });
 };
 
-// Funcție pentru inițializarea structurii HTML
 const initializeNewsSection = () => {
     const newsSection = document.querySelector('.news');
     if (!newsSection) return;
 
-    // Verificăm dacă elementele necesare există, dacă nu, le creăm
     if (!newsSection.querySelector('.news-container')) {
         const newsContainer = document.createElement('div');
         newsContainer.className = 'news-container';
@@ -235,7 +220,7 @@ const initializeNewsSection = () => {
             <div class="search-icon">
                 <i class="fas fa-search"></i>
             </div>
-            <input type="text" class="news-search" placeholder="Caută știri crypto...">
+            <input type="text" class="news-search" placeholder="Search crypto news...">
         `;
         newsSection.insertBefore(searchContainer, newsSection.firstChild);
     }
@@ -260,7 +245,6 @@ const initializeNewsSection = () => {
     }
 };
 
-// Inițializare la încărcarea paginii
 document.addEventListener('DOMContentLoaded', () => {
     initializeNewsSection();
     loadNews(currentPage);

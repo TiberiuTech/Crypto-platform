@@ -126,25 +126,24 @@ export class ApiService {
             let endpoint = 'histohour';
             let limit = 24;
 
-            // Normalizăm timeframe-ul la uppercase
             timeframe = timeframe.toUpperCase();
 
             switch (timeframe) {
                 case '1H':
                     endpoint = 'histominute';
-                    limit = 60; // 60 minute pentru 1H
+                    limit = 60; 
                     break;
                 case '4H':
                     endpoint = 'histominute';
-                    limit = 240; // 240 minute pentru 4H
+                    limit = 240; 
                     break;
                 case '1D':
                     endpoint = 'histohour';
-                    limit = 24; // 24 ore pentru 1D
+                    limit = 24; 
                     break;
                 case '1W':
                     endpoint = 'histoday';
-                    limit = 7; // 7 zile pentru 1W
+                    limit = 7; 
                     break;
                 default:
                     endpoint = 'histohour';
@@ -180,27 +179,27 @@ export class ApiService {
         const now = Date.now();
         const basePrice = this.mockData['ORX'].USD.PRICE;
         let numPoints = 24;
-        let interval = 3600000; // 1 hour in milliseconds
+        let interval = 3600000; 
 
-        // Normalizăm timeframe-ul la uppercase
+        
         timeframe = timeframe.toUpperCase();
 
         switch (timeframe) {
             case '1H':
                 numPoints = 60;
-                interval = 60000; // 1 minute
+                interval = 60000; 
                 break;
             case '4H':
                 numPoints = 12;
-                interval = 14400000; // 4 hours
+                interval = 14400000; 
                 break;
             case '1D':
                 numPoints = 24;
-                interval = 3600000; // 1 hour
+                interval = 3600000; 
                 break;
             case '1W':
                 numPoints = 7;
-                interval = 86400000; // 1 day
+                interval = 86400000; 
                 break;
         }
 

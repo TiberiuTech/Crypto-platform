@@ -11,7 +11,6 @@ class AuthService {
     }
 
     login(email, password) {
-        // Simulăm un login reușit
         const user = {
             email: email,
             name: email.split('@')[0]
@@ -19,7 +18,6 @@ class AuthService {
         localStorage.setItem('user', JSON.stringify(user));
         this.isAuthenticated = true;
         
-        // Verificăm dacă există o pagină de redirecționare
         const redirectUrl = localStorage.getItem('redirect_after_login');
         if (redirectUrl) {
             localStorage.removeItem('redirect_after_login');
@@ -38,7 +36,7 @@ class AuthService {
     requireAuth() {
         if (!this.checkAuthStatus()) {
             localStorage.setItem('redirect_after_login', window.location.pathname);
-            localStorage.setItem('auth_warning', 'Pentru a accesa această pagină trebuie să fii autentificat.');
+            localStorage.setItem('auth_warning', 'For access to this page, you must be authenticated.');
             window.location.href = '/pages/login.html';
             return false;
         }

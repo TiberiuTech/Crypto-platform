@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const listOverlay = document.getElementById('coinListOverlay');
     const coinList = document.getElementById('coinList');
     
-    // Lista de monede predefinite
     const coins = [
         { symbol: 'BTC', name: 'Bitcoin' },
         { symbol: 'ETH', name: 'Ethereum' },
@@ -18,34 +17,28 @@ document.addEventListener('DOMContentLoaded', () => {
         { symbol: 'DOT', name: 'Polkadot' }
     ];
 
-    // Inițializăm cu Bitcoin
     updateCoinData('BTC', 'https://www.cryptocompare.com/media/37746251/btc.png');
 
-    // Funcție pentru a obține URL-ul imaginii de la CryptoCompare
     function getCryptoCompareImageUrl(symbol) {
-        return `https://www.cryptocompare.com/api/data/coinlist/`; // Vom obține URL-ul corect din răspunsul API
+        return `https://www.cryptocompare.com/api/data/coinlist/`; 
     }
 
-    // Deschide overlay-ul când se face click pe iconița monedei
     rightCoinIcon.addEventListener('click', () => {
         listOverlay.classList.add('active');
         loadCoinData();
     });
 
-    // Închide overlay-ul când se face click în afara listei
     listOverlay.addEventListener('click', (e) => {
         if (e.target === listOverlay) {
             listOverlay.classList.remove('active');
         }
     });
 
-    // Încarcă datele monedelor inclusiv imaginile
     async function loadCoinData() {
         try {
             const response = await fetch('https://min-api.cryptocompare.com/data/all/coinlist?summary=true');
             const data = await response.json();
             
-            // Populăm lista doar cu monedele predefinite
             const coinListHTML = coins.map(coin => {
                 const coinData = data.Data[coin.symbol];
                 const imageUrl = `https://www.cryptocompare.com${coinData.ImageUrl}`;
@@ -62,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             coinList.innerHTML = coinListHTML;
 
-            // Adaugă event listeners pentru fiecare monedă
             document.querySelectorAll('.coin-list-item').forEach(item => {
                 item.addEventListener('click', () => {
                     const symbol = item.dataset.symbol;
@@ -74,11 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } catch (error) {
             console.error('Error loading coin data:', error);
-            coinList.innerHTML = '<div class="error">A apărut o eroare la încărcarea datelor. Încercați din nou.</div>';
+            coinList.innerHTML = '<div class="error">An error occurred while loading the data. Please try again.</div>';
         }
     }
 
-    // Funcție pentru actualizarea datelor monedei
     async function updateCoinData(symbol, imageUrl) {
         try {
             const response = await fetch(`https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${symbol}&tsyms=USD`);
@@ -98,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Actualizăm interfața cu noile date
             document.getElementById('rightCoinIcon').src = imageUrl;
             document.getElementById('rightCoinName').textContent = coins.find(c => c.symbol === symbol).name;
             document.getElementById('rightCoinSymbol').textContent = symbol;
@@ -107,14 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('rightCoinVolume').textContent = formatLargeNumber(coinData.VOLUME24HOUR);
             document.getElementById('rightCoinMarketCap').textContent = formatLargeNumber(coinData.MKTCAP);
 
-            // Actualizăm și graficul
             updateChart(symbol);
         } catch (error) {
             console.error('Error updating coin data:', error);
         }
     }
 
-    // Funcție pentru actualizarea graficului
     async function updateChart(symbol) {
         try {
             const response = await fetch(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=USD&limit=24`);
@@ -126,13 +114,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.rightCoinChartInstance.destroy();
             }
 
-            // Formatare pentru etichete de timp
             const timeFormat = new Intl.DateTimeFormat('ro-RO', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
 
-            // Calculăm min și max pentru axa Y
             const priceValues = prices.map(price => price.close);
             const minPrice = Math.min(...priceValues);
             const maxPrice = Math.max(...priceValues);

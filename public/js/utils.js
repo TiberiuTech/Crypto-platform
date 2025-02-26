@@ -1,5 +1,3 @@
-// Funcții utilitare comune
-
 export function formatNumber(number) {
     return new Intl.NumberFormat('ro-RO', {
         minimumFractionDigits: 2,

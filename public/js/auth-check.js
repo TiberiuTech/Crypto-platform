@@ -1,4 +1,3 @@
-// Setăm starea inițială imediat
 (function() {
     const user = JSON.parse(localStorage.getItem('user'));
     document.documentElement.classList.add(user ? 'is-authenticated' : 'not-authenticated');
@@ -6,11 +5,9 @@
 
 import authService from './services/authService.js';
 
-// Verificăm dacă suntem pe o pagină protejată
 const protectedPages = ['wallet.html', 'trade.html'];
 const currentPath = window.location.pathname.toLowerCase();
 
-// Funcție pentru actualizarea UI-ului în funcție de starea autentificării
 function updateAuthUI() {
     const navbar = document.querySelector('.navbar');
     const authButtons = document.querySelector('.auth-buttons');
@@ -21,7 +18,6 @@ function updateAuthUI() {
 
     const user = JSON.parse(localStorage.getItem('user'));
 
-    // Setăm starea inițială corectă
     if (user) {
         document.documentElement.classList.add('is-authenticated');
         document.documentElement.classList.remove('not-authenticated');
@@ -31,7 +27,6 @@ function updateAuthUI() {
             usernameElement.textContent = user.name || user.email;
         }
 
-        // Adăugăm handler pentru logout
         const logoutBtn = userProfile.querySelector('.logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
@@ -43,7 +38,6 @@ function updateAuthUI() {
         document.documentElement.classList.remove('is-authenticated');
         document.documentElement.classList.add('not-authenticated');
 
-        // Verificăm dacă suntem pe o pagină protejată
         if (protectedPages.some(page => currentPath.includes(page.toLowerCase()))) {
             localStorage.setItem('redirect_after_login', window.location.pathname);
             window.location.href = '/pages/login.html';
@@ -52,7 +46,6 @@ function updateAuthUI() {
     }
 }
 
-// Verificăm autentificarea pentru paginile protejate
 if (protectedPages.some(page => currentPath.includes(page.toLowerCase()))) {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
@@ -61,24 +54,20 @@ if (protectedPages.some(page => currentPath.includes(page.toLowerCase()))) {
     }
 }
 
-// Actualizăm UI-ul la încărcarea paginii
 document.addEventListener('DOMContentLoaded', updateAuthUI);
 
-// Adăugăm un event listener pentru schimbări în localStorage
 window.addEventListener('storage', (e) => {
     if (e.key === 'user') {
         updateAuthUI();
     }
 });
 
-// Verificăm dacă există un warning de autentificare
 const authWarning = localStorage.getItem('auth_warning');
 if (authWarning) {
     showNotification(authWarning, 'warning');
     localStorage.removeItem('auth_warning');
 }
 
-// Funcție pentru afișarea notificărilor
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;

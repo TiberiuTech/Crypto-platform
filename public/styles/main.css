@@ -22,7 +22,7 @@ body {
     color: var(--text-primary);
     line-height: 1.5;
     min-height: 100vh;
-    padding-top: 60px; /* Pentru a compensa navbar-ul fix */
+    padding-top: 60px; 
 }
 
 a {
@@ -37,14 +37,14 @@ button {
     outline: none;
 }
 
-/* Layout */
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 24px;
 }
 
-/* Utilități */
+
 .text-primary {
     color: var(--text-primary);
 }

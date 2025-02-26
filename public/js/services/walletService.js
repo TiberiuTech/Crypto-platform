@@ -1,25 +1,19 @@
 export class WalletService {
     constructor() {
-        // Inițializăm cache-ul pentru prețuri și timestamp-uri
         this.priceCache = new Map();
         this.lastPriceUpdate = new Map();
         this.isInitialized = false;
         this.lastTotalBalance = 0;
         
-        // Inițializăm cu un obiect gol pentru active și tranzacții
         this.assets = {};
         this.transactions = [];
         
-        // Flag pentru a ști dacă datele au fost încărcate
         this.dataLoaded = false;
     }
 
-    // Metodă nouă pentru încărcarea datelor din localStorage
     async loadStoredData() {
-        // Dacă datele au fost deja încărcate, nu le mai încărcăm din nou
         if (this.dataLoaded) return;
 
-        // Ștergem datele existente
         this.assets = {};
         this.transactions = [];
         this.priceCache.clear();
@@ -31,7 +25,7 @@ export class WalletService {
             try {
                 this.assets = JSON.parse(savedAssets);
             } catch (error) {
-                console.error('Eroare la parsarea activelor:', error);
+                console.error('Error parsing assets:', error);
                 localStorage.removeItem('wallet_assets');
             }
         }
@@ -41,7 +35,7 @@ export class WalletService {
             try {
                 this.transactions = JSON.parse(savedTransactions);
             } catch (error) {
-                console.error('Eroare la parsarea tranzacțiilor:', error);
+                console.error('Error parsing transactions:', error);
                 localStorage.removeItem('transactions');
             }
         }
@@ -50,7 +44,6 @@ export class WalletService {
     }
 
     calculateTotalBalance() {
-        // Dacă nu suntem inițializați sau nu avem prețuri, returnăm 0
         if (!this.isInitialized || this.priceCache.size === 0) {
             return 0;
         }
@@ -69,7 +62,6 @@ export class WalletService {
     }
 
     getTotalBalance() {
-        // Dacă nu suntem inițializați, returnăm 0
         if (!this.isInitialized) {
             return 0;
         }
@@ -79,12 +71,10 @@ export class WalletService {
         return currentBalance;
     }
 
-    // Metodă pentru obținerea listei de tranzacții
     getTransactions() {
         return this.transactions;
     }
 
-    // Salvează starea activelor în localStorage
     saveState() {
         localStorage.setItem('wallet_assets', JSON.stringify(this.assets));
         localStorage.setItem('transactions', JSON.stringify(this.transactions));
@@ -93,12 +83,10 @@ export class WalletService {
 
     async updateAllPrices() {
         try {
-            // Mai întâi încărcăm datele stocate
             await this.loadStoredData();
 
             const symbols = Object.keys(this.assets).filter(symbol => symbol !== 'USD').join(',');
             
-            // Dacă nu avem simboluri, setăm doar USD
             if (!symbols) {
                 this.assets = { 'USD': { symbol: 'USD', name: 'US Dollar', amount: 0, value: 0 } };
                 this.isInitialized = true;
@@ -142,7 +130,7 @@ export class WalletService {
                 this.saveState();
             }
         } catch (error) {
-            console.error('Eroare la actualizarea prețurilor:', error);
+            console.error('Error updating prices:', error);
             this.assets = { 'USD': { symbol: 'USD', name: 'US Dollar', amount: 0, value: 0 } };
             this.isInitialized = false;
             this.priceCache.clear();
@@ -150,14 +138,12 @@ export class WalletService {
         }
     }
 
-    // Metodă pentru adăugarea unui nou activ
     async addAsset(symbol, name) {
         if (this.assets[symbol]) {
-            throw new Error(`Activul ${symbol} există deja în portofoliu`);
+            throw new Error(`The asset ${symbol} already exists in the portfolio`);
         }
 
         try {
-            // Verificăm dacă putem obține prețul pentru acest activ
             const price = await this.getPricePerUnit(symbol);
             
             this.assets[symbol] = {
@@ -172,18 +158,17 @@ export class WalletService {
             this.notifyUpdate();
             return true;
         } catch (error) {
-            throw new Error(`Nu s-a putut adăuga activul ${symbol}. Verificați dacă simbolul este valid.`);
+            throw new Error(`Could not add the asset ${symbol}. Check if the symbol is valid.`);
         }
     }
 
-    // Metodă pentru eliminarea unui activ
     removeAsset(symbol) {
         if (!this.assets[symbol]) {
-            throw new Error(`Activul ${symbol} nu există în portofoliu`);
+            throw new Error(`The asset ${symbol} does not exist in the portfolio`);
         }
 
         if (this.assets[symbol].amount > 0) {
-            throw new Error(`Nu puteți elimina un activ care are un sold pozitiv`);
+            throw new Error(`You cannot remove an asset that has a positive balance`);
         }
 
         delete this.assets[symbol];
@@ -192,7 +177,6 @@ export class WalletService {
         return true;
     }
 
-    // Metodă pentru adăugarea unei tranzacții în istoric
     addTransaction(type, fromAsset, toAsset, amount, valueInUSD, toAmount = null) {
         const transaction = {
             id: Date.now(),
@@ -207,38 +191,34 @@ export class WalletService {
 
         this.transactions.unshift(transaction);
         
-        // Limităm numărul de tranzacții stocate la 100
         if (this.transactions.length > 100) {
             this.transactions = this.transactions.slice(0, 100);
         }
     }
 
-    // Metodă pentru retragere
     async withdraw(asset, amount) {
         if (!this.assets[asset]) {
-            throw new Error(`Nu aveți ${asset} în portofel`);
+            throw new Error(`You do not have ${asset} in your wallet`);
         }
         if (amount <= 0) {
-            throw new Error('Suma trebuie să fie pozitivă');
+            throw new Error('The amount must be positive');
         }
 
         const currentBalance = this.assets[asset].amount;
-        console.log(`Retragere ${asset}: Sold curent = ${currentBalance}, Suma cerută = ${amount}`);
+        console.log(`Withdrawal ${asset}: Current balance = ${currentBalance}, Requested amount = ${amount}`);
 
         if (currentBalance < amount) {
-            throw new Error('Sold insuficient');
+            throw new Error('Insufficient balance');
         }
 
         try {
             const currentPrice = await this.getPricePerUnit(asset);
             if (!currentPrice) {
-                throw new Error(`Nu s-a putut obține prețul pentru ${asset}`);
+                throw new Error(`Could not obtain the price for ${asset}`);
             }
 
-            // Calculăm valoarea în USD
             const valueInUSD = parseFloat((amount * currentPrice).toFixed(2));
 
-            // Actualizăm soldul și valoarea activului
             const newAmount = parseFloat((currentBalance - amount).toFixed(8));
             this.assets[asset] = {
                 ...this.assets[asset],
@@ -246,13 +226,11 @@ export class WalletService {
                 value: parseFloat((newAmount * currentPrice).toFixed(2))
             };
 
-            // Adăugăm tranzacția
             this.addTransaction('withdraw', asset, null, amount, valueInUSD);
 
-            // Salvăm starea
+            
             this.saveState();
             
-            // Emitem evenimentul de actualizare a soldului
             const newBalance = this.getTotalBalance();
             window.dispatchEvent(new CustomEvent('balance-update', {
                 detail: { 
@@ -267,19 +245,17 @@ export class WalletService {
             
             return true;
         } catch (error) {
-            console.error('Eroare la retragere:', error);
-            throw new Error('Nu s-a putut efectua retragerea. Încercați din nou.');
+            console.error('Error during withdrawal:', error);
+            throw new Error('Could not perform the withdrawal. Please try again.');
         }
     }
 
-    // Metodă pentru depunere
     async deposit(asset, amount) {
         if (amount <= 0) {
-            throw new Error('Suma trebuie să fie pozitivă');
+            throw new Error('The amount must be positive');
         }
 
         try {
-            // Inițializăm USD dacă nu există
             if (!this.assets['USD']) {
                 this.assets['USD'] = {
                     symbol: 'USD',
@@ -290,32 +266,27 @@ export class WalletService {
             }
 
             if (asset === 'USD') {
-                // Pentru depuneri USD, adăugăm direct la sold
                 this.assets['USD'].amount = parseFloat((this.assets['USD'].amount + amount).toFixed(2));
                 this.assets['USD'].value = this.assets['USD'].amount;
                 this.addTransaction('deposit', null, 'USD', amount, amount);
             } else {
                 const currentPrice = await this.getPricePerUnit(asset);
                 if (!currentPrice) {
-                    throw new Error(`Nu s-a putut obține prețul pentru ${asset}`);
+                    throw new Error(`Could not obtain the price for ${asset}`);
                 }
 
-                // Verificăm dacă avem suficient USD
                 if (this.assets['USD'].amount < amount) {
-                    // Dacă nu avem suficient USD, îl depunem automat
+                    
                     this.assets['USD'].amount = parseFloat((this.assets['USD'].amount + amount).toFixed(2));
                     this.assets['USD'].value = this.assets['USD'].amount;
                     this.addTransaction('deposit', null, 'USD', amount, amount);
                 }
 
-                // Calculăm suma în crypto
                 const cryptoAmount = parseFloat((amount / currentPrice).toFixed(8));
 
-                // Scădem din USD
                 this.assets['USD'].amount = parseFloat((this.assets['USD'].amount - amount).toFixed(2));
                 this.assets['USD'].value = this.assets['USD'].amount;
 
-                // Adăugăm crypto
                 if (!this.assets[asset]) {
                     await this.addAsset(asset);
                 }
@@ -323,15 +294,12 @@ export class WalletService {
                 this.assets[asset].amount = parseFloat((this.assets[asset].amount + cryptoAmount).toFixed(8));
                 this.assets[asset].value = parseFloat((this.assets[asset].amount * currentPrice).toFixed(2));
 
-                // Adăugăm tranzacțiile în istoric
                 this.addTransaction('withdraw', 'USD', null, amount, amount);
                 this.addTransaction('deposit', null, asset, cryptoAmount, amount);
             }
 
-            // Salvăm starea
             this.saveState();
             
-            // Emitem evenimentul de actualizare a soldului
             const newBalance = this.getTotalBalance();
             window.dispatchEvent(new CustomEvent('balance-update', {
                 detail: { 
@@ -346,59 +314,48 @@ export class WalletService {
             
             return true;
         } catch (error) {
-            console.error('Eroare la depunere:', error);
-            throw new Error(error.message || 'Nu s-a putut efectua depunerea. Încercați din nou.');
+            console.error('Error during deposit:', error);
+            throw new Error(error.message || 'Could not perform the deposit. Please try again.');
         }
     }
 
-    // Metodă pentru swap
     async swap(fromAsset, toAsset, amount) {
         if (!this.assets[fromAsset] || !this.assets[toAsset]) {
-            throw new Error('Unul dintre active nu există');
+            throw new Error('One of the assets does not exist');
         }
         if (amount <= 0) {
-            throw new Error('Cantitatea trebuie să fie pozitivă');
+            throw new Error('Quantity must be positive');
         }
         if (this.assets[fromAsset].amount < amount) {
-            throw new Error('Sold insuficient');
+            throw new Error('Insufficient balance');
         }
 
         try {
-            // Obținem prețurile actuale
             const fromPrice = await this.getPricePerUnit(fromAsset);
             const toPrice = await this.getPricePerUnit(toAsset);
 
             if (!fromPrice || !toPrice) {
-                throw new Error('Nu s-au putut obține prețurile pentru active');
+                throw new Error('Could not obtain the prices for the assets');
             }
 
-            // Calculăm valoarea în USD a activului sursă
             const fromValue = amount * fromPrice;
             
-            // Calculăm cantitatea de activ destinație bazată pe prețul actual
             const toAmount = fromValue / toPrice;
             
-            // Calculăm valoarea în USD a activului destinație
             const toValue = toAmount * toPrice;
             
-            // Calculăm diferența de valoare (profit/pierdere)
             const valueDiff = toValue - fromValue;
 
-            // Actualizăm soldurile
             this.assets[fromAsset].amount = parseFloat((this.assets[fromAsset].amount - amount).toFixed(8));
             this.assets[toAsset].amount = parseFloat((this.assets[toAsset].amount + toAmount).toFixed(8));
 
-            // Actualizăm valorile activelor
             this.assets[fromAsset].value = parseFloat((this.assets[fromAsset].amount * fromPrice).toFixed(2));
             this.assets[toAsset].value = parseFloat((this.assets[toAsset].amount * toPrice).toFixed(2));
 
-            // Adăugăm tranzacția în istoric
             this.addTransaction('swap', fromAsset, toAsset, amount, fromValue, toAmount);
 
-            // Salvăm starea și notificăm UI-ul
             this.saveState();
 
-            // Emitem evenimentul de actualizare a soldului
             window.dispatchEvent(new CustomEvent('balance-update', {
                 detail: { 
                     newBalance: this.getTotalBalance(),
@@ -422,14 +379,12 @@ export class WalletService {
                 valueDiff: valueDiff
             };
         } catch (error) {
-            console.error('Eroare la swap:', error);
-            throw new Error(error.message || 'Nu s-a putut efectua swap-ul. Încercați din nou.');
+            console.error('Error during swap:', error);
+            throw new Error(error.message || 'Could not perform the swap. Please try again.');
         }
     }
 
-    // Metodă pentru notificarea UI-ului despre schimbări
     notifyUpdate() {
-        // Emitem un eveniment custom pentru actualizarea UI-ului
         window.dispatchEvent(new CustomEvent('wallet-update'));
     }
 
@@ -488,13 +443,11 @@ export class WalletService {
             const lastUpdate = this.lastPriceUpdate.get(symbol);
             const cachedPrice = this.priceCache.get(symbol);
             
-            // Folosim cache-ul doar dacă prețul a fost actualizat în ultimele 5 secunde
             if (cachedPrice && lastUpdate && Date.now() - lastUpdate < 5000) {
                 console.log(`Using cached price for ${symbol}:`, cachedPrice);
                 return cachedPrice;
             }
 
-            // Folosim API-ul CryptoCompare cu mai multe detalii
             const response = await fetch(`https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${symbol}&tsyms=USD`);
             const data = await response.json();
 
@@ -502,7 +455,6 @@ export class WalletService {
                 const priceData = data.RAW[symbol].USD;
                 const price = parseFloat(priceData.PRICE);
                 
-                // Verificăm dacă prețul este valid
                 if (!isNaN(price) && price > 0) {
                     this.priceCache.set(symbol, price);
                     this.lastPriceUpdate.set(symbol, Date.now());
@@ -511,16 +463,14 @@ export class WalletService {
                 }
             }
 
-            // Dacă nu am putut obține un preț nou valid, dar avem unul în cache, îl folosim pe cel din cache
             if (cachedPrice) {
                 console.log(`Using fallback cached price for ${symbol}:`, cachedPrice);
                 return cachedPrice;
             }
 
-            throw new Error(`Nu s-a putut obține prețul pentru ${symbol}`);
+            throw new Error(`Could not obtain the price for ${symbol}`);
         } catch (error) {
-            console.error(`Eroare la obținerea prețului pentru ${symbol}:`, error);
-            // Dacă avem un preț în cache, îl folosim ca fallback
+            console.error(`Error obtaining the price for ${symbol}:`, error);
             const cachedPrice = this.priceCache.get(symbol);
             if (cachedPrice) {
                 console.log(`Using fallback cached price for ${symbol}:`, cachedPrice);

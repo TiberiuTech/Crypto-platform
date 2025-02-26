@@ -1,7 +1,6 @@
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcrypt';
 
-// Simulăm o bază de date în memorie pentru dezvoltare
 const users = new Map();
 let nextUserId = 1;
 
@@ -22,26 +21,26 @@ export async function getUserById(id) {
 }
 
 export async function createUser(name, email, password = null, options = {}) {
-    if (!email) throw new Error('Email-ul este obligatoriu');
+    if (!email) throw new Error('Email is required');
     
     const normalizedEmail = email.toLowerCase();
     console.log('Creating new user:', { name, email: normalizedEmail, isGoogleAuth: options.isGoogleAuth });
     
-    // Verificăm mai întâi dacă există deja un utilizator cu acest email
+  
     const existingUser = await getUserByEmail(normalizedEmail);
     if (existingUser) {
         console.log('User already exists:', existingUser);
         
-        // Verificăm dacă încercăm să creăm un cont Google pentru un email existent
+    
         if (options.isGoogleAuth && !existingUser.isGoogleAuth) {
-            throw new Error('Acest email este deja înregistrat cu o metodă tradițională');
-        }
-        // Verificăm dacă încercăm să creăm un cont tradițional pentru un email Google
-        if (!options.isGoogleAuth && existingUser.isGoogleAuth) {
-            throw new Error('Acest email este deja înregistrat cu Google');
+            throw new Error('This email is already registered with a traditional method');
         }
         
-        throw new Error('Acest email este deja înregistrat');
+        if (!options.isGoogleAuth && existingUser.isGoogleAuth) {
+            throw new Error('This email is already registered with Google');
+        }
+        
+        throw new Error('This email is already registered');
     }
 
     const userId = nextUserId++;
@@ -76,10 +75,10 @@ export async function updateUserProfile(userId, name, email) {
     }
     
     if (email && email !== user.email) {
-        // Verificăm dacă noul email există deja
+        
         const existingUser = await getUserByEmail(email.toLowerCase());
         if (existingUser && existingUser.id !== userId) {
-            throw new Error('Acest email este deja folosit de alt cont');
+            throw new Error('This email is already used by another account');
         }
     }
     
@@ -91,23 +90,22 @@ export async function updateUserProfile(userId, name, email) {
 }
 
 export async function loginUser(email, password) {
-    if (!email) throw new Error('Email-ul este obligatoriu');
+    if (!email) throw new Error('Email is required');
     
     const normalizedEmail = email.toLowerCase();
     const user = await getUserByEmail(normalizedEmail);
     
     if (!user) {
-        throw new Error('Utilizatorul nu a fost găsit');
+        throw new Error('User not found');
     }
     
-    // Verificăm dacă este un cont Google
+
     if (user.isGoogleAuth) {
-        throw new Error('Acest cont a fost creat cu Google. Vă rugăm să folosiți butonul de Google Sign-In');
+        throw new Error('This account was created with Google. Please use the Google Sign-In button');
     }
     
-    // Verificăm parola pentru conturi tradiționale
     if (!user.password || user.password !== password) {
-        throw new Error('Parolă incorectă');
+        throw new Error('Incorrect password');
     }
     
     return user;

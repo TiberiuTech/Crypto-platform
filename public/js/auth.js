@@ -1,27 +1,21 @@
-// Funcție pentru verificarea dacă utilizatorul este autentificat
 function isAuthenticated() {
     return localStorage.getItem('user') !== null;
 }
 
-// Funcție pentru afișarea alertei personalizate
 function showAlert(message, callback) {
-    // Creăm overlay-ul
     const overlay = document.createElement('div');
     overlay.className = 'alert-overlay';
     overlay.style.display = 'flex';
     overlay.style.opacity = '1';
     overlay.style.visibility = 'visible';
     
-    // Creăm alerta
     const alertBox = document.createElement('div');
     alertBox.className = 'custom-alert';
     
-    // Adăugăm mesajul
     const messageDiv = document.createElement('div');
     messageDiv.className = 'alert-message';
     messageDiv.textContent = message;
     
-    // Adăugăm butonul OK
     const button = document.createElement('button');
     button.className = 'alert-button';
     button.textContent = 'OK';
@@ -32,24 +26,20 @@ function showAlert(message, callback) {
         }
     };
     
-    // Asamblăm alerta
     alertBox.appendChild(messageDiv);
     alertBox.appendChild(button);
     overlay.appendChild(alertBox);
     document.body.appendChild(overlay);
 }
 
-// Facem showAlert disponibil global
 window.showAlert = showAlert;
 
-// Funcție pentru redirecționare către login cu warning
 function redirectToLoginWithWarning() {
-    localStorage.setItem('loginWarning', 'Trebuie să vă autentificați pentru a accesa această secțiune.');
+    localStorage.setItem('loginWarning', 'You must be authenticated to access this section.');
     localStorage.setItem('redirectAfterLogin', window.location.pathname);
     window.location.href = '/pages/login.html';
 }
 
-// Funcție pentru atașarea event listener-ilor
 function setupProtectedLinks() {
     const protectedLinks = document.querySelectorAll('a[href*="wallet"], a[href*="trade"]');
     protectedLinks.forEach(link => {
@@ -62,15 +52,13 @@ function handleProtectedLink(e) {
     e.stopPropagation();
     
     if (!isAuthenticated()) {
-        localStorage.setItem('loginWarning', 'Trebuie să vă autentificați pentru a accesa această secțiune.');
+        localStorage.setItem('loginWarning', 'You must be authenticated to access this section.');
         window.location.href = '/pages/login.html';
     } else {
-        // Dacă utilizatorul este autentificat, permitem navigarea
         window.location.href = e.target.closest('a').href;
     }
 }
 
-// Funcție pentru verificarea și afișarea warning-ului pe pagina de login
 function checkLoginWarning() {
     const warning = localStorage.getItem('loginWarning');
     if (warning) {
@@ -79,23 +67,19 @@ function checkLoginWarning() {
     }
 }
 
-// Inițializare când documentul este gata
 function init() {
     setupProtectedLinks();
     checkForWarning();
 }
 
-// Atașăm event listener-ul când DOM-ul este încărcat
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
 }
 
-// Exportăm funcțiile necesare
 export { isAuthenticated, showAlert };
 
-// Funcție pentru validarea parolei
 function validatePassword(password) {
     const minLength = 8;
     const hasUpperCase = /[A-Z]/.test(password);
@@ -105,31 +89,29 @@ function validatePassword(password) {
 
     const errors = [];
     if (password.length < minLength) {
-        errors.push(`Parola trebuie să aibă cel puțin ${minLength} caractere`);
+        errors.push(`Password must be at least ${minLength} characters`);
     }
     if (!hasUpperCase) {
-        errors.push('Parola trebuie să conțină cel puțin o literă mare');
+        errors.push('Password must contain at least one uppercase letter');
     }
     if (!hasLowerCase) {
-        errors.push('Parola trebuie să conțină cel puțin o literă mică');
+        errors.push('Password must contain at least one lowercase letter');
     }
     if (!hasNumbers) {
-        errors.push('Parola trebuie să conțină cel puțin un număr');
+        errors.push('Password must contain at least one number');
     }
     if (!hasSpecialChar) {
-        errors.push('Parola trebuie să conțină cel puțin un caracter special');
+        errors.push('Password must contain at least one special character');
     }
 
     return errors;
 }
 
-// Funcție pentru validarea emailului
 function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 }
 
-// Funcționalitate pentru toggle password visibility
 document.querySelectorAll('.toggle-password').forEach(button => {
     button.addEventListener('click', () => {
         const input = button.parentElement.querySelector('input');
@@ -147,14 +129,12 @@ document.querySelectorAll('.toggle-password').forEach(button => {
     });
 });
 
-// Verificăm dacă există un warning de autentificare
 const authWarning = localStorage.getItem('auth_warning');
 if (authWarning) {
     showAlert(authWarning);
     localStorage.removeItem('auth_warning');
 }
 
-// Handler pentru formularul de login
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -164,7 +144,7 @@ if (loginForm) {
         const password = loginForm.password.value;
 
         if (!validateEmail(email)) {
-            showAlert('Te rugăm să introduci o adresă de email validă');
+            showAlert('Please enter a valid email address');
             return;
         }
 
@@ -180,12 +160,11 @@ if (loginForm) {
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.error || 'Eroare la autentificare');
+                throw new Error(data.error || 'Error during authentication');
             }
 
             localStorage.setItem('user', JSON.stringify(data.user));
             
-            // Verificăm dacă există o pagină de redirecționare
             const redirectUrl = localStorage.getItem('redirect_after_login');
             if (redirectUrl) {
                 localStorage.removeItem('redirect_after_login');
@@ -194,12 +173,11 @@ if (loginForm) {
                 window.location.href = '/';
             }
         } catch (error) {
-            showAlert(error.message || 'Eroare la autentificare');
+            showAlert(error.message || 'Error during authentication');
         }
     });
 }
 
-// Handler pentru formularul de înregistrare
 const signupForm = document.getElementById('signupForm');
 if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
@@ -212,7 +190,7 @@ if (signupForm) {
         const terms = signupForm.terms.checked;
 
         if (!validateEmail(email)) {
-            showAlert('Te rugăm să introduci o adresă de email validă');
+            showAlert('Please enter a valid email address');
             return;
         }
 
@@ -228,7 +206,7 @@ if (signupForm) {
         }
 
         if (!terms) {
-            showAlert('Te rugăm să accepți termenii și condițiile');
+            showAlert('Please accept the terms and conditions');
             return;
         }
 
@@ -244,20 +222,19 @@ if (signupForm) {
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.error || 'Eroare la crearea contului');
+                throw new Error(data.error || 'Error during account creation');
             }
 
             localStorage.setItem('user', JSON.stringify(data.user));
-            showAlert('Cont creat cu succes!', () => {
+            showAlert('Account created successfully!', () => {
                 window.location.href = '/';
             });
         } catch (error) {
-            showAlert(error.message || 'Eroare la crearea contului');
+            showAlert(error.message || 'Error during account creation');
         }
     });
 }
 
-// Actualizare butoane de navigare
 document.querySelectorAll('.auth-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         if (btn.classList.contains('login')) {
@@ -304,16 +281,13 @@ function handleLogout() {
     window.location.href = '/';
 }
 
-// Adăugăm event listener pentru butonul de logout
 document.querySelector('.logout-btn')?.addEventListener('click', handleLogout);
 
-// Funcție pentru inițializarea UI-ului pe toate paginile
 function initializeUI() {
     const navbar = document.querySelector('.navbar');
     if (navbar) {
         updateUIForAuthState();
         
-        // Adăugăm event listener pentru logout doar dacă butonul există
         const logoutBtn = document.querySelector('.logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', handleLogout);
@@ -321,5 +295,4 @@ function initializeUI() {
     }
 }
 
-// Atașăm event listener-ul pentru încărcarea paginii
 document.addEventListener('DOMContentLoaded', initializeUI); 

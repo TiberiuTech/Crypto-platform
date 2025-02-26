@@ -1,15 +1,13 @@
-// Configurare Chart.js
 if (typeof Chart === 'undefined') {
-    console.error('Chart.js nu este încărcat!');
+    console.error('Chart.js is not loaded!');
 } else {
-    console.log('Chart.js este încărcat corect');
+    console.log('Chart.js is loaded correctly');
     Chart.defaults.color = '#94A3B8';
     Chart.defaults.font.family = "'Inter', sans-serif";
 }
 
 import walletService from './services/walletService.js';
 
-// Funcție pentru formatarea valorilor în USD
 function formatUSD(value) {
     return new Intl.NumberFormat('ro-RO', {
         style: 'currency',
@@ -19,7 +17,6 @@ function formatUSD(value) {
     }).format(value);
 }
 
-// Funcție pentru formatarea datelor
 function formatDate(date) {
     return new Intl.DateTimeFormat('ro-RO', {
         day: 'numeric',
@@ -27,22 +24,19 @@ function formatDate(date) {
     }).format(date);
 }
 
-// Inițializare grafic
 document.addEventListener('DOMContentLoaded', async () => {
     const ctx = document.getElementById('portfolioChart');
     if (!ctx) {
-        console.error('Nu s-a găsit elementul canvas pentru grafic');
+        console.error('Could not find the canvas element for the chart');
         return;
     }
 
-    console.log('Inițializare grafic...');
+    console.log('Initializing chart...');
 
-    // Creează gradient pentru fundal
     const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
     gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
 
-    // Generăm date pentru ultimele 7 zile
     const generateChartData = (period = '1L') => {
         const data = [];
         const totalBalance = walletService.getTotalBalance();
@@ -57,35 +51,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             default: days = 30;
         }
 
-        // Calculăm valorile minime și maxime permise
         const minValue = totalBalance * 0.99;
         const maxValue = totalBalance * 1.01;
         const range = maxValue - minValue;
 
-        // Generăm puncte de control pentru curba Bezier
         const numPoints = Math.min(10, Math.floor(days / 7));
         const points = [];
         
-        // Primul punct este undeva în mijlocul intervalului
         points.push(minValue + (range * 0.5));
         
-        // Generăm restul punctelor de control
         for (let i = 1; i < numPoints - 1; i++) {
-            // Calculăm un punct care depinde de punctul anterior pentru continuitate
             const prevPoint = points[i - 1];
-            const maxDiff = range * 0.005; // Limitează variația între puncte
+            const maxDiff = range * 0.005;
             const diff = (Math.random() - 0.5) * maxDiff * 2;
             let newPoint = prevPoint + diff;
             
-            // Ne asigurăm că punctul rămâne în limitele permise
             newPoint = Math.max(minValue, Math.min(maxValue, newPoint));
             points.push(newPoint);
         }
         
-        // Ultimul punct este valoarea curentă
         points.push(totalBalance);
 
-        // Interpolăm între punctele de control pentru a genera toate valorile
         for (let i = days - 1; i >= 0; i--) {
             const progress = (days - 1 - i) / (days - 1);
             const segmentIndex = Math.floor(progress * (points.length - 1));
@@ -94,7 +80,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const start = points[segmentIndex];
             const end = points[segmentIndex + 1];
             
-            // Interpolăm linear între puncte
             const value = start + (end - start) * segmentProgress;
             
             const date = new Date();
@@ -115,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         type: 'line',
         data: {
             datasets: [{
-                label: 'Valoare Portofoliu',
+                label: 'Portfolio Value',
                 data: generateChartData(),
                 borderColor: '#3B82F6',
                 backgroundColor: gradient,
@@ -261,7 +246,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }]
     });
 
-    // Funcție pentru actualizarea limitelor axei Y
     const updateChartLimits = () => {
         const totalBalance = walletService.getTotalBalance();
         portfolioChart.options.scales.y.min = totalBalance * 0.99;
@@ -270,7 +254,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         portfolioChart.options.scales.y.suggestedMax = totalBalance * 1.01;
     };
 
-    // Event listeners pentru butoanele de perioadă
     const periodButtons = document.querySelectorAll('.period-btn');
     periodButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -300,19 +283,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Actualizare grafic când se schimbă portofelul
     window.addEventListener('wallet-update', () => {
         portfolioChart.data.datasets[0].data = generateChartData();
         updateChartLimits();
         portfolioChart.update();
     });
 
-    // Adăugăm un event listener pentru redimensionare
     window.addEventListener('resize', () => {
         portfolioChart.resize();
     });
 
-    // Funcție pentru generarea etichetelor de timp
     function generateTimeLabels() {
         const labels = [];
         const date = new Date();
@@ -322,7 +302,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return labels;
     }
 
-    // Opțiuni comune pentru grafice
     function getChartOptions() {
         return {
             responsive: true,
@@ -370,7 +349,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
-    // Configurare pentru graficul Bitcoin
     const bitcoinCtx = document.getElementById('bitcoinChart').getContext('2d');
     const bitcoinChart = new Chart(bitcoinCtx, {
         type: 'line',
@@ -389,7 +367,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         options: getChartOptions()
     });
 
-    // Configurare pentru graficul Orionix
     const orionixCtx = document.getElementById('orionixChart').getContext('2d');
     const orionixChart = new Chart(orionixCtx, {
         type: 'line',
@@ -408,7 +385,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         options: getChartOptions()
     });
 
-    // Configurare pentru graficul USDC
     const usdcCtx = document.getElementById('usdcChart').getContext('2d');
     const usdcChart = new Chart(usdcCtx, {
         type: 'line',
@@ -426,4 +402,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         options: getChartOptions()
     });
-}); 
+});

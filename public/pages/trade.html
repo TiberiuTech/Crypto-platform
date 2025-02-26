@@ -16,7 +16,7 @@
     <script src="../js/auth-check.js" type="module"></script>
 </head>
 <body>
-    <!-- Navbar -->
+   
     <nav class="navbar auth-loading">
         <div class="nav-left">
             <a href="/" class="logo">Crypto-Impact</a>
@@ -44,12 +44,12 @@
         </div>
     </nav>
 
-    <!-- Trading Section -->
+
     <section class="trading-section">
         <div class="trading-container">
-            <!-- Left Panel - Chart și Orderbook -->
+        
             <div class="trading-left-panel">
-                <!-- Header cu informații despre pereche -->
+             
                 <div class="pair-header">
                     <div class="pair-selector-container">
                         <div class="selected-pair">
@@ -93,7 +93,7 @@
                                 <img src="https://www.cryptocompare.com/media/37746235/ada.png" alt="ADA" />
                                 <span>ADA/USD</span>
                             </div>
-                            <!-- Adaugă restul monedelor în același format -->
+                            
                         </div>
                     </div>
                     <div class="price-info">
@@ -102,7 +102,7 @@
                     </div>
                 </div>
 
-                <!-- Controale pentru grafic -->
+               
                 <div class="chart-controls">
                     <div class="timeframe-buttons">
                         <button class="timeframe-btn active" data-timeframe="1H">1H</button>
@@ -112,18 +112,18 @@
                     </div>
                 </div>
 
-                <!-- Grafic -->
+               
                 <div class="chart-container">
                     <canvas id="tradingChart"></canvas>
                 </div>
 
-                <!-- Orderbook și Tranzacții Recente -->
+                
                 <div class="market-data">
                     <div class="orderbook">
                         <h3>Orderbook</h3>
                         <div class="orderbook-header">
-                            <span>Preț</span>
-                            <span>Cantitate</span>
+                            <span>Price</span>
+                            <span>Amount</span>
                             <span>Total</span>
                         </div>
                         <div class="orderbook-content">
@@ -135,41 +135,41 @@
                         </div>
                     </div>
                     <div class="recent-trades">
-                        <h3>Tranzacții Recente</h3>
+                        <h3>Recent Trades</h3>
                         <div class="trades-header">
-                            <span>Preț</span>
-                            <span>Cantitate</span>
-                            <span>Timp</span>
+                            <span>Price</span>
+                            <span>Amount</span>
+                            <span>Time</span>
                         </div>
                         <div class="trades-list"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Panel - Trading Form -->
+           
             <div class="trading-right-panel">
-                <!-- Tip Ordin -->
+              
                 <div class="order-type">
                     <button class="order-type-btn active" data-type="market">Market</button>
                     <button class="order-type-btn" data-type="limit">Limit</button>
                     <button class="order-type-btn" data-type="stop">Stop</button>
                 </div>
 
-                <!-- Buy/Sell Toggle -->
+             
                 <div class="trade-type">
-                    <button class="trade-type-btn buy active" data-type="buy">Cumpără</button>
-                    <button class="trade-type-btn sell" data-type="sell">Vinde</button>
+                    <button class="trade-type-btn buy active" data-type="buy">Buy</button>
+                    <button class="trade-type-btn sell" data-type="sell">Sell</button>
                 </div>
 
-                <!-- Trading Form -->
+              
                 <div class="trade-form">
                     <div class="form-group">
-                        <label for="priceInput">Preț</label>
+                        <label for="priceInput">Price</label>
                         <input type="number" id="priceInput" name="price" step="0.01" placeholder="0.00">
                     </div>
 
                     <div class="form-group">
-                        <label for="amountInput">Cantitate</label>
+                        <label for="amountInput">Amount</label>
                         <input type="number" id="amountInput" name="amount" step="0.00000001" placeholder="0.00000000">
                         <div class="quick-amount">
                             <button class="quick-amount-btn" data-percentage="25">25%</button>
@@ -185,24 +185,24 @@
                     </div>
 
                     <div class="available-balance">
-                        Disponibil: <span id="availableBalance">0.00000000</span>
+                        Available: <span id="availableBalance">0.00000000</span>
                     </div>
 
                     <button id="submitTrade" class="submit-btn buy">
-                        Cumpără BTC
+                        Buy BTC
                     </button>
                 </div>
 
-                <!-- Ordine Active -->
+                
                 <div class="active-orders">
-                    <h3>Ordine Active</h3>
+                    <h3>Active Orders</h3>
                     <div class="orders-list"></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Scripts -->
+  
     <script type="module" src="../js/services/apiService.js"></script>
     <script type="module" src="../js/services/walletService.js"></script>
     <script type="module" src="../js/trade.js"></script>

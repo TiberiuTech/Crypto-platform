@@ -144,7 +144,6 @@ body {
     transform: translateY(-1px);
 }
 
-/* Navigation Buttons */
 .prices {
     padding: 0;
     background: rgb(13, 17, 28);
@@ -531,12 +530,12 @@ body {
     scroll-snap-type: x mandatory;
     padding: 0.5rem;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;  /* Pentru Firefox */
-    -ms-overflow-style: none;  /* Pentru IE și Edge */
+    scrollbar-width: none;  
+    -ms-overflow-style: none; 
 }
 
 .movers-container::-webkit-scrollbar {
-    display: none; /* Pentru Chrome, Safari și Opera */
+    display: none; 
 }
 
 .carousel-btn {
@@ -672,7 +671,6 @@ body {
     transition: all 0.3s ease;
 }
 
-/* Remove carousel navigation buttons styles */
 .carousel-btn {
     display: none;
 }
