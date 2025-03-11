@@ -4,7 +4,8 @@ export class ApiService {
         this.symbolMap = {
             'bitcoin': 'BTC',
             'ethereum': 'ETH',
-            'orionix': 'ORX'
+            'orionix': 'ORX',
+            'orion': 'ORX'
         };
         this.mockData = {
             'ORX': {
@@ -16,6 +17,7 @@ export class ApiService {
                 }
             }
         };
+        this.ORX_CONTRACT_ADDRESS = "ADRESA_CONTRACT_DUPĂ_DEPLOYMENT";
     }
 
     getSymbol(coin) {
@@ -222,4 +224,4 @@ export class ApiService {
 
         return points;
     }
-} 
+}

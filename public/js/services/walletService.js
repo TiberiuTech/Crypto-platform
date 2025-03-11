@@ -14,31 +14,26 @@ export class WalletService {
     async loadStoredData() {
         if (this.dataLoaded) return;
 
-        this.assets = {};
+        // Resetăm complet portofelul la starea inițială
+        this.assets = {
+            'USD': {
+                symbol: 'USD',
+                name: 'US Dollar',
+                amount: 0,
+                value: 0
+            }
+        };
+        
         this.transactions = [];
         this.priceCache.clear();
         this.lastPriceUpdate.clear();
-        this.isInitialized = false;
+        this.isInitialized = true;
         
-        const savedAssets = localStorage.getItem('wallet_assets');
-        if (savedAssets) {
-            try {
-                this.assets = JSON.parse(savedAssets);
-            } catch (error) {
-                console.error('Error parsing assets:', error);
-                localStorage.removeItem('wallet_assets');
-            }
-        }
-        
-        const savedTransactions = localStorage.getItem('transactions');
-        if (savedTransactions) {
-            try {
-                this.transactions = JSON.parse(savedTransactions);
-            } catch (error) {
-                console.error('Error parsing transactions:', error);
-                localStorage.removeItem('transactions');
-            }
-        }
+        // Salvăm starea inițială în localStorage
+        localStorage.removeItem('wallet_assets');
+        localStorage.removeItem('transactions');
+        localStorage.setItem('wallet_assets', JSON.stringify(this.assets));
+        localStorage.setItem('transactions', JSON.stringify(this.transactions));
 
         this.dataLoaded = true;
     }
@@ -256,49 +251,22 @@ export class WalletService {
         }
 
         try {
-            if (!this.assets['USD']) {
-                this.assets['USD'] = {
-                    symbol: 'USD',
-                    name: 'US Dollar',
-                    amount: 0,
-                    value: 0
-                };
+            if (!this.assets[asset]) {
+                await this.addAsset(asset);
             }
 
-            if (asset === 'USD') {
-                this.assets['USD'].amount = parseFloat((this.assets['USD'].amount + amount).toFixed(2));
-                this.assets['USD'].value = this.assets['USD'].amount;
-                this.addTransaction('deposit', null, 'USD', amount, amount);
-            } else {
-                const currentPrice = await this.getPricePerUnit(asset);
-                if (!currentPrice) {
-                    throw new Error(`Could not obtain the price for ${asset}`);
-                }
+            const currentPrice = asset === 'USD' ? 1 : await this.getPricePerUnit(asset);
+            const valueInUSD = amount * currentPrice;
 
-                if (this.assets['USD'].amount < amount) {
-                    
-                    this.assets['USD'].amount = parseFloat((this.assets['USD'].amount + amount).toFixed(2));
-                    this.assets['USD'].value = this.assets['USD'].amount;
-                    this.addTransaction('deposit', null, 'USD', amount, amount);
-                }
+            // Actualizăm direct balanța activului
+            this.assets[asset].amount = parseFloat((this.assets[asset].amount + amount).toFixed(8));
+            this.assets[asset].value = parseFloat((this.assets[asset].amount * currentPrice).toFixed(2));
 
-                const cryptoAmount = parseFloat((amount / currentPrice).toFixed(8));
-
-                this.assets['USD'].amount = parseFloat((this.assets['USD'].amount - amount).toFixed(2));
-                this.assets['USD'].value = this.assets['USD'].amount;
-
-                if (!this.assets[asset]) {
-                    await this.addAsset(asset);
-                }
-
-                this.assets[asset].amount = parseFloat((this.assets[asset].amount + cryptoAmount).toFixed(8));
-                this.assets[asset].value = parseFloat((this.assets[asset].amount * currentPrice).toFixed(2));
-
-                this.addTransaction('withdraw', 'USD', null, amount, amount);
-                this.addTransaction('deposit', null, asset, cryptoAmount, amount);
-            }
+            // Adăugăm tranzacția
+            this.addTransaction('deposit', null, asset, amount, valueInUSD);
 
             this.saveState();
+            await this.updateAllPrices();
             
             const newBalance = this.getTotalBalance();
             window.dispatchEvent(new CustomEvent('balance-update', {
@@ -389,7 +357,15 @@ export class WalletService {
     }
 
     getAssets(limit = 5) {
-        return Object.values(this.assets).slice(0, limit);
+        // Filtrăm active cu valoare pozitivă, excluzând USD
+        const filteredAssets = Object.entries(this.assets)
+            .filter(([symbol, asset]) => symbol !== 'USD' && asset.amount > 0)
+            .map(([_, asset]) => ({
+                ...asset,
+                value: asset.amount * (this.priceCache.get(asset.symbol) || 0)
+            }));
+            
+        return limit ? filteredAssets.slice(0, limit) : filteredAssets;
     }
 
     getBalance(symbol) {

@@ -44,6 +44,21 @@
         </div>
     </nav>
 
+    <div class="wallet-overview">
+        <div class="wallet-header">
+            <div class="wallet-title">
+                <h3>Portfolio Overview</h3>
+                <span class="refresh-icon">
+                    <i class="fas fa-sync-alt"></i>
+                </span>
+            </div>
+            <div class="wallet-total">
+                <div class="total-label">Total Balance</div>
+                <div class="total-value">$<span id="totalWalletBalance">0.00</span></div>
+            </div>
+        </div>
+        <div class="wallet-assets"></div>
+    </div>
 
     <section class="trading-section">
         <div class="trading-container">
@@ -51,64 +66,27 @@
             <div class="trading-left-panel">
              
                 <div class="pair-header">
-                    <div class="pair-selector-container">
-                        <div class="selected-pair">
-                            <img src="https://www.cryptocompare.com/media/37746251/btc.png" alt="BTC" />
-                            <span>BTC/USD</span>
+                    <div class="trading-pair-info">
+                        <div class="pair-selector-container">
+                            <div class="selected-pair">
+                                <!-- Se va popula dinamic -->
+                            </div>
+                            <div class="pair-dropdown">
+                                <!-- Se va popula dinamic prin JavaScript -->
+                            </div>
                         </div>
-                        <div class="pair-dropdown">
-                            <div class="pair-option" data-pair="BTC/USD">
-                                <img src="https://www.cryptocompare.com/media/37746251/btc.png" alt="BTC" />
-                                <span>BTC/USD</span>
-                            </div>
-                            <div class="pair-option" data-pair="ETH/USD">
-                                <img src="https://www.cryptocompare.com/media/37746238/eth.png" alt="ETH" />
-                                <span>ETH/USD</span>
-                            </div>
-                            <div class="pair-option" data-pair="USDT/USD">
-                                <img src="https://www.cryptocompare.com/media/37746338/usdt.png" alt="USDT" />
-                                <span>USDT/USD</span>
-                            </div>
-                            <div class="pair-option" data-pair="XRP/USD">
-                                <img src="https://www.cryptocompare.com/media/38553096/xrp.png" alt="XRP" />
-                                <span>XRP/USD</span>
-                            </div>
-                            <div class="pair-option" data-pair="BNB/USD">
-                                <img src="https://www.cryptocompare.com/media/40485170/bnb.png" alt="BNB" />
-                                <span>BNB/USD</span>
-                            </div>
-                            <div class="pair-option" data-pair="SOL/USD">
-                                <img src="https://www.cryptocompare.com/media/37747734/sol.png" alt="SOL" />
-                                <span>SOL/USD</span>
-                            </div>
-                            <div class="pair-option" data-pair="DOGE/USD">
-                                <img src="https://www.cryptocompare.com/media/37746339/doge.png" alt="DOGE" />
-                                <span>DOGE/USD</span>
-                            </div>
-                            <div class="pair-option" data-pair="USDC/USD">
-                                <img src="https://www.cryptocompare.com/media/34835941/usdc.png" alt="USDC" />
-                                <span>USDC/USD</span>
-                            </div>
-                            <div class="pair-option" data-pair="ADA/USD">
-                                <img src="https://www.cryptocompare.com/media/37746235/ada.png" alt="ADA" />
-                                <span>ADA/USD</span>
-                            </div>
-                            
+                        <div class="price-info">
+                            <span class="current-price">Loading...</span>
+                            <span class="price-change">0.00%</span>
                         </div>
                     </div>
-                    <div class="price-info">
-                        <span class="current-price">Loading...</span>
-                        <span class="price-change">0.00%</span>
-                    </div>
-                </div>
-
-               
-                <div class="chart-controls">
-                    <div class="timeframe-buttons">
-                        <button class="timeframe-btn active" data-timeframe="1H">1H</button>
-                        <button class="timeframe-btn" data-timeframe="4H">4H</button>
-                        <button class="timeframe-btn" data-timeframe="1D">1D</button>
-                        <button class="timeframe-btn" data-timeframe="1W">1W</button>
+                    <div class="chart-controls">
+                        <div class="timeframe-buttons">
+                            <button class="timeframe-btn active" data-timeframe="1H">1H</button>
+                            <button class="timeframe-btn" data-timeframe="4H">4H</button>
+                            <button class="timeframe-btn" data-timeframe="1D">1D</button>
+                            <button class="timeframe-btn" data-timeframe="1W">1W</button>
+                        </div>
                     </div>
                 </div>
 
@@ -164,27 +142,56 @@
               
                 <div class="trade-form">
                     <div class="form-group">
-                        <label for="priceInput">Price</label>
-                        <input type="number" id="priceInput" name="price" step="0.01" placeholder="0.00">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="amountInput">Amount</label>
-                        <input type="number" id="amountInput" name="amount" step="0.00000001" placeholder="0.00000000">
-                        <div class="quick-amount">
-                            <button class="quick-amount-btn" data-percentage="25">25%</button>
-                            <button class="quick-amount-btn" data-percentage="50">50%</button>
-                            <button class="quick-amount-btn" data-percentage="75">75%</button>
-                            <button class="quick-amount-btn" data-percentage="100">100%</button>
+                        <label for="priceInput" class="form-label">Price (USD)</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="number" 
+                                id="priceInput" 
+                                name="price" 
+                                step="0.01" 
+                                min="0"
+                                inputmode="decimal"
+                                aria-label="Price in USD"
+                                placeholder="0.00">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="totalInput">Total</label>
-                        <input type="number" id="totalInput" name="total" step="0.01" placeholder="0.00" readonly>
+                        <label for="amountInput" class="form-label">Amount</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="number" 
+                                id="amountInput" 
+                                name="amount" 
+                                step="0.00000001" 
+                                min="0"
+                                inputmode="decimal"
+                                aria-label="Amount to trade"
+                                placeholder="0.00000000">
+                            <div class="quick-amount" role="group" aria-label="Quick amount selection">
+                                <button class="quick-amount-btn" data-percentage="25">25%</button>
+                                <button class="quick-amount-btn" data-percentage="50">50%</button>
+                                <button class="quick-amount-btn" data-percentage="75">75%</button>
+                                <button class="quick-amount-btn" data-percentage="100">100%</button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="available-balance">
+                    <div class="form-group">
+                        <label for="totalInput" class="form-label">Total (USD)</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="number" 
+                                id="totalInput" 
+                                name="total" 
+                                step="0.01" 
+                                readonly
+                                aria-label="Total amount in USD"
+                                placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <div class="available-balance" role="status" aria-live="polite">
                         Available: <span id="availableBalance">0.00000000</span>
                     </div>
 
@@ -202,9 +209,179 @@
         </div>
     </section>
 
-  
+    <style>
+        .wallet-overview {
+            background: linear-gradient(160deg, rgba(30, 32, 38, 0.95) 0%, rgba(25, 27, 31, 0.95) 100%);
+            border-radius: 12px;
+            margin: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .wallet-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wallet-title h3 {
+            color: #fff;
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .refresh-icon {
+            color: #00ff88;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .refresh-icon:hover {
+            transform: rotate(180deg);
+        }
+
+        .wallet-total {
+            text-align: right;
+        }
+
+        .total-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .total-value {
+            color: #00ff88;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .wallet-assets {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            max-height: 120px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .wallet-assets::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .wallet-assets::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .wallet-assets::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .asset-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px;
+            transition: transform 0.2s ease, background 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .asset-item:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .asset-name {
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .asset-balance {
+            color: #00ff88;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .asset-value {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+        }
+
+        /* Animații pentru actualizări */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .value-update {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .wallet-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .wallet-total {
+                text-align: left;
+            }
+
+            .wallet-assets {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        .pair-option img, 
+        .selected-pair img,
+        .asset-item img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+            object-fit: cover;
+        }
+
+        .selected-pair {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .pair-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .pair-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+
     <script type="module" src="../js/services/apiService.js"></script>
     <script type="module" src="../js/services/walletService.js"></script>
     <script type="module" src="../js/trade.js"></script>
 </body>
-</html> 
+</html>

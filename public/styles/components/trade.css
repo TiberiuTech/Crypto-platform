@@ -32,18 +32,20 @@
 
 .pair-selector-container {
     position: relative;
+    display: inline-block;
     width: 150px;
     cursor: pointer;
 }
 
 .selected-pair {
+    min-width: 120px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    gap: 8px;
 }
 
 .selected-pair img {
@@ -57,12 +59,12 @@
     position: absolute;
     top: 100%;
     left: 0;
-    width: 100%;
+    width: 200px;
     max-height: 300px;
     overflow-y: auto;
-    background: #1a1a1a;
+    background: rgba(30, 32, 38, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    border-radius: 8px;
     z-index: 1000;
 }
 
@@ -71,11 +73,10 @@
 }
 
 .pair-option {
+    padding: 10px 15px;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    cursor: pointer;
     transition: background-color 0.2s;
 }
 
@@ -204,7 +205,7 @@
 .price-info {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .current-price {
@@ -484,6 +485,7 @@
     border-radius: 8px;
     color: var(--text-primary);
     font-size: 1rem;
+    margin-bottom: 0.5rem; /* Adăugăm spațiu sub input */
 }
 
 .form-group input:focus {
@@ -506,6 +508,7 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 0.5rem;
+    margin-top: 0.5rem; /* Adăugăm spațiu deasupra butoanelor */
 }
 
 .quick-amount-btn {
@@ -707,8 +710,13 @@
     .order-type, .trade-type {
         grid-template-columns: 1fr;
     }
-}
 
+    .trading-pair-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+}
 
 .notification {
     position: fixed;
@@ -809,4 +817,30 @@
 .trades-list {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
-} 
+}
+
+.trading-pair-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Adaugă sau actualizează aceste stiluri */
+.total-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.usd-balance {
+    color: #00ff88;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+/* Elimină stilurile vechi pentru asset-item.usd-balance */
+.asset-item.usd-balance {
+    display: none;
+}
