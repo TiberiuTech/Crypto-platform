@@ -1,6 +1,6 @@
 .compare {
     padding: 80px 0;
-    background: #1a1f2c;
+    background: #0d111c;
 }
 
 .compare h2 {
@@ -28,7 +28,6 @@
     flex: 1;
     background: #1e2330;
     border-radius: 16px;
-    padding: 24px;
     max-width: 500px;
     position: relative;
 }
@@ -96,7 +95,7 @@
 }
 
 .stat-label {
-    color: #64748b;
+    color: #fff;
     font-size: 1rem;
 }
 
@@ -197,7 +196,8 @@
 .coin-list {
     max-height: 250px;
     overflow-y: auto;
-    background: #2a2f3d;
+    background: #1e2330;
+;
     border-radius: 8px;
     padding: 8px;
 }
@@ -213,7 +213,7 @@
 }
 
 .coin-list-item:hover {
-    background: #353b4d;
+    background: #2c3242;
 }
 
 .coin-list-item img {
@@ -256,7 +256,7 @@
 }
 
 .coin-list::-webkit-scrollbar-track {
-    background: #1e2330;
+    background: #0d111c;
     border-radius: 3px;
 }
 

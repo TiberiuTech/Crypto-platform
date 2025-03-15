@@ -1006,41 +1006,107 @@ class TradingPage {
                 });
             }
 
-            const walletAssetsElement = document.querySelector('.wallet-assets');
+            const walletAssetsElement = document.getElementById('walletAssets');
             if (walletAssetsElement && this.cryptoData) {
-                // Nu mai e nevoie să filtrăm USD aici deoarece getAssets() deja îl exclude
-                const assetsHtml = assets.map(asset => {
-                    const coinData = this.cryptoData[asset.symbol];
-                    const imageUrl = coinData ? 
-                        `${this.cryptoImageBaseUrl}${coinData.ImageUrl}` : 
-                        '../assets/images/default-crypto.png';
-                    
-                    return `
-                        <div class="asset-item">
-                            <div class="asset-name">
-                                <img src="${imageUrl}" 
-                                     alt="${asset.symbol}"
-                                     width="24" 
-                                     height="24"
-                                />
-                                <span>${asset.symbol}</span>
-                            </div>
-                            <div class="asset-balance">
-                                ${asset.amount.toFixed(8)} ${asset.symbol}
-                            </div>
-                            <div class="asset-value">
-                                $${asset.value?.toFixed(2) || '0.00'}
-                                ${asset.priceChange ? `
-                                    <span class="price-change ${asset.priceChange >= 0 ? 'positive' : 'negative'}">
-                                        ${asset.priceChange >= 0 ? '+' : ''}${asset.priceChange.toFixed(2)}%
-                                    </span>
-                                ` : ''}
-                            </div>
+                if (assets.length === 0) {
+                    walletAssetsElement.innerHTML = `
+                        <div class="no-assets">
+                            <i class="fas fa-wallet"></i>
+                            <p>Nu aveți active în portofoliu</p>
                         </div>
                     `;
-                });
-
-                walletAssetsElement.innerHTML = assetsHtml.join('');
+                } else {
+                    // Sortăm activele după valoare (descrescător)
+                    const sortedAssets = [...assets].sort((a, b) => (b.value || 0) - (a.value || 0));
+                    
+                    // Generăm HTML pentru cardurile de active
+                    const generateAssetCards = (assetsList) => {
+                        return assetsList.map(asset => {
+                            const coinData = this.cryptoData[asset.symbol];
+                            const imageUrl = coinData ? 
+                                `${this.cryptoImageBaseUrl}${coinData.ImageUrl}` : 
+                                '../assets/images/default-crypto.png';
+                            
+                            // Calculăm schimbarea procentuală
+                            const priceChange = asset.priceChange || 0;
+                            const priceChangeClass = priceChange >= 0 ? 'positive' : 'negative';
+                            
+                            return `
+                                <div class="asset-card">
+                                    <div class="asset-header">
+                                        <div class="asset-icon">
+                                            <img src="${imageUrl}" alt="${asset.symbol}" width="20" height="20"/>
+                                        </div>
+                                        <div>
+                                            <div class="asset-name">${asset.symbol}</div>
+                                            <div class="asset-value">$${asset.value?.toFixed(2) || '0.00'}</div>
+                                        </div>
+                                    </div>
+                                    <div class="asset-details">
+                                        <div class="asset-symbol">${asset.amount.toFixed(6)}</div>
+                                        ${asset.priceChange !== undefined ? `
+                                            <div class="asset-change ${priceChangeClass}">
+                                                ${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}%
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                    <div class="asset-actions">
+                                        <a href="#" class="asset-action-btn buy" data-symbol="${asset.symbol}" data-action="buy">Buy</a>
+                                        <a href="#" class="asset-action-btn sell" data-symbol="${asset.symbol}" data-action="sell">Sell</a>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    };
+                    
+                    // Creăm două seturi identice de carduri pentru animația infinită
+                    const assetsHtml = generateAssetCards(sortedAssets);
+                    
+                    // Structura pentru animația de derulare continuă
+                    walletAssetsElement.innerHTML = `
+                        <div class="wallet-assets-inner">
+                            ${assetsHtml}
+                            ${assetsHtml}
+                        </div>
+                    `;
+                    
+                    // Ajustăm viteza animației în funcție de numărul de carduri
+                    const animationDuration = Math.max(20, sortedAssets.length * 5);
+                    const assetsInner = walletAssetsElement.querySelector('.wallet-assets-inner');
+                    if (assetsInner) {
+                        assetsInner.style.animationDuration = `${animationDuration}s`;
+                    }
+                    
+                    // Adăugăm event listeners pentru butoanele de acțiune
+                    const actionButtons = walletAssetsElement.querySelectorAll('.asset-action-btn');
+                    actionButtons.forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const symbol = button.getAttribute('data-symbol');
+                            const action = button.getAttribute('data-action');
+                            
+                            // Selectăm perechea de tranzacționare
+                            if (symbol) {
+                                const pairToSelect = `${symbol}/USD`;
+                                const pairOptions = document.querySelectorAll('.pair-option');
+                                
+                                for (const option of pairOptions) {
+                                    if (option.textContent.includes(symbol)) {
+                                        option.click();
+                                        break;
+                                    }
+                                }
+                                
+                                // Setăm tipul de tranzacție (buy/sell)
+                                if (action === 'buy') {
+                                    document.querySelector('.trade-type-btn.buy').click();
+                                } else if (action === 'sell') {
+                                    document.querySelector('.trade-type-btn.sell').click();
+                                }
+                            }
+                        });
+                    });
+                }
             }
 
             // Adăugăm event listener pentru refresh

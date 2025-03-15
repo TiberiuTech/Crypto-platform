@@ -17,7 +17,13 @@ export class ApiService {
                 }
             }
         };
-        this.ORX_CONTRACT_ADDRESS = "ADRESA_CONTRACT_DUPĂ_DEPLOYMENT";
+        this.ORX_CONTRACT_ADDRESS = "adresa_primită_la_deploy"; // Aici pui adresa primită
+        this.ORX = {
+            name: 'Orion',
+            symbol: 'ORX',
+            decimals: 18,
+            contractAddress: 'ADRESA_PRIMITĂ_DIN_REMIX'  // Adaugă aici adresa
+        };
     }
 
     getSymbol(coin) {

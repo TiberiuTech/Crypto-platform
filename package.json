@@ -13,11 +13,21 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "crypto-platform": "file:",
-    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "google-auth-library": "^9.15.1",
-    "mysql2": "^3.12.0"
+    "mysql2": "^3.13.0"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.6",
+    "@openzeppelin/contracts": "^5.2.0",
+    "chai": "^5.2.0",
+    "dotenv": "^16.4.7",
+    "ethereum-waffle": "^4.0.10",
+    "ethers": "^5.8.0",
+    "hardhat": "^2.22.19"
   }
 }

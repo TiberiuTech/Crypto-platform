@@ -1,0 +1,289 @@
+/* Stiluri pentru Portfolio Overview */
+.portfolio-overview {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid rgba(56, 97, 251, 0.1);
+}
+
+.portfolio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.wallet-overview {
+  background: linear-gradient(180deg, rgba(20, 30, 48, 0.8) 0%, rgba(11, 17, 31, 0.9) 100%);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  height: auto;
+  max-height: 160px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.wallet-overview:hover {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.wallet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.wallet-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wallet-title h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.refresh-icon {
+  color: var(--success-color);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  background: rgba(22, 199, 132, 0.1);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.refresh-icon:hover {
+  transform: rotate(180deg);
+  background: rgba(22, 199, 132, 0.2);
+}
+
+.wallet-total {
+  text-align: right;
+}
+
+.total-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.total-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--success-color);
+  letter-spacing: 0.5px;
+}
+
+/* Stiluri pentru lista de active */
+.wallet-assets {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 10px;
+  margin-top: 10px;
+  padding-bottom: 10px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.wallet-assets-inner {
+  display: flex;
+  gap: 10px;
+  animation: scrollAssets 30s linear infinite;
+  padding-right: 10px;
+}
+
+@keyframes scrollAssets {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.wallet-overview:hover .wallet-assets-inner {
+  animation-play-state: paused;
+}
+
+.asset-card {
+  background: rgba(30, 40, 60, 0.4);
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+  min-width: 180px;
+  flex: 0 0 auto;
+}
+
+.asset-card:hover {
+  background: rgba(40, 50, 70, 0.4);
+  transform: translateY(-2px);
+}
+
+.asset-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.asset-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.asset-name {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.asset-symbol {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 1px;
+}
+
+.asset-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.asset-balance {
+  font-weight: 500;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.asset-value {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.asset-change {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  width: fit-content;
+  margin-top: 2px;
+}
+
+.asset-change.positive {
+  background: rgba(22, 199, 132, 0.1);
+  color: var(--success-color);
+}
+
+.asset-change.negative {
+  background: rgba(234, 57, 67, 0.1);
+  color: var(--error-color);
+}
+
+.asset-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.asset-action-btn {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  flex: 1;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.asset-action-btn.buy {
+  background: rgba(22, 199, 132, 0.1);
+  color: var(--success-color);
+  border: 1px solid rgba(22, 199, 132, 0.3);
+}
+
+.asset-action-btn.sell {
+  background: rgba(234, 57, 67, 0.1);
+  color: var(--error-color);
+  border: 1px solid rgba(234, 57, 67, 0.3);
+}
+
+.asset-action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.asset-action-btn.buy:hover {
+  background: rgba(22, 199, 132, 0.2);
+}
+
+.asset-action-btn.sell:hover {
+  background: rgba(234, 57, 67, 0.2);
+}
+
+/* Stiluri pentru mesajul când nu există active */
+.no-assets {
+  text-align: center;
+  padding: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+  font-size: 12px;
+}
+
+/* Stiluri pentru indicatorul de expandare */
+.wallet-expand-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 5px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.wallet-overview:hover .wallet-expand-hint {
+  opacity: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .wallet-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .wallet-total {
+    text-align: left;
+    margin-top: 8px;
+  }
+} 

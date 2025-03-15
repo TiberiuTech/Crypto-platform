@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt';
 import * as db from './services/databaseService.js';
 import { OAuth2Client } from 'google-auth-library';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -188,6 +189,15 @@ app.post('/api/auth/google', async (req, res) => {
             error: 'Authentication failed: ' + error.message
         });
     }
+});
+
+
+app.get('/trade', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'trade.html'));
+});
+
+app.get('/new-trade', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'new-trade.html'));
 });
 
 

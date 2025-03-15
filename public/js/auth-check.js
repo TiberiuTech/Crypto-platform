@@ -54,7 +54,32 @@ if (protectedPages.some(page => currentPath.includes(page.toLowerCase()))) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', updateAuthUI);
+document.addEventListener('DOMContentLoaded', () => {
+    updateAuthUI();
+    setActiveNavLink();
+});
+
+function setActiveNavLink() {
+    const currentPath = window.location.pathname.toLowerCase();
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    // Elimină clasa active de pe toate link-urile
+    navLinks.forEach(link => link.classList.remove('active'));
+    
+    // Verifică dacă suntem pe pagina principală
+    if (currentPath === '/' || currentPath === '/index.html') {
+        // Nu setăm niciun link ca activ pe pagina principală
+        return;
+    }
+    
+    // Adaugă clasa active pe link-ul corespunzător paginii curente
+    navLinks.forEach(link => {
+        const href = link.getAttribute('href').toLowerCase();
+        if (currentPath.includes(href.split('/').pop())) {
+            link.classList.add('active');
+        }
+    });
+}
 
 window.addEventListener('storage', (e) => {
     if (e.key === 'user') {

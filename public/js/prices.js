@@ -53,18 +53,18 @@ const updatePagination = (currentPage, totalPages) => {
     const pagination = document.querySelector('.pagination');
     
     pagination.innerHTML = `
-        <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">
+        <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" data-page="${currentPage - 1}">
             <i class="fas fa-chevron-left"></i>
         </button>
         ${generatePageNumbers(currentPage, totalPages)}
-        <button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">
+        <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" data-page="${currentPage + 1}">
             <i class="fas fa-chevron-right"></i>
         </button>
     `;
 
     pagination.querySelectorAll('.pagination-btn').forEach(button => {
         button.addEventListener('click', () => {
-            if (!button.disabled) {
+            if (!button.classList.contains('disabled')) {
                 const newPage = parseInt(button.dataset.page);
                 changePage(newPage);
             }
@@ -219,7 +219,7 @@ const formatNumber = (number) => {
 
 const formatPrice = (price) => {
     if (price >= 1) {
-        return `$${Math.floor(price).toLocaleString('en-US')}`;
+        return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     } else {
         return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
     }
@@ -252,12 +252,6 @@ const updatePrices = async () => {
         }
 
         const tableHTML = `
-            <div class="top-movers">
-                <div class="movers-carousel">
-                    <div class="movers-container">
-                    </div>
-                </div>
-            </div>
             <h2 class="prices-title">Today's Cryptocurrency Prices</h2>
             <div class="table-header">
                 <span data-sort="rank">#</span>
@@ -267,7 +261,6 @@ const updatePrices = async () => {
                 <span data-sort="volume">Vol. 24h</span>
                 <span data-sort="marketcap">Mkt Cap</span>
                 <span>Chart</span>
-                <span>Trade</span>
             </div>
             <table class="crypto-table">
                 <tbody>
@@ -302,9 +295,6 @@ const updatePrices = async () => {
                                 <td class="market-cap">${formatNumber(rawData.MKTCAP)}</td>
                                 <td class="chart-cell">
                                     <canvas id="chart-${crypto}-sparkline" height="40"></canvas>
-                                </td>
-                                <td>
-                                    <button class="trade-btn">Trade</button>
                                 </td>
                             </tr>
                         `;
@@ -433,7 +423,10 @@ function createMoverCard(coin) {
                 </div>
             </div>
             <div class="mover-price-container">
-                <div class="mover-price">$${coin.price.toFixed(coin.price < 1 ? 6 : 2)}</div>
+                <div class="mover-price">${coin.price >= 1 
+                    ? `$${coin.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : `$${coin.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`
+                }</div>
                 <div class="mover-change ${changeClass}">
                     ${changeSign}${coin.change24h.toFixed(2)}%
                 </div>
@@ -542,48 +535,39 @@ function initializeCarousel() {
     const container = document.querySelector('.movers-container');
     if (!container) return;
     
-    let isScrolling = false;
-    const cardWidth = 316; 
+    // Adăugăm auto-scroll pentru carduri
+    let autoScrollInterval;
     
-    const scrollNext = () => {
-        if (isScrolling) return;
-        isScrolling = true;
-        
-        const currentScroll = container.scrollLeft;
-        const maxScroll = container.scrollWidth - container.clientWidth;
-        
-        if (currentScroll >= maxScroll) {
-            container.scrollTo({
-                left: 0,
-                behavior: 'auto'
-            });
-            setTimeout(() => {
+    const startAutoScroll = () => {
+        autoScrollInterval = setInterval(() => {
+            const currentScroll = container.scrollLeft;
+            const maxScroll = container.scrollWidth - container.clientWidth;
+            
+            if (currentScroll >= maxScroll) {
                 container.scrollTo({
-                    left: cardWidth,
+                    left: 0,
+                    behavior: 'auto'
+                });
+            } else {
+                container.scrollBy({
+                    left: 200,
                     behavior: 'smooth'
                 });
-            }, 50);
-        } else {
-            container.scrollTo({
-                left: currentScroll + cardWidth,
-                behavior: 'smooth'
-            });
-        }
-        
-        setTimeout(() => {
-            isScrolling = false;
-        }, 500);
+            }
+        }, 5000); // Auto-scroll la fiecare 5 secunde
     };
     
-    let autoScrollInterval = setInterval(scrollNext, 3000);
-    
+    // Oprim auto-scroll când utilizatorul interacționează cu containerul
     container.addEventListener('mouseenter', () => {
         clearInterval(autoScrollInterval);
     });
     
     container.addEventListener('mouseleave', () => {
-        autoScrollInterval = setInterval(scrollNext, 3000);
+        startAutoScroll();
     });
+    
+    // Pornim auto-scroll
+    startAutoScroll();
 }
 
 async function updateTopMovers() {
