@@ -39,11 +39,20 @@
             <form id="loginForm" class="auth-form">
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" autocomplete="email" required>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" autocomplete="email" required>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" autocomplete="current-password" required>
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit" class="submit-btn">Login</button>
             </form>
@@ -169,6 +178,32 @@
                 console.error('Login error:', error);
                 showAlert('Authentication error. Please try again.');
             }
+        });
+        
+        // Adaug funcționalitatea pentru butonul de toggle password
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    console.log('Toggle password clicked');
+                    const inputGroup = this.closest('.input-group');
+                    const input = inputGroup.querySelector('input');
+                    console.log('Input found:', input);
+                    
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    console.log('Changing type from', input.getAttribute('type'), 'to', type);
+                    
+                    input.setAttribute('type', type);
+                    
+                    const icon = this.querySelector('i');
+                    if (type === 'text') {
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
         });
     </script>
 </body>

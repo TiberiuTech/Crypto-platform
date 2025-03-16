@@ -100,6 +100,12 @@ const formatVolume = (volume) => {
 document.addEventListener('DOMContentLoaded', () => {
     updateCryptoCards();
     
+    // Setez indexul pentru fiecare card pentru animația secvențială
+    const cryptoCards = document.querySelectorAll('.crypto-card');
+    cryptoCards.forEach((card, index) => {
+        card.style.setProperty('--card-index', index);
+    });
+    
     const text = [
         "Orionix is an innovative cryptocurrency that combines blockchain technology with modern payment solutions.",
         "Developed with a focus on scalability and energy efficiency, Orionix offers fast transactions and low costs.",
@@ -121,6 +127,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
         observer.observe(typingText);
     }
+
+    const heroTitle = document.querySelector('.hero h1');
+    const heroSubtitle = document.querySelector('.hero .subtitle');
+    
+    // Funcție pentru a anima titlul
+    function animateTitle() {
+        setTimeout(() => {
+            heroTitle.classList.add('animate');
+            heroTitle.style.opacity = '1';
+            
+            // Adaugă un efect de text shadow pentru a evidenția textul
+            heroTitle.style.textShadow = '0 0 15px rgba(99, 102, 241, 0.4)';
+        }, 500);
+    }
+    
+    // Funcție pentru a anima subtitlul
+    function animateSubtitle() {
+        setTimeout(() => {
+            heroSubtitle.classList.add('animate');
+            heroSubtitle.style.opacity = '1';
+            
+            // Adaugă un efect de text shadow pentru a evidenția textul
+            heroSubtitle.style.textShadow = '0 0 10px rgba(99, 102, 241, 0.3)';
+        }, 1000);
+    }
+    
+    // Inițiază animațiile
+    animateTitle();
+    animateSubtitle();
 });
 
 function typeWriter(textArray, element, lineIndex = 0, charIndex = 0) {

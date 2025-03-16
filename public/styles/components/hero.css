@@ -12,68 +12,94 @@
 .hero h1 {
     font-size: 4rem;
     margin-bottom: 24px;
-    background: linear-gradient(
-        to right,
-        #fff 20%,
-        #a5b4fc 30%,
-        #3b82f6 70%,
-        #fff 80%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-size: 200% auto;
-    animation: textShine 4s ease-in-out infinite alternate;
-    text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-    letter-spacing: 2px;
+    color: #fff;
+    letter-spacing: -1px;
     font-weight: 800;
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+    padding: 0;
+    transition: all 0.5s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    background: linear-gradient(45deg, #6366f1, #8b5cf6, #3b82f6);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero h1.animate {
+    opacity: 1;
+    transform: translateY(0);
+    animation: gradientShift 3s ease infinite;
+}
+
+.hero h1::before {
+    display: none;
+}
+
+.hero h1.gradient-active::before {
+    display: none;
+}
+
+.hero h1:hover {
+    transform: translateY(-5px);
+    text-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
 }
 
 .hero .subtitle {
     font-size: 1.35rem;
-    background: linear-gradient(
-        45deg,
-        rgba(255, 255, 255, 0.8) 25%,
-        rgba(165, 180, 252, 0.8) 50%,
-        rgba(59, 130, 246, 0.8) 75%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-size: 200% auto;
-    animation: subtitleGradient 8s ease infinite;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.5px;
     font-weight: 500;
-    margin-bottom: 120px;
-    padding: 0.5rem 1rem;
+    margin-bottom: 80px;
+    padding: 0;
     position: relative;
     display: inline-block;
+    z-index: 1;
+    transition: all 0.5s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    background: linear-gradient(45deg, #6366f1, #8b5cf6, #3b82f6);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-.hero .subtitle::before,
-.hero .subtitle::after {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
+.hero .subtitle.animate {
+    opacity: 1;
+    transform: translateY(0);
+    animation: gradientShift 3s ease infinite;
 }
 
 .hero .subtitle::before {
-    top: 0;
-    left: 0;
-    border-top: 2px solid #3b82f6;
-    border-left: 2px solid #3b82f6;
-    animation: cornerAnimateTopLeft 4s ease-in-out infinite;
+    display: none;
+}
+
+.hero .subtitle.gradient-active::before {
+    display: none;
+}
+
+.hero .subtitle:hover {
+    transform: translateY(-3px);
+    text-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
 }
 
 .hero .subtitle::after {
-    bottom: 0;
-    right: 0;
-    border-bottom: 2px solid #8b5cf6;
-    border-right: 2px solid #8b5cf6;
-    animation: cornerAnimateBottomRight 4s ease-in-out infinite;
+    display: none;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 @keyframes subtitleGradient {
@@ -174,11 +200,15 @@
     flex-direction: column;
     align-items: center;
     margin: 0 auto;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s forwards;
+    animation-delay: calc(var(--card-index, 0) * 0.2s);
 }
 
 .crypto-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.3);
     background: rgba(17, 25, 40, 0.85);
 }
@@ -191,6 +221,25 @@
     height: 150px;
     margin-bottom: 1rem;
     margin-top: 3.5rem;
+    position: relative;
+}
+
+.crypto-icon::after {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.1) 50%, transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.crypto-card:hover .crypto-icon::after {
+    opacity: 1;
+    transform: scale(1.2);
 }
 
 .crypto-icon img {
@@ -199,32 +248,40 @@
     object-fit: contain;
     filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
 }
 
 .crypto-card:hover .crypto-icon img {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.4));
+    transform: scale(1.1) translateY(-5px);
+    filter: drop-shadow(0 0 40px rgba(99, 102, 241, 0.4));
 }
 
 .crypto-data {
     margin-top: auto;
     background: rgba(17, 25, 40, 0.95);
-    padding: 1rem;
-    border-radius: 12px;
+    padding: 1.25rem;
+    border-radius: 16px;
     width: 90%;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
 }
 
 .crypto-data h3 {
     font-size: 1.25rem;
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 0.75rem;
-    color: rgba(255, 255, 255, 0.9);
     letter-spacing: 0.5px;
     text-align: center;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(45deg, #6366f1, #8b5cf6, #3b82f6);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease infinite;
 }
 
 .crypto-stats {
@@ -259,35 +316,48 @@
 }
 
 .stat .price,
-.stat .volume,
-.stat .change {
-    font-weight: 500;
+.stat .volume {
+    font-weight: 600;
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.9);
     font-family: 'JetBrains Mono', monospace;
     text-align: right;
     flex: 1;
+    transition: all 0.3s ease;
+}
+
+.stat:hover .price,
+.stat:hover .volume {
+    background: linear-gradient(45deg, #6366f1, #8b5cf6, #3b82f6);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease infinite;
+    transform: translateX(2px);
 }
 
 .stat .change {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.9);
     font-family: 'JetBrains Mono', monospace;
     text-align: right;
     flex: 1;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
 }
 
 .stat .change.positive {
     color: #10B981;
     background: rgba(16, 185, 129, 0.1);
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
 }
 
 .stat .change.negative {
     color: #EF4444;
     background: rgba(239, 68, 68, 0.1);
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
 .crypto-card:hover .crypto-data {

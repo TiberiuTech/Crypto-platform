@@ -69,19 +69,43 @@
 
 .logo {
     font-size: 1.2rem;
-    font-weight: 600;
+    font-weight: 700;
     color: #fff;
     text-decoration: none;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     height: 100%;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.logo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, #6366f1, #8b5cf6, #3b82f6);
+    background-size: 200% 200%;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+}
+
+.logo:hover::before {
+    opacity: 1;
+    animation: gradientShift 3s ease infinite;
 }
 
 .logo:hover {
-    color: rgb(56, 97, 251);
-    transform: scale(1.05);
-    text-shadow: 0 0 10px rgba(56, 97, 251, 0.5);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .nav-center {
