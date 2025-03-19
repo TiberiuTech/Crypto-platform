@@ -4,13 +4,29 @@ A modern cryptocurrency trading and portfolio management platform, developed wit
 
 ## Screenshots
 
-### Trading Interface
-![Trading Interface](https://github.com/TiberiuTech/Crypto-platform/blob/main/trade.png)
-*Advanced trading interface featuring real-time price charts, order book, and trading functionality for BTC/USD with a clean, dark-themed design*
+### Homepage
+![Trading Interface](https://github.com/TiberiuTech/Crypto-platform/blob/main/interface.png)
+*Crypto-Impact platform homepage featuring main cryptocurrencies: Bitcoin, Orionix, and Ethereum with current prices and 24h changes. Modern purple gradient design with platform tagline promoting access to 100+ cryptocurrencies*
 
-### Wallet Interface
-![Wallet Interface](https://github.com/TiberiuTech/Crypto-platform/blob/main/wallet.png)
-*Digital wallet interface showing portfolio balance, transaction history, and asset management with a modern dark theme*
+### Prices Page
+![Trading Interface](https://github.com/TiberiuTech/Crypto-platform/blob/main/prices.png)
+*Cryptocurrency price overview featuring "Top Movers" carousel with Bitcoin, Ethereum, XRP, Solana and USD Coin. Comprehensive price table displays current values, 24h changes, volume, and market cap with interactive sparkline charts*
+
+### Wallet Overview
+![Trading Interface](https://github.com/TiberiuTech/Crypto-platform/blob/main/wallet.png)
+*Portfolio management page showing $1,559,014.39 total value with interactive performance chart. Features include time period filters, deposit/withdraw/swap options, and detailed transaction history for the user's cryptocurrency holdings*
+
+### Trading Interface
+![Wallet Interface](https://github.com/TiberiuTech/Crypto-platform/blob/main/trade.png)
+*Advanced trading dashboard showing real-time BTC/USD chart at $84,097.66 with orderbook, recent trades panel, and trading options (Market/Limit/Stop). Streamlined buy/sell interface with price input and position size controls*
+
+### Login Page
+![Trading Interface](https://github.com/TiberiuTech/Crypto-platform/blob/main/login.png)
+*Sleek login interface with email and password fields featuring a dark theme with purple accents. Includes Google sign-in option and link to create a new account, maintaining the platform's modern aesthetic with a centered modal design*
+
+### Sign Up Page
+![Trading Interface](https://github.com/TiberiuTech/Crypto-platform/blob/main/sign%20up.png)
+*User registration form with fields for full name, email, and password (with confirmation). Features the same dark theme with purple gradient accents, Google authentication option, and a link for existing users to navigate to the login page*
 
 ## Key Features
 
