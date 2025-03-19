@@ -62,13 +62,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function setActiveNavLink() {
     const currentPath = window.location.pathname.toLowerCase();
     const navLinks = document.querySelectorAll('.nav-link');
+    const logo = document.querySelector('.logo');
     
-    // Elimină clasa active de pe toate link-urile
+    // Elimină clasa active de pe toate link-urile și logo
     navLinks.forEach(link => link.classList.remove('active'));
+    if (logo) logo.classList.remove('active');
     
     // Verifică dacă suntem pe pagina principală
     if (currentPath === '/' || currentPath === '/index.html') {
-        // Nu setăm niciun link ca activ pe pagina principală
+        // Setăm logo-ul ca activ pe pagina principală
+        if (logo) logo.classList.add('active');
         return;
     }
     

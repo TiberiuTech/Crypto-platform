@@ -7,6 +7,7 @@ import * as db from './services/databaseService.js';
 import { OAuth2Client } from 'google-auth-library';
 import dotenv from 'dotenv';
 import path from 'path';
+import { getOrionixInfo, getOrionixPriceHistory, updateOrionixPrice, ORIONIX_CONTRACT_ADDRESS } from './services/orionixService.js';
 
 dotenv.config();
 
@@ -205,6 +206,40 @@ app.get('*', (req, res) => {
     res.sendFile(join(__dirname, 'public', 'index.html'));
 });
 
+// API pentru Orionix
+app.get('/api/crypto/orionix/info', async (req, res) => {
+  try {
+    const info = await getOrionixInfo();
+    res.json(info);
+  } catch (error) {
+    console.error('Eroare la obținerea informațiilor Orionix:', error);
+    res.status(500).json({ error: 'Nu s-au putut obține informațiile pentru Orionix' });
+  }
+});
+
+app.get('/api/crypto/orionix/price-history', (req, res) => {
+  try {
+    const { period } = req.query;
+    const history = getOrionixPriceHistory(period);
+    res.json(history);
+  } catch (error) {
+    console.error('Eroare la obținerea istoricului de preț Orionix:', error);
+    res.status(500).json({ error: 'Nu s-a putut obține istoricul de preț pentru Orionix' });
+  }
+});
+
+app.post('/api/crypto/orionix/update-price', (req, res) => {
+  try {
+    // Această rută este protejată și ar trebui accesată doar de administratori
+    // TODO: Adăugați autentificare și autorizare aici
+    
+    const updatedData = updateOrionixPrice();
+    res.json(updatedData);
+  } catch (error) {
+    console.error('Eroare la actualizarea prețului Orionix:', error);
+    res.status(500).json({ error: 'Nu s-a putut actualiza prețul pentru Orionix' });
+  }
+});
 
 const startServer = async () => {
     try {

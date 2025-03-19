@@ -26,7 +26,7 @@ class TradingPage {
         
         this.baseUrl = 'https://min-api.cryptocompare.com/data';
         this.cryptoCompareBaseUrl = 'https://min-api.cryptocompare.com/data';
-        this.cryptoCompareApiKey = 'da32007c65be52c3e9d98542bebd8906d676d7c0129c31e7ad40c04a927fd4a';
+        this.cryptoCompareApiKey = '';
         this.cryptoImageBaseUrl = 'https://www.cryptocompare.com';
         
         const savedState = localStorage.getItem('tradingState');
@@ -391,7 +391,7 @@ class TradingPage {
     async updatePrice() {
         try {
             const [symbol] = this.currentPair.split('/');
-            const response = await fetch(`${this.cryptoCompareBaseUrl}/price?fsym=${symbol}&tsyms=USD&api_key=${this.cryptoCompareApiKey}`);
+            const response = await fetch(`${this.cryptoCompareBaseUrl}/price?fsym=${symbol}&tsyms=USD`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -1128,7 +1128,7 @@ class TradingPage {
 
     async initializeCryptoData() {
         try {
-            const response = await fetch(`${this.cryptoCompareBaseUrl}/all/coinlist?api_key=${this.cryptoCompareApiKey}`);
+            const response = await fetch(`${this.cryptoCompareBaseUrl}/all/coinlist`);
             const data = await response.json();
             
             if (data.Response === 'Success' && data.Data) {

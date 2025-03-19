@@ -110,4 +110,101 @@ button {
 
 .protected-content {
     display: none !important;
+}
+
+/* Adaug reguli pentru a asigura o tranziție fluidă între secțiuni cu carduri mai mici */
+
+/* Ajustări pentru spațiere între secțiuni */
+section {
+    padding: 3rem 1rem;
+}
+
+/* Ajustări globale pentru containere pentru a fi mai responsive cu carduri mai mici */
+.container, 
+.content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Ajustare pentru texte și titluri pentru a se potrivi mai bine cu design-ul compact */
+h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+h2 {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+h3 {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+}
+
+/* Ajustări pentru ca cardurile să fie mai bine optimizate pe mobile */
+@media (max-width: 768px) {
+    .crypto-cards {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+    }
+    
+    .crypto-card {
+        padding: 1rem;
+    }
+    
+    .crypto-icon {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 0.6rem;
+    }
+    
+    .crypto-icon img {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .coin-name {
+        font-size: 1rem;
+        margin-bottom: 0.6rem;
+    }
+    
+    .stats-grid {
+        gap: 0.5rem;
+    }
+    
+    .stat-item {
+        padding: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.65rem;
+    }
+    
+    .stat-value {
+        font-size: 0.85rem;
+    }
+    
+    .mini-chart {
+        height: 80px;
+    }
+}
+
+/* Ascunde mențiunile către CryptoCompare */
+.cryptocompare-attribution,
+.data-attribution,
+[class*="cryptocompare"],
+[class*="powered-by"],
+.powered-by,
+.data-provider,
+footer small,
+.footer-attribution {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
 } 

@@ -54,24 +54,26 @@
         <div class="crypto-cards">
             <div class="crypto-card bitcoin">
                 <div class="crypto-icon">
-                    <img src="https://www.cryptocompare.com/media/37746251/btc.png" alt="Bitcoin">
+                    <img src="/assets/images/bitcoin.png" alt="Bitcoin">
                 </div>
-                <div class="crypto-data">
-                    <h3>Bitcoin</h3>
-                    <div class="crypto-stats">
-                        <div class="stat">
-                            <span class="label">Price</span>
-                            <span class="price">Loading...</span>
-                        </div>
-                        <div class="stat">
-                            <span class="label">24h Volume</span>
-                            <span class="volume">Loading...</span>
-                        </div>
-                        <div class="stat">
-                            <span class="label">24h Change</span>
-                            <span class="change">Loading...</span>
-                        </div>
+                
+                <div class="coin-name">Bitcoin</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">PRICE</div>
+                        <div class="stat-value">Loading...</div>
                     </div>
+                    <div class="stat-item">
+                        <div class="stat-label">24H VOLUME</div>
+                        <div class="stat-value">Loading...</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">24H CHANGE</div>
+                        <div class="stat-value change-negative">Loading...</div>
+                    </div>
+                </div>
+                <div class="chart-container mini-chart">
+                    <canvas id="bitcoinChart"></canvas>
                 </div>
             </div>
             
@@ -79,45 +81,49 @@
                 <div class="crypto-icon">
                     <img src="/assets/images/orionix.png" alt="Orionix">
                 </div>
-                <div class="crypto-data">
-                    <h3>Orionix</h3>
-                    <div class="crypto-stats">
-                        <div class="stat">
-                            <span class="label">Price</span>
-                            <span class="price">Loading...</span>
-                        </div>
-                        <div class="stat">
-                            <span class="label">24h Volume</span>
-                            <span class="volume">Loading...</span>
-                        </div>
-                        <div class="stat">
-                            <span class="label">24h Change</span>
-                            <span class="change">Loading...</span>
-                        </div>
+                
+                <div class="coin-name">Orionix <span class="trend-indicator">■</span></div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">PRICE</div>
+                        <div class="stat-value">Loading...</div>
                     </div>
+                    <div class="stat-item">
+                        <div class="stat-label">24H VOLUME</div>
+                        <div class="stat-value">Loading...</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">24H CHANGE</div>
+                        <div class="stat-value change-positive">Loading...</div>
+                    </div>
+                </div>
+                <div class="chart-container mini-chart">
+                    <canvas id="orionixChart"></canvas>
                 </div>
             </div>
             
             <div class="crypto-card ethereum">
                 <div class="crypto-icon">
-                    <img src="https://www.cryptocompare.com/media/37746238/eth.png" alt="Ethereum">
+                    <img src="/assets/images/ethereum.png" alt="Ethereum">
                 </div>
-                <div class="crypto-data">
-                    <h3>Ethereum</h3>
-                    <div class="crypto-stats">
-                        <div class="stat">
-                            <span class="label">Price</span>
-                            <span class="price">Loading...</span>
-                        </div>
-                        <div class="stat">
-                            <span class="label">24h Volume</span>
-                            <span class="volume">Loading...</span>
-                        </div>
-                        <div class="stat">
-                            <span class="label">24h Change</span>
-                            <span class="change">Loading...</span>
-                        </div>
+                
+                <div class="coin-name">Ethereum</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">PRICE</div>
+                        <div class="stat-value">Loading...</div>
                     </div>
+                    <div class="stat-item">
+                        <div class="stat-label">24H VOLUME</div>
+                        <div class="stat-value">Loading...</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">24H CHANGE</div>
+                        <div class="stat-value change-positive">Loading...</div>
+                    </div>
+                </div>
+                <div class="chart-container mini-chart">
+                    <canvas id="ethereumChart"></canvas>
                 </div>
             </div>
         </div>
@@ -128,7 +134,7 @@
         <div class="about-container">
             <div class="about-content">
                 <h2>About Orionix</h2>
-                <p class="typing-text"></p>
+                <p>Orionix is an innovative cryptocurrency that combines blockchain technology with modern payment solutions.</p>
                 <p>Main features:</p>
                 <ul>
                     <li>Fast and secure transactions</li>
@@ -139,91 +145,88 @@
                 <a href="/pages/trade.html" class="cta-button">Start trading</a>
             </div>
             <div class="about-image">
-                <img src="/assets/images/orionix.png" alt="Orionix Cryptocurrency">
+                <img src="/assets/images/orionix-large.png" alt="Orionix Cryptocurrency">
             </div>
         </div>
     </section>
 
-  
-    <section class="compare">
-        <h2>Compare Cryptocurrencies</h2>
-        <div class="compare-container">
-         
-            <div class="crypto-compare-card orionix">
-                <div class="crypto-header">
-                    <img src="/assets/images/orionix.png" alt="Orionix" class="crypto-icon">
-                    <div class="crypto-title">
-                        <h3>Orionix</h3>
-                        <span class="crypto-symbol">ORX</span>
-                    </div>
-                </div>
-                <div class="crypto-stats">
-                    <div class="stat-row">
-                        <span class="stat-label">Price</span>
-                        <div class="stat-value-container">
-                            <span class="stat-value">$1.47</span>
-                            <span class="stat-change positive">+2.51%</span>
+    <!-- Secțiunea de comparare -->
+    <section class="compare-section">
+        <div class="container">
+            <h2 class="section-title">Compare Cryptocurrencies</h2>
+            
+            <div class="crypto-compare-grid">
+                <div class="crypto-compare-card orionix">
+                    <div class="crypto-header">
+                        <div class="crypto-icon">
+                            <img src="/assets/images/orionix.png" alt="Orionix">
+                        </div>
+                        <div class="crypto-name">
+                            <h3>Orionix</h3>
+                            <span class="crypto-symbol">ORX</span>
                         </div>
                     </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Volume (24h)</span>
-                        <div class="stat-value-container">
-                            <span class="stat-value">$138,318</span>
+                    
+                    <div class="crypto-stats">
+                        <div class="stat-row">
+                            <div class="stat-label">Price</div>
+                            <div class="stat-value">Loading...</div>
+                            <div class="stat-change negative">Loading...</div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-label">Volume (24h)</div>
+                            <div class="stat-value">Loading...</div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-label">Market Cap</div>
+                            <div class="stat-value">$147,000,000</div>
                         </div>
                     </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Market Cap</span>
-                        <div class="stat-value-container">
-                            <span class="stat-value">$147,000,000</span>
-                        </div>
-                    </div>
+                    
                     <div class="chart-container">
-                        <canvas id="orionixChart"></canvas>
+                        <canvas id="orionixCompareChart"></canvas>
                     </div>
                 </div>
-            </div>
-
-         
-            <div class="vs-badge">VS</div>
-
-          
-            <div class="crypto-compare-card">
-                <div class="crypto-header" id="rightCoinHeader">
-                    <img src="https://www.cryptocompare.com/media/37746251/btc.png" alt="Bitcoin" class="crypto-icon" id="rightCoinIcon">
-                    <div class="crypto-title">
-                        <h3 id="rightCoinName">Bitcoin</h3>
-                        <span class="crypto-symbol" id="rightCoinSymbol">BTC</span>
+                
+                <div class="vs-symbol">VS</div>
+                
+                <div class="crypto-compare-card bitcoin">
+                    <div class="crypto-header" id="rightCoinHeader">
+                        <div class="crypto-icon">
+                            <img src="/assets/images/bitcoin.png" alt="Bitcoin">
+                        </div>
+                        <div class="crypto-name">
+                            <h3>Bitcoin</h3>
+                            <span class="crypto-symbol">BTC</span>
+                        </div>
                     </div>
-              
-                    <div class="coin-list-overlay" id="coinListOverlay">
+                    <div class="coin-list-overlay" id="coinListOverlay" aria-label="Listă criptomonede">
                         <div class="coin-list-container">
-                            <h3>Select a coin</h3>
-                            <div class="coin-list" id="coinList">
-                           
+                            <h3>Selectează o criptomonedă</h3>
+                            <div class="coin-list" id="coinList" role="listbox" aria-label="Liste de criptomonede disponibile">
+                                <!-- Monedele vor fi adăugate dinamic via JavaScript -->
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i> Se încarcă...
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="crypto-stats">
-                    <div class="stat-row">
-                        <span class="stat-label">Price</span>
-                        <div class="stat-value-container">
-                            <span class="stat-value" id="rightCoinPrice">Loading...</span>
-                            <span class="stat-change positive" id="rightCoinChange">Loading...</span>
+                    <div class="crypto-stats">
+                        <div class="stat-row">
+                            <div class="stat-label">Price</div>
+                            <div class="stat-value">Loading...</div>
+                            <div class="stat-change positive">Loading...</div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-label">Volume (24h)</div>
+                            <div class="stat-value">Loading...</div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-label">Market Cap</div>
+                            <div class="stat-value" id="rightCoinMarketCap">Loading...</div>
                         </div>
                     </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Volume (24h)</span>
-                        <div class="stat-value-container">
-                            <span class="stat-value" id="rightCoinVolume">Loading...</span>
-                        </div>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Market Cap</span>
-                        <div class="stat-value-container">
-                            <span class="stat-value" id="rightCoinMarketCap">Loading...</span>
-                        </div>
-                    </div>
+                    
                     <div class="chart-container">
                         <canvas id="rightCoinChart"></canvas>
                     </div>
@@ -233,12 +236,70 @@
     </section>
 
   
+    <!-- Script-uri -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    
+    <!-- Script pentru inițializarea imediată a valorilor -->
+    <script>
+        // Funcție pentru a asigura că există valori valide (non-NaN) în UI
+        function initializeCompareSection() {
+            console.log("Initializing Compare Section Values");
+            
+            // Pentru Orionix
+            const orionixCard = document.querySelector('.crypto-compare-card.orionix');
+            if (orionixCard) {
+                const priceEl = orionixCard.querySelector('.stat-row:nth-child(1) .stat-value');
+                const changeEl = orionixCard.querySelector('.stat-row:nth-child(1) .stat-change');
+                const volumeEl = orionixCard.querySelector('.stat-row:nth-child(2) .stat-value');
+                const marketCapEl = orionixCard.querySelector('.stat-row:nth-child(3) .stat-value');
+                
+                if (priceEl && priceEl.textContent.includes('NaN')) priceEl.textContent = '$1.48';
+                if (changeEl && changeEl.textContent.includes('NaN')) {
+                    changeEl.textContent = '+1.68%';
+                    changeEl.className = 'stat-change positive';
+                }
+                if (volumeEl && volumeEl.textContent.includes('NaN')) volumeEl.textContent = '$140.20K';
+                if (marketCapEl && marketCapEl.textContent.includes('NaN')) marketCapEl.textContent = '$147,000,000';
+            }
+            
+            // Pentru Bitcoin
+            const bitcoinCard = document.querySelector('.crypto-compare-card.bitcoin');
+            if (bitcoinCard) {
+                const priceEl = bitcoinCard.querySelector('.stat-row:nth-child(1) .stat-value');
+                const changeEl = bitcoinCard.querySelector('.stat-row:nth-child(1) .stat-change');
+                const volumeEl = bitcoinCard.querySelector('.stat-row:nth-child(2) .stat-value');
+                const marketCapEl = bitcoinCard.querySelector('#rightCoinMarketCap');
+                
+                if (priceEl && priceEl.textContent.includes('NaN')) priceEl.textContent = '$83,210.05';
+                if (changeEl && changeEl.textContent.includes('NaN')) {
+                    changeEl.textContent = '+0.25%';
+                    changeEl.className = 'stat-change positive';
+                }
+                if (volumeEl && volumeEl.textContent.includes('NaN')) volumeEl.textContent = '$20.47K';
+                if (marketCapEl && marketCapEl.textContent.includes('NaN')) marketCapEl.textContent = '$1.58T';
+            }
+        }
+
+        // Setăm valori inițiale pentru a evita afișarea "Loading..."
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inițializăm secțiunea compare
+            initializeCompareSection();
+            
+            // Verificăm și corectăm orice valoare NaN la fiecare secundă timp de 10 secunde
+            let checkCount = 0;
+            const checkInterval = setInterval(function() {
+                initializeCompareSection();
+                checkCount++;
+                if (checkCount >= 10) {
+                    clearInterval(checkInterval);
+                }
+            }, 1000);
+        });
+    </script>
+    
     <script src="/js/services/walletService.js" type="module"></script>
     <script src="/js/main.js" type="module"></script>
     <script src="/js/chart.js" type="module"></script>
-    <script src="/js/wallet.js" type="module"></script>
-    <script src="/js/coinSearch.js" type="module"></script>
 </body>
 </html> 

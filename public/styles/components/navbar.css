@@ -97,12 +97,14 @@
     transition: opacity 0.3s ease;
 }
 
-.logo:hover::before {
+.logo:hover::before,
+.logo.active::before {
     opacity: 1;
     animation: gradientShift 3s ease infinite;
 }
 
-.logo:hover {
+.logo:hover,
+.logo.active {
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);

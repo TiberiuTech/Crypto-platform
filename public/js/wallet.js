@@ -536,7 +536,6 @@ document.head.appendChild(style);
 function initializeChart() {
     const chartCanvas = document.getElementById('portfolioChart');
     if (!chartCanvas) {
-        console.log('The canvas element for the chart is not present on the page');
         return;
     }
 
@@ -586,7 +585,6 @@ function generateHistoricalData(currentBalance, days) {
 function updatePortfolioChart() {
     const chartCanvas = document.getElementById('portfolioChart');
     if (!chartCanvas) {
-        console.log('The canvas element for the chart is not present on the page');
         return;
     }
 
@@ -598,7 +596,6 @@ function updatePortfolioChart() {
 
     const ctx = chartCanvas.getContext('2d');
     if (!ctx) {
-        console.log('Could not get the context for the canvas');
         return;
     }
 

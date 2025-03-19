@@ -1,7 +1,7 @@
 // Funcționalitate pentru lista de monede
 document.addEventListener('DOMContentLoaded', () => {
     const rightCoinIcon = document.getElementById('rightCoinIcon');
-    const listOverlay = document.getElementById('coinListOverlay');
+    const listOverlay = document.querySelector('.coin-list-overlay');
     const coinList = document.getElementById('coinList');
     
     const coins = [
@@ -17,31 +17,33 @@ document.addEventListener('DOMContentLoaded', () => {
         { symbol: 'DOT', name: 'Polkadot' }
     ];
 
-    updateCoinData('BTC', 'https://www.cryptocompare.com/media/37746251/btc.png');
+    updateCoinData('BTC', '/assets/images/btc.png');
 
-    function getCryptoCompareImageUrl(symbol) {
-        return `https://www.cryptocompare.com/api/data/coinlist/`; 
+    function getCoinImageUrl(symbol) {
+        return `/assets/images/${symbol.toLowerCase()}.png`; 
     }
 
-    rightCoinIcon.addEventListener('click', () => {
-        listOverlay.classList.add('active');
-        loadCoinData();
-    });
+    if (rightCoinIcon) {
+        rightCoinIcon.addEventListener('click', () => {
+            if (listOverlay) {
+                listOverlay.classList.add('active');
+                loadCoinData();
+            }
+        });
+    }
 
-    listOverlay.addEventListener('click', (e) => {
-        if (e.target === listOverlay) {
-            listOverlay.classList.remove('active');
-        }
-    });
+    if (listOverlay) {
+        listOverlay.addEventListener('click', (e) => {
+            if (e.target === listOverlay) {
+                listOverlay.classList.remove('active');
+            }
+        });
+    }
 
     async function loadCoinData() {
         try {
-            const response = await fetch('https://min-api.cryptocompare.com/data/all/coinlist?summary=true');
-            const data = await response.json();
-            
             const coinListHTML = coins.map(coin => {
-                const coinData = data.Data[coin.symbol];
-                const imageUrl = `https://www.cryptocompare.com${coinData.ImageUrl}`;
+                const imageUrl = getCoinImageUrl(coin.symbol);
                 return `
                     <div class="coin-list-item" data-symbol="${coin.symbol}">
                         <img src="${imageUrl}" alt="${coin.name}">
@@ -58,8 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.coin-list-item').forEach(item => {
                 item.addEventListener('click', () => {
                     const symbol = item.dataset.symbol;
-                    const coinData = data.Data[symbol];
-                    const imageUrl = `https://www.cryptocompare.com${coinData.ImageUrl}`;
+                    const imageUrl = getCoinImageUrl(symbol);
                     updateCoinData(symbol, imageUrl);
                     listOverlay.classList.remove('active');
                 });
@@ -76,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             const coinData = data.RAW[symbol].USD;
 
-            // Formatare pentru numere mari
             function formatLargeNumber(number) {
                 if (number >= 1e12) {
                     return `$${(number / 1e12).toFixed(2)}T`;
@@ -89,13 +89,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            document.getElementById('rightCoinIcon').src = imageUrl;
-            document.getElementById('rightCoinName').textContent = coins.find(c => c.symbol === symbol).name;
-            document.getElementById('rightCoinSymbol').textContent = symbol;
-            document.getElementById('rightCoinPrice').textContent = `$${coinData.PRICE.toFixed(2)}`;
-            document.getElementById('rightCoinChange').textContent = `${coinData.CHANGEPCT24HOUR.toFixed(2)}%`;
-            document.getElementById('rightCoinVolume').textContent = formatLargeNumber(coinData.VOLUME24HOUR);
-            document.getElementById('rightCoinMarketCap').textContent = formatLargeNumber(coinData.MKTCAP);
+            const rightCoinIcon = document.getElementById('rightCoinIcon');
+            if (rightCoinIcon) rightCoinIcon.src = imageUrl;
+            
+            const rightCoinName = document.getElementById('rightCoinName');
+            if (rightCoinName) rightCoinName.textContent = coins.find(c => c.symbol === symbol)?.name || symbol;
+            
+            const rightCoinSymbol = document.getElementById('rightCoinSymbol');
+            if (rightCoinSymbol) rightCoinSymbol.textContent = symbol;
+            
+            const rightCoinPrice = document.getElementById('rightCoinPrice');
+            if (rightCoinPrice) rightCoinPrice.textContent = `$${coinData.PRICE.toFixed(2)}`;
+            
+            const rightCoinChange = document.getElementById('rightCoinChange');
+            if (rightCoinChange) rightCoinChange.textContent = `${coinData.CHANGEPCT24HOUR.toFixed(2)}%`;
+            
+            const rightCoinVolume = document.getElementById('rightCoinVolume');
+            if (rightCoinVolume) rightCoinVolume.textContent = formatLargeNumber(coinData.VOLUME24HOUR);
+            
+            const rightCoinMarketCap = document.getElementById('rightCoinMarketCap');
+            if (rightCoinMarketCap) rightCoinMarketCap.textContent = formatLargeNumber(coinData.MKTCAP);
 
             updateChart(symbol);
         } catch (error) {
@@ -105,6 +118,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function updateChart(symbol) {
         try {
+            const chartElement = document.getElementById('rightCoinChart');
+            if (!chartElement) {
+                // Dacă elementul canvas nu există, ieșim din funcție silențios
+                return;
+            }
+            
             const response = await fetch(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=USD&limit=24`);
             const data = await response.json();
             const prices = data.Data.Data;

@@ -746,4 +746,609 @@ body {
 
 .price-value, .mover-price, .volume-24h, .market-cap, .price-change, .pagination-btn {
     font-family: 'Roboto Mono', monospace;
+}
+
+/* Stilizare pentru modalul de detalii despre monede */
+.crypto-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.crypto-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.crypto-modal {
+    background: linear-gradient(135deg, rgb(18, 24, 38) 0%, rgb(13, 17, 28) 100%);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.crypto-modal-overlay.active .crypto-modal {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.crypto-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+.crypto-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.crypto-modal-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px;
+}
+
+.crypto-modal-name {
+    display: flex;
+    flex-direction: column;
+}
+
+.crypto-modal-name h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.crypto-modal-name span {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.crypto-modal-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.5rem;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.crypto-modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.crypto-modal-content {
+    padding: 24px;
+}
+
+.crypto-modal-section {
+    margin-bottom: 32px;
+}
+
+.crypto-modal-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.crypto-price-overview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.crypto-price-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+    flex: 1;
+    min-width: 180px;
+}
+
+.crypto-price-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 8px;
+}
+
+.crypto-price-value {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.crypto-price-change {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.crypto-price-change.positive {
+    background: rgba(22, 163, 74, 0.2);
+    color: rgb(34, 197, 94);
+}
+
+.crypto-price-change.negative {
+    background: rgba(220, 38, 38, 0.2);
+    color: rgb(248, 113, 113);
+}
+
+.crypto-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.crypto-info-item {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.crypto-info-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 8px;
+}
+
+.crypto-info-value {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.crypto-description {
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+}
+
+.crypto-chart-container {
+    height: 300px;
+    margin: 24px 0;
+    position: relative;
+}
+
+.chart-period-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.chart-period-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.chart-period-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.chart-period-btn.active {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.5);
+    color: rgb(129, 140, 248);
+}
+
+@media (max-width: 768px) {
+    .crypto-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .crypto-price-overview {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .crypto-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .crypto-modal-header {
+        padding: 16px;
+    }
+    
+    .crypto-modal-content {
+        padding: 16px;
+    }
+    
+    .crypto-modal-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .crypto-modal-name h2 {
+        font-size: 1.3rem;
+    }
+}
+
+/* Top Movers */
+.top-movers {
+    margin-bottom: 2rem;
+}
+
+.top-movers-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.top-movers-header h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+.info-icon {
+    margin-left: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: help;
+}
+
+.movers-carousel {
+    overflow: hidden;
+    position: relative;
+}
+
+.movers-container {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    scroll-behavior: smooth;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.movers-container::-webkit-scrollbar {
+    display: none;
+}
+
+.mover-card {
+    flex: 0 0 auto;
+    width: 260px;
+    background: rgba(30, 41, 59, 0.6);
+    border-radius: 16px;
+    padding: 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.mover-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.mover-card.orionix-mover {
+    background: linear-gradient(180deg, rgba(26, 26, 46, 0.8) 0%, rgba(13, 17, 28, 0.9) 100%);
+    border: 1px solid rgba(99, 129, 255, 0.3);
+    position: relative;
+}
+
+.mover-card.orionix-mover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #5d62e3, #8154e3);
+    border-radius: 16px 16px 0 0;
+}
+
+.mover-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 1rem;
+}
+
+.mover-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.mover-data {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.mover-name {
+    display: flex;
+    flex-direction: column;
+}
+
+.mover-name strong {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.mover-name span {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.mover-price {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.mover-change {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.mover-change.positive {
+    background-color: rgba(22, 199, 132, 0.1);
+    color: rgb(22, 199, 132);
+}
+
+.mover-change.negative {
+    background-color: rgba(234, 57, 67, 0.1);
+    color: rgb(234, 57, 67);
+}
+
+.mover-chart {
+    margin-top: 0.5rem;
+}
+
+.mover-chart svg {
+    width: 100%;
+    height: 30px;
+}
+
+.mover-chart svg path {
+    stroke-width: 2;
+    fill: transparent;
+}
+
+.mover-card.orionix-mover .mover-name strong {
+    color: #8154e3;
+}
+
+/* Orionix Card */
+.orionix-card {
+    background: linear-gradient(180deg, rgba(26, 26, 46, 0.8) 0%, rgba(13, 17, 28, 0.9) 100%);
+    border: 1px solid rgba(99, 129, 255, 0.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 340px;
+    margin-right: 1rem;
+    position: relative;
+}
+
+.orionix-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #5d62e3, #8154e3);
+    border-radius: 16px 16px 0 0;
+}
+
+.orionix-card .coin-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1rem;
+}
+
+.orionix-card .coin-name {
+    color: #8154e3;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.orionix-card .stats-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.orionix-card .stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.orionix-card .stat-item:last-child {
+    border-bottom: none;
+}
+
+.orionix-card .stat-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.orionix-card .stat-value {
+    color: white;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.orionix-card .change-positive {
+    color: #00ca72;
+}
+
+/* Price List */
+.prices-container {
+    margin-top: 2rem;
+}
+
+.prices-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.crypto-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.crypto-table th,
+.crypto-table td {
+    padding: 1rem;
+    text-align: left;
+}
+
+.crypto-table th {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+}
+
+.crypto-table th:hover {
+    color: white;
+}
+
+.crypto-table tbody tr {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s ease;
+}
+
+.crypto-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.crypto-table tbody tr.orionix-row {
+    background: linear-gradient(90deg, rgba(26, 26, 46, 0.4) 0%, rgba(13, 17, 28, 0.1) 100%);
+    border-left: 3px solid #8154e3;
+}
+
+.crypto-table tbody tr.orionix-row:hover {
+    background: linear-gradient(90deg, rgba(26, 26, 46, 0.6) 0%, rgba(13, 17, 28, 0.2) 100%);
+}
+
+.coin-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.coin-icon-small {
+    width: 24px;
+    height: 24px;
+}
+
+.coin-name-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.coin-symbol {
+    font-weight: 600;
+    color: white;
+}
+
+.coin-name {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.price {
+    font-weight: 600;
+    color: white;
+}
+
+.price-change {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.price-change.positive {
+    background-color: rgba(22, 199, 132, 0.1);
+    color: rgb(22, 199, 132);
+}
+
+.price-change.negative {
+    background-color: rgba(234, 57, 67, 0.1);
+    color: rgb(234, 57, 67);
+}
+
+.chart-cell {
+    width: 150px;
+}
+
+.mini-chart {
+    height: 50px;
+    width: 100%;
 } 
