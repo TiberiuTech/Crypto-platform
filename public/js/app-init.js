@@ -174,7 +174,7 @@ function setupTypingEffect() {
     textElement.style.minHeight = '0';
     
     let i = 0;
-    const speed = 25; // viteza de typing în milisecunde
+    const speed = 80; // viteza de typing în milisecunde
 
     function type() {
         if (i < text.length) {

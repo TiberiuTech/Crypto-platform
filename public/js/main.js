@@ -759,6 +759,43 @@ async function selectCoin(symbol, name, imageUrl) {
     
     // Actualizăm datele și graficul
     await updateCoinData(symbol, imageUrl);
+    
+    // Actualizăm graficul cu noua monedă selectată
+    try {
+        // Importăm funcția updateCoinChartForSymbol din compareSection.js
+        const { updateCoinChartForSymbol } = await import('./compareSection.js');
+        
+        // Stabilim un preț de bază pentru grafic
+        let basePrice = 0;
+        if (symbol === 'BTC') {
+            basePrice = 85000;
+        } else if (symbol === 'ETH') {
+            basePrice = 3000;
+        } else if (symbol === 'ORX') {
+            basePrice = 4.20;
+        } else {
+            // Pentru alte monede, încercăm să obținem un preț de bază de la API
+            try {
+                const response = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=USD`);
+                const data = await response.json();
+                if (data && data.USD) {
+                    basePrice = data.USD;
+                } else {
+                    // Preț implicit pentru monede necunoscute
+                    basePrice = 100;
+                }
+            } catch (error) {
+                console.error('Eroare la obținerea prețului de bază pentru grafic:', error);
+                basePrice = 100; // Preț implicit
+            }
+        }
+        
+        // Actualizăm graficul cu noua monedă
+        console.log(`Actualizare grafic pentru ${symbol} cu preț de bază ${basePrice}`);
+        updateCoinChartForSymbol(symbol, basePrice);
+    } catch (error) {
+        console.error('Eroare la actualizarea graficului:', error);
+    }
 }
 
 async function updateCoinData(symbol, imageUrl) {

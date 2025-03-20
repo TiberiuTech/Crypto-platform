@@ -90,6 +90,7 @@ const chartConfig = {
 // Stocăm referințele către grafice global pentru a le putea distruge când e nevoie
 let orionixChart = null;
 let bitcoinChart = null;
+let rightCoinChart = null; // Noua referință pentru graficul din dreapta
 
 // Inițializare grafice pentru secțiunea de comparare
 document.addEventListener('DOMContentLoaded', () => {
@@ -106,38 +107,57 @@ document.addEventListener('DOMContentLoaded', () => {
         orionixChart = initOrionixChart(orionixCtx);
     }
     
-    // Inițializare grafic Bitcoin
-    const bitcoinCtx = document.getElementById('rightCoinChart');
-    if (bitcoinCtx) {
-        console.log('Inițializare grafic Bitcoin...');
+    // Inițializare grafic pentru moneda din dreapta (default: Bitcoin)
+    const rightCoinCtx = document.getElementById('rightCoinChart');
+    if (rightCoinCtx) {
+        console.log('Inițializare grafic Bitcoin (default)...');
         // Distrugem graficul existent dacă există
-        if (bitcoinChart) {
-            bitcoinChart.destroy();
+        if (rightCoinChart) {
+            rightCoinChart.destroy();
         }
-        bitcoinChart = initBitcoinChart(bitcoinCtx);
+        // Inițial folosim Bitcoin ca monedă implicită
+        rightCoinChart = initCoinChart(rightCoinCtx, 'BTC', 85000, 'rgba(247, 147, 26, 0.4)', 'rgb(247, 147, 26)');
     }
 });
 
-function initOrionixChart(ctx) {
+function initCoinChart(ctx, symbol, basePrice, gradientColor, borderColor) {
     // Verificăm dacă există deja un grafic pe acest canvas
     const existingChart = Chart.getChart(ctx);
     if (existingChart) {
         existingChart.destroy();
     }
 
-    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, 'rgba(22, 199, 132, 0.4)');
-    gradient.addColorStop(0.6, 'rgba(22, 199, 132, 0.1)');
-    gradient.addColorStop(1, 'rgba(22, 199, 132, 0)');
+    // Determinăm culorile bazate pe simbolul monedei
+    let gradientStartColor, borderColorValue;
+    
+    if (symbol === 'BTC') {
+        gradientStartColor = 'rgba(247, 147, 26, 0.4)';
+        borderColorValue = 'rgb(247, 147, 26)';
+    } else if (symbol === 'ETH') {
+        gradientStartColor = 'rgba(115, 103, 240, 0.4)';
+        borderColorValue = 'rgb(115, 103, 240)';
+    } else if (symbol === 'ORX') {
+        gradientStartColor = 'rgba(22, 199, 132, 0.4)';
+        borderColorValue = 'rgb(22, 199, 132)';
+    } else {
+        // Culori implicite pentru alte monede
+        gradientStartColor = gradientColor || 'rgba(66, 139, 202, 0.4)';
+        borderColorValue = borderColor || 'rgb(66, 139, 202)';
+    }
 
-    const data = generateHistoricalData(4.20, 24);
+    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, gradientStartColor);
+    gradient.addColorStop(0.6, gradientStartColor.replace('0.4', '0.1'));
+    gradient.addColorStop(1, gradientStartColor.replace('0.4', '0'));
+
+    const data = generateHistoricalData(basePrice, 24);
     
     const chart = new Chart(ctx, {
         ...chartConfig,
         data: {
             datasets: [{
                 data: data,
-                borderColor: 'rgb(22, 199, 132)',
+                borderColor: borderColorValue,
                 backgroundColor: gradient,
                 borderWidth: 2,
                 fill: true,
@@ -150,7 +170,7 @@ function initOrionixChart(ctx) {
     // Actualizare periodică
     const updateInterval = setInterval(() => {
         if (chart.ctx && chart.ctx.canvas) {
-            updateOrionixChart(chart);
+            updateCoinChart(chart, symbol, basePrice);
         } else {
             clearInterval(updateInterval);
         }
@@ -159,45 +179,12 @@ function initOrionixChart(ctx) {
     return chart;
 }
 
+function initOrionixChart(ctx) {
+    return initCoinChart(ctx, 'ORX', 4.20, 'rgba(22, 199, 132, 0.4)', 'rgb(22, 199, 132)');
+}
+
 function initBitcoinChart(ctx) {
-    // Verificăm dacă există deja un grafic pe acest canvas
-    const existingChart = Chart.getChart(ctx);
-    if (existingChart) {
-        existingChart.destroy();
-    }
-
-    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, 'rgba(247, 147, 26, 0.4)');
-    gradient.addColorStop(0.6, 'rgba(247, 147, 26, 0.1)');
-    gradient.addColorStop(1, 'rgba(247, 147, 26, 0)');
-
-    const data = generateHistoricalData(85000, 24);
-    
-    const chart = new Chart(ctx, {
-        ...chartConfig,
-        data: {
-            datasets: [{
-                data: data,
-                borderColor: 'rgb(247, 147, 26)',
-                backgroundColor: gradient,
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 0
-            }]
-        }
-    });
-
-    // Actualizare periodică
-    const updateInterval = setInterval(() => {
-        if (chart.ctx && chart.ctx.canvas) {
-            updateBitcoinChart(chart);
-        } else {
-            clearInterval(updateInterval);
-        }
-    }, 5000);
-
-    return chart;
+    return initCoinChart(ctx, 'BTC', 85000, 'rgba(247, 147, 26, 0.4)', 'rgb(247, 147, 26)');
 }
 
 function generateHistoricalData(basePrice, points) {
@@ -218,10 +205,11 @@ function generateHistoricalData(basePrice, points) {
     return data;
 }
 
-function updateOrionixChart(chart) {
+function updateCoinChart(chart, symbol, basePrice) {
     const lastData = chart.data.datasets[0].data;
     const lastPrice = lastData[lastData.length - 1].y;
-    const newPrice = lastPrice * (1 + (Math.random() - 0.5) * 0.02);
+    const randomFactor = (symbol === 'BTC') ? 0.01 : 0.02; // Bitcoin are variație mai mică
+    const newPrice = lastPrice * (1 + (Math.random() - 0.5) * randomFactor);
     
     const newData = [...lastData.slice(1), {
         x: new Date(),
@@ -231,25 +219,23 @@ function updateOrionixChart(chart) {
     chart.data.datasets[0].data = newData;
     chart.update('none');
     
-    // Actualizare statistici
-    updateOrionixStats(newPrice);
+    // Actualizare statistici bazate pe simbolul monedei
+    if (symbol === 'BTC') {
+        updateBitcoinStats(newPrice);
+    } else if (symbol === 'ORX') {
+        updateOrionixStats(newPrice);
+    } else {
+        // Pentru alte monede, actualizăm statisticile din dreapta
+        updateGenericCoinStats(newPrice, symbol, basePrice);
+    }
 }
 
 function updateBitcoinChart(chart) {
-    const lastData = chart.data.datasets[0].data;
-    const lastPrice = lastData[lastData.length - 1].y;
-    const newPrice = lastPrice * (1 + (Math.random() - 0.5) * 0.01);
-    
-    const newData = [...lastData.slice(1), {
-        x: new Date(),
-        y: newPrice
-    }];
-    
-    chart.data.datasets[0].data = newData;
-    chart.update('none');
-    
-    // Actualizare statistici
-    updateBitcoinStats(newPrice);
+    updateCoinChart(chart, 'BTC', 85000);
+}
+
+function updateOrionixChart(chart) {
+    updateCoinChart(chart, 'ORX', 4.20);
 }
 
 function updateOrionixStats(currentPrice) {
@@ -278,6 +264,22 @@ function updateBitcoinStats(currentPrice) {
         changeEl.className = `stat-change ${change >= 0 ? 'positive' : 'negative'}`;
     }
     if (volumeEl) volumeEl.textContent = `$${formatNumber(27280000000)}`;
+}
+
+function updateGenericCoinStats(currentPrice, symbol, basePrice) {
+    const priceEl = document.querySelector('.crypto-compare-card.bitcoin .stat-value');
+    const changeEl = document.querySelector('.crypto-compare-card.bitcoin .stat-change');
+    const volumeEl = document.querySelector('.crypto-compare-card.bitcoin .stat-row:nth-child(2) .stat-value');
+    
+    if (priceEl) priceEl.textContent = `$${currentPrice.toFixed(2)}`;
+    if (changeEl) {
+        const change = ((currentPrice - basePrice) / basePrice) * 100;
+        changeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+        changeEl.className = `stat-change ${change >= 0 ? 'positive' : 'negative'}`;
+    }
+    // Valoare de volum generică în funcție de prețul monedei
+    const volume = currentPrice * 10000 * (Math.random() * 5 + 0.5);
+    if (volumeEl) volumeEl.textContent = `$${formatNumber(volume)}`;
 }
 
 // Funcție pentru a asigura că există valori valide (non-NaN) în UI
@@ -336,4 +338,54 @@ document.addEventListener('DOMContentLoaded', function() {
     requestAnimationFrame(checkValues);
 });
 
-export { initializeCompareSection }; 
+// Funcție pentru actualizarea graficului la schimbarea monedei
+function updateCoinChartForSymbol(symbol, basePrice) {
+    const rightCoinCtx = document.getElementById('rightCoinChart');
+    if (!rightCoinCtx) {
+        console.error('Nu s-a găsit canvas-ul pentru graficul monedei din dreapta');
+        return;
+    }
+    
+    console.log(`Actualizare grafic pentru moneda: ${symbol}, preț de bază: ${basePrice}`);
+    
+    // Determinăm culoarea în funcție de monedă
+    let gradientColor, borderColor;
+    
+    if (symbol === 'BTC') {
+        gradientColor = 'rgba(247, 147, 26, 0.4)';
+        borderColor = 'rgb(247, 147, 26)';
+        basePrice = basePrice || 85000;
+    } else if (symbol === 'ETH') {
+        gradientColor = 'rgba(115, 103, 240, 0.4)';
+        borderColor = 'rgb(115, 103, 240)';
+        basePrice = basePrice || 3000;
+    } else if (symbol === 'ORX') {
+        gradientColor = 'rgba(22, 199, 132, 0.4)';
+        borderColor = 'rgb(22, 199, 132)';
+        basePrice = basePrice || 4.20;
+    } else {
+        // Culori implicite pentru alte monede
+        gradientColor = 'rgba(66, 139, 202, 0.4)';
+        borderColor = 'rgb(66, 139, 202)';
+    }
+    
+    // Distrugem graficul existent înainte de a crea unul nou
+    if (rightCoinChart) {
+        rightCoinChart.destroy();
+    }
+    
+    // Creăm un nou grafic pentru moneda selectată
+    rightCoinChart = initCoinChart(rightCoinCtx, symbol, basePrice, gradientColor, borderColor);
+    
+    return rightCoinChart;
+}
+
+export { 
+    initializeCompareSection, 
+    updateCoinChartForSymbol,
+    initCoinChart, 
+    initOrionixChart, 
+    initBitcoinChart,
+    updateCoinChart, 
+    formatNumber 
+}; 
