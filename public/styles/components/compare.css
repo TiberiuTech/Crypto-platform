@@ -71,10 +71,11 @@
 
 .crypto-header {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
@@ -94,7 +95,7 @@
     visibility: visible;
     justify-content: center;
     align-items: center;
-    margin-right: 10px;
+    margin-bottom: 8px;
 }
 
 .crypto-icon img {
