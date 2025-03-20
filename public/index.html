@@ -134,18 +134,75 @@
         <div class="about-container">
             <div class="about-content">
                 <h2>About Orionix</h2>
-                <p>Orionix is an innovative cryptocurrency that combines blockchain technology with modern payment solutions.</p>
-                <p>Main features:</p>
-                <ul>
-                    <li>Fast and secure transactions</li>
-                    <li>Advanced blockchain technology</li>
-                    <li>Active community and growing</li>
-                    <li>Easy integration with existing platforms</li>
-                </ul>
-                <a href="/pages/trade.html" class="cta-button">Start trading</a>
+                <div class="typing-text" id="orionixDescription">
+                    Orionix (ORX) este o criptomonedă ERC-20 implementată pe blockchain prin contracte inteligente Solidity, lansată în 2023 de echipa Crypto-Impact. Dezvoltată pe Binance Smart Chain, oferă tranzacții rapide și costuri reduse.
+                </div>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fas fa-code"></i></div>
+                        <h3>Implementare Tehnică</h3>
+                        <p>Token ERC-20 dezvoltat în Solidity v0.8.19, bazat pe OpenZeppelin pentru securitate maximă. Contract principal: OrionixToken.sol cu funcționalități avansate de control.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fas fa-coins"></i></div>
+                        <h3>Tokenomics</h3>
+                        <p>Supply inițial: 1 milion ORX, Supply maxim: 10 milioane ORX. Implementează o taxă de transfer de 2% pentru susținerea ecosistemului, cu mecanism de excludere pentru adrese specifice.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fas fa-shield-alt"></i></div>
+                        <h3>Securitate</h3>
+                        <p>Contractul folosește pattern-ul Ownable pentru control de acces, are limitări stricte de supply și implementează verificări pentru toate funcțiile ce modifică starea blockchain-ului.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fas fa-leaf"></i></div>
+                        <h3>Rețea & Eficiență</h3>
+                        <p>Implementat pe BSC (Binance Smart Chain) folosind consensul Proof of Staked Authority, oferind eficiență energetică superioară și taxe de tranzacție reduse.</p>
+                    </div>
+                </div>
+                <div class="technical-details">
+                    <h3>Funcționalități Avansate</h3>
+                    <ul>
+                        <li><strong>Taxare Inteligentă:</strong> Suprascrierea funcției _transfer pentru taxa de ecosistem</li>
+                        <li><strong>Sistemul de Recompense:</strong> Funcția distributeRewards pentru programul de stimulare</li>
+                        <li><strong>Control Administrativ:</strong> Funcții de management al taxelor și listelor de excludere</li>
+                        <li><strong>Limitarea Supply-ului:</strong> Prevenirea inflației prin plafonare strictă la 10M tokeni</li>
+                    </ul>
+                </div>
+                <div class="cta-group">
+                    <a href="/pages/trade.html" class="cta-button primary">Start trading</a>
+                    <a href="/pages/whitepaper.html" class="cta-button secondary">Citește whitepaper</a>
+                </div>
             </div>
             <div class="about-image">
-                <img src="/assets/images/orionix-large.png" alt="Orionix Cryptocurrency">
+                <img src="/assets/images/orionix.png" alt="Orionix Cryptocurrency" class="main-coin-image">
+                <div class="coin-stats">
+                    <div class="coin-stat">
+                        <span class="stat-title">Preț curent</span>
+                        <span class="stat-value">$4.25</span>
+                    </div>
+                    <div class="coin-stat">
+                        <span class="stat-title">Capitalizare</span>
+                        <span class="stat-value">$147M</span>
+                    </div>
+                    <div class="coin-stat">
+                        <span class="stat-title">Supply circulant</span>
+                        <span class="stat-value">35M ORX</span>
+                    </div>
+                    <div class="coin-stat">
+                        <span class="stat-title">Supply maxim</span>
+                        <span class="stat-value">100M ORX</span>
+                    </div>
+                </div>
+                <div class="contract-info">
+                    <div class="contract-address">
+                        <span class="label">Contract Address:</span>
+                        <code>0x9807C001b13521041aD3dbdda59e25bE074Eb63d</code>
+                    </div>
+                    <div class="network-info">
+                        <span class="label">Network:</span>
+                        <span class="value">BSC (Binance Smart Chain)</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

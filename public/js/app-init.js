@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Inițializare actualizări periodice
     startPeriodicUpdates();
+    
+    // Inițializare efect typing
+    setupTypingEffect();
 });
 
 // Funcție pentru inițializarea graficelor
@@ -159,4 +162,28 @@ function startPeriodicUpdates() {
     if (window.startChartUpdate && typeof window.startChartUpdate === 'function') {
         window.startChartUpdate();
     }
+}
+
+// Funcționalitate pentru efectul de typing în secțiunea About
+function setupTypingEffect() {
+    const textElement = document.getElementById('orionixDescription');
+    if (!textElement) return;
+    
+    const text = textElement.textContent.trim();
+    textElement.textContent = '';
+    textElement.style.minHeight = '0';
+    
+    let i = 0;
+    const speed = 25; // viteza de typing în milisecunde
+
+    function type() {
+        if (i < text.length) {
+            textElement.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+        }
+    }
+    
+    // Pornim efectul după încărcarea paginii
+    setTimeout(type, 1000);
 } 
