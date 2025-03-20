@@ -1,186 +1,202 @@
-.compare {
-    padding: 80px 0;
+.compare-section {
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     background: #0d111c;
 }
 
-.compare h2 {
+.section-title {
+    font-size: 2.2rem;
+    color: #4a90e2;
     text-align: center;
-    font-size: 2.5rem;
-    color: #fff;
-    margin-bottom: 50px;
+    margin-bottom: 2.5rem;
+    margin-top: -0.5rem;
+    font-weight: 600;
     background: linear-gradient(90deg, #4a90e2, #67b0ff);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
 }
 
 .compare-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 40px;
-}
-
-.crypto-compare-card {
-    flex: 1;
-    background: #1e2330;
-    border-radius: 16px;
-    max-width: 500px;
-    position: relative;
-}
-
-
-.crypto-header {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    margin-bottom: 24px;
-    padding: 0;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.crypto-compare-grid {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.crypto-compare-card {
+    flex: 1;
+    background: rgba(17, 24, 39, 0.4);
+    border-radius: 12px;
+    padding: 1rem;
+    max-width: 400px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vs-symbol {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #4a90e2;
+    background: transparent;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    text-shadow: 0 0 10px rgba(74, 144, 226, 0.6);
+}
+
+.crypto-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    position: relative;
+}
+
+.crypto-header:hover {
+    transform: translateY(-2px);
 }
 
 .crypto-icon {
-    width: 48px;
-    height: 48px;
-    object-fit: contain;
+    display: inline-flex;
+    width: 70px;
+    height: 70px;
+    overflow: hidden;
+    position: relative;
+    visibility: visible;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
 }
 
-.compare .orionix .crypto-icon,
-.compare #rightCoinIcon {
-    width: 90px !important;
-    height: 90px !important;
+.crypto-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    max-width: 70px;
+    max-height: 70px;
 }
 
 .crypto-title {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    gap: 0.5rem;
+    align-items: center;
 }
 
-.crypto-title h3 {
-    color: #fff;
-    font-size: 1.25rem;
-    margin: 0;
+.crypto-name {
+    color: #4a90e2;
+    font-size: 0.95rem;
     font-weight: 500;
+    margin: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.crypto-name h3 {
+    margin: 0 0 2px 0;
+    font-size: 1rem;
+    color: #4a90e2;
 }
 
 .crypto-symbol {
-    color: #64748b;
-    font-size: 0.875rem;
-    margin-top: 4px;
+    color: #67b0ff;
+    font-size: 0.8rem;
+    text-align: center;
 }
 
 .crypto-stats {
     display: flex;
     flex-direction: column;
-    padding: 0 16px;
+    gap: 1rem;
 }
 
 .stat-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 0;
+    padding: 6px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.stat-value-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
 .stat-label {
-    color: #fff;
-    font-size: 1rem;
+    color: #67b0ff;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .stat-value {
     color: #fff;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 500;
 }
 
 .stat-change {
-    font-size: 0.875rem;
-    font-weight: 500;
-    padding: 4px 8px;
+    display: inline-flex;
+    padding: 0.2rem 0.5rem;
     border-radius: 4px;
-    min-width: 70px;
+    font-size: 0.8rem;
+    margin-left: 0.75rem;
+    min-width: 60px;
     text-align: center;
-    margin-left: 12px;
 }
 
 .stat-change.positive {
-    color: #10b981;
     background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
 }
 
 .stat-change.negative {
-    color: #ef4444;
     background: rgba(239, 68, 68, 0.1);
-}
-
-.vs-badge {
-    color: #64748b;
-    font-size: 1.5rem;
-    font-weight: 500;
-    align-self: center;
+    color: #ef4444;
 }
 
 .chart-container {
-    position: relative;
-    height: 300px;
+    height: 180px;
     width: 100%;
-    margin-top: 20px;
+    margin-top: 1rem;
+    background: transparent;
+    position: relative;
+    border-radius: 8px;
     overflow: hidden;
-    border-radius: 0 0 16px 16px;
-    background-color: rgba(20, 25, 40, 0.5);
-    padding: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    animation: fadeIn 1s ease-in-out;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Adăugăm un stil specific pentru canvas-uri */
 .chart-container canvas {
     width: 100% !important;
     height: 100% !important;
-    display: block;
 }
 
-@media (max-width: 768px) {
-    .compare-container {
-        flex-direction: column;
-    }
-
-    .crypto-compare-card {
-        width: 100%;
-    }
-
-    .vs-badge {
-        transform: rotate(90deg);
-    }
-}
-
-
-.compare .orionix .crypto-icon,
-.compare .orionix .crypto-header,
-.compare .orionix .crypto-icon:hover {
-    position: static;
-    transform: none;
-    margin-left: 0;
-    box-shadow: none;
-}
-
+/* Coin list overlay styles */
 .coin-list-overlay {
     display: none;
     position: absolute;
@@ -188,7 +204,7 @@
     left: 0;
     right: 0;
     background: rgba(19, 23, 34, 0.98);
-    border-radius: 16px 16px 0 0;
+    border-radius: 16px;
     z-index: 100;
     padding: 20px;
     max-height: 350px;
@@ -249,99 +265,7 @@
     padding: 3px;
 }
 
-.coin-list-item .coin-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.coin-list-item .coin-name {
-    color: #fff;
-    font-size: 0.95rem;
-    font-weight: 500;
-}
-
-.coin-list-item .coin-symbol {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.8rem;
-    margin-top: 2px;
-}
-
-.loading-spinner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
-}
-
-.loading-spinner i {
-    margin-right: 8px;
-    color: #6366f1;
-}
-
-.coin-select-hint {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.4);
-    margin-left: 8px;
-    font-style: italic;
-    transition: all 0.3s ease;
-    display: none;
-}
-
-#rightCoinHeader:hover .coin-select-hint {
-    color: rgba(99, 102, 241, 0.8);
-}
-
-.error-message {
-    padding: 20px;
-    text-align: center;
-    color: #f87171;
-    font-size: 0.95rem;
-    background: rgba(234, 57, 67, 0.1);
-    border: 1px solid rgba(234, 57, 67, 0.2);
-    border-radius: 8px;
-    margin: 15px auto;
-    max-width: 90%;
-}
-
-#rightCoinHeader {
-    cursor: pointer;
-    position: relative;
-    transition: all 0.2s ease;
-}
-
-#rightCoinHeader:hover {
-    transform: translateY(-2px);
-}
-
-#rightCoinHeader:hover::after {
-    content: "Schimbă";
-    position: absolute;
-    bottom: -18px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(99, 102, 241, 0.9);
-    color: white;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 500;
-    opacity: 0;
-    animation: fadeInUp 0.3s forwards;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translate(-50%, 5px);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, 0);
-    }
-}
-
+/* Scrollbar styles */
 .coin-list::-webkit-scrollbar {
     width: 6px;
 }
@@ -360,323 +284,48 @@
     background: #357abd;
 }
 
-.compare-section {
-    padding: 2rem 1rem;
-    background-color: var(--background-dark);
-    position: relative;
-    overflow: hidden;
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.compare-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.05), transparent 60%),
-                radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.05), transparent 60%);
-    z-index: 0;
-}
-
-.compare-section .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-}
-
-.compare-section .section-title {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-    background: linear-gradient(90deg, #4a90e2, #6366f1, #8b5cf6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 10px 20px rgba(99, 102, 241, 0.15);
-    letter-spacing: -0.02em;
-}
-
-.crypto-compare-grid {
-    display: grid;
-    grid-template-columns: minmax(250px, 400px) auto minmax(250px, 400px);
-    gap: 1.5rem;
-    align-items: center;
-    justify-content: center;
-}
-
-.crypto-compare-card {
-    background: rgba(19, 23, 34, 0.8);
-    border-radius: 16px;
-    padding: 1.2rem;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(99, 102, 241, 0.1);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2), 
-                0 0 0 1px rgba(255, 255, 255, 0.05);
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    height: auto;
-}
-
-.crypto-compare-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, 
-        rgba(99, 102, 241, 0.8), 
-        rgba(139, 92, 246, 0.8), 
-        rgba(59, 130, 246, 0.8));
-    z-index: 2;
-    transform: scaleX(0.8);
-    opacity: 0.6;
-    transition: all 0.4s ease;
-}
-
-.crypto-compare-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), 
-                0 0 0 1px rgba(255, 255, 255, 0.07);
-}
-
-.crypto-compare-card:hover::before {
-    transform: scaleX(1);
-    opacity: 1;
-}
-
-.crypto-compare-card .crypto-header {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-bottom: 1.2rem;
-}
-
-.crypto-compare-card .crypto-icon {
-    width: 42px;
-    height: 42px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    padding: 0.3rem;
-    transition: all 0.3s ease;
-}
-
-.crypto-compare-card .crypto-icon img {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
-    transition: all 0.3s ease;
-}
-
-.crypto-compare-card:hover .crypto-icon img {
-    transform: scale(1.1);
-}
-
-.crypto-compare-card.orionix .crypto-icon {
-    background: linear-gradient(135deg, rgba(137, 91, 246, 0.15), rgba(99, 102, 241, 0.05));
-    border: 1px solid rgba(137, 91, 246, 0.25);
-    box-shadow: 0 8px 16px rgba(137, 91, 246, 0.15);
-}
-
-.crypto-compare-card.bitcoin .crypto-icon {
-    background: linear-gradient(135deg, rgba(247, 147, 26, 0.15), rgba(255, 99, 71, 0.05));
-    border: 1px solid rgba(247, 147, 26, 0.25);
-    box-shadow: 0 8px 16px rgba(247, 147, 26, 0.15);
-}
-
-.crypto-compare-card .crypto-name {
-    display: flex;
-    flex-direction: column;
-}
-
-.crypto-compare-card .crypto-name h3 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin: 0;
-    margin-bottom: 0.2rem;
-    letter-spacing: -0.01em;
-}
-
-.crypto-compare-card .crypto-name .crypto-symbol {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    letter-spacing: 0.05em;
-}
-
-.crypto-compare-card .crypto-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    margin-bottom: 1.2rem;
-}
-
-.crypto-compare-card .stat-row {
-    display: grid;
-    grid-template-columns: 100px 1fr auto;
-    align-items: center;
-    gap: 0.6rem;
-    padding-bottom: 0.6rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.crypto-compare-card .stat-label {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    letter-spacing: 0.02em;
-}
-
-.crypto-compare-card .stat-value {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    text-align: right;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.crypto-compare-card .stat-change {
-    padding: 0.4rem 0.7rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-align: center;
-    min-width: 70px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}
-
-.crypto-compare-card .stat-change.positive {
-    background: linear-gradient(135deg, rgba(22, 163, 74, 0.2), rgba(34, 197, 94, 0.1));
-    color: #4ade80;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(74, 222, 128, 0.3);
-}
-
-.crypto-compare-card .stat-change.negative {
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(239, 68, 68, 0.1));
-    color: #f87171;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(248, 113, 113, 0.3);
-}
-
-.crypto-compare-card .chart-container {
-    height: 180px;
-    width: 100%;
-    margin-top: auto;
-    padding: 1rem;
-    background: rgba(13, 17, 28, 0.5);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
-    position: relative;
-    overflow: hidden;
-}
-
-.crypto-compare-card .chart-container::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    background: linear-gradient(to top, 
-        rgba(13, 17, 28, 0.3), 
-        transparent);
-    z-index: 0;
-    pointer-events: none;
-}
-
-.vs-symbol {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: #4b5563;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6, #3b82f6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 5px 10px rgba(99, 102, 241, 0.3);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    height: 60px;
-    width: 60px;
-    margin: 0 auto;
-    z-index: 5;
-}
-
-.vs-symbol::before,
-.vs-symbol::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    width: 30px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
-    transform: translateX(-50%);
-}
-
-.vs-symbol::before {
-    top: -15px;
-}
-
-.vs-symbol::after {
-    bottom: -15px;
-}
-
-@media (max-width: 992px) {
-    .crypto-compare-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 5px);
     }
-    
-    .vs-symbol {
-        grid-row: 2;
-        margin: -1rem 0;
-        transform: rotate(90deg);
-        height: 40px;
-        width: 40px;
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
     }
-    
-    .vs-symbol::before,
-    .vs-symbol::after {
-        width: 20px;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+    .compare-container {
+        padding: 0 1rem;
     }
-    
-    .vs-symbol::before {
-        top: -10px;
-    }
-    
-    .vs-symbol::after {
-        bottom: -10px;
+}
+
+@media (max-width: 1024px) {
+    .crypto-compare-card {
+        padding: 1.5rem;
     }
 }
 
 @media (max-width: 768px) {
+    .crypto-compare-grid {
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
     .crypto-compare-card {
-        padding: 1rem;
+        max-width: 100%;
+        width: 100%;
     }
     
-    .crypto-compare-card .stat-row {
-        grid-template-columns: 90px 1fr auto;
-    }
-    
-    .crypto-compare-card .chart-container {
-        height: 160px;
-    }
-    
-    .compare-section .section-title {
-        font-size: 1.6rem;
-        margin-bottom: 1.2rem;
+    .vs-symbol {
+        margin: -0.5rem 0;
     }
 } 

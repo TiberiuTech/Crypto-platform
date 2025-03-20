@@ -1,0 +1,83 @@
+.crypto-compare-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.crypto-compare-card {
+    flex: 1;
+    background: rgba(17, 24, 39, 0.7);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 300px !important;
+    margin: 1rem 0;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.stat-label {
+    color: #94A3B8;
+    font-size: 0.875rem;
+}
+
+.stat-value {
+    color: #fff;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.stat-change {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    margin-left: 0.5rem;
+}
+
+.stat-change.positive {
+    color: #16C784;
+    background: rgba(22, 199, 132, 0.1);
+}
+
+.stat-change.negative {
+    color: #EA3943;
+    background: rgba(234, 57, 67, 0.1);
+}
+
+/* Media Queries pentru responsivitate */
+@media (max-width: 768px) {
+    .crypto-compare-section {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .chart-container {
+        height: 250px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .chart-container {
+        height: 200px !important;
+    }
+} 

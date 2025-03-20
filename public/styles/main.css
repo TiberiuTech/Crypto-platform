@@ -22,7 +22,10 @@ body {
     color: var(--text-primary);
     line-height: 1.5;
     min-height: 100vh;
-    padding-top: 60px; 
+    padding-top: 60px;
+    width: 100%;
+    overflow-x: hidden;
+    margin: 0;
 }
 
 a {
@@ -37,13 +40,13 @@ button {
     outline: none;
 }
 
-
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 1rem;
+    width: 100%;
+    box-sizing: border-box;
 }
-
 
 .text-primary {
     color: var(--text-primary);
@@ -117,6 +120,10 @@ button {
 /* Ajustări pentru spațiere între secțiuni */
 section {
     padding: 3rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 auto;
+    text-align: center;
 }
 
 /* Ajustări globale pentru containere pentru a fi mai responsive cu carduri mai mici */
@@ -125,6 +132,9 @@ section {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
 }
 
 /* Ajustare pentru texte și titluri pentru a se potrivi mai bine cu design-ul compact */
@@ -142,13 +152,20 @@ h3 {
 
 /* Ajustări pentru ca cardurile să fie mai bine optimizate pe mobile */
 @media (max-width: 768px) {
+    .container {
+        padding: 0 16px;
+    }
+    
     .crypto-cards {
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        flex-direction: column;
+        align-items: center;
         gap: 1rem;
     }
     
     .crypto-card {
         padding: 1rem;
+        flex-basis: 100%;
+        max-width: 320px;
     }
     
     .crypto-icon {

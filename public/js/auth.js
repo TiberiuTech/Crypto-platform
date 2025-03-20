@@ -2,7 +2,7 @@ function isAuthenticated() {
     return localStorage.getItem('user') !== null;
 }
 
-function showAlert(message, callback) {
+function showAlert(message) {
     const overlay = document.createElement('div');
     overlay.className = 'alert-overlay';
     overlay.style.display = 'flex';
@@ -19,12 +19,7 @@ function showAlert(message, callback) {
     const button = document.createElement('button');
     button.className = 'alert-button';
     button.textContent = 'OK';
-    button.onclick = () => {
-        document.body.removeChild(overlay);
-        if (callback) {
-            setTimeout(callback, 100);
-        }
-    };
+    button.onclick = () => document.body.removeChild(overlay);
     
     alertBox.appendChild(messageDiv);
     alertBox.appendChild(button);
@@ -295,4 +290,141 @@ function initializeUI() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', initializeUI); 
+document.addEventListener('DOMContentLoaded', initializeUI);
+
+function handleGoogleSignIn(response) {
+    if (response.credential) {
+        const isSignup = window.location.pathname.includes('signup');
+        fetch('/api/auth/google', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                credential: response.credential,
+                isSignup: isSignup
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = '/';
+            } else {
+                showAlert(data.error);
+                if (data.shouldRedirect) {
+                    setTimeout(() => {
+                        window.location.href = data.shouldRedirect;
+                    }, 2000);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Google Sign-In Error:', error);
+            showAlert('Error during Google authentication');
+        });
+    }
+}
+
+function initializeAuth() {
+    const warning = localStorage.getItem('loginWarning');
+    if (warning) {
+        showAlert(warning);
+        localStorage.removeItem('loginWarning');
+    }
+
+    // Inițializare formular de login
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/';
+                } else {
+                    showAlert(data.error || 'Authentication error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('Authentication error. Please try again.');
+            }
+        });
+    }
+
+    // Inițializare formular de signup
+    const signupForm = document.getElementById('signupForm');
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                showAlert('Passwords do not match');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/';
+                } else {
+                    showAlert(data.error || 'Registration error');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showAlert('Registration error. Please try again.');
+            }
+        });
+    }
+
+    // Inițializare butoane toggle password
+    document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', function() {
+            const inputGroup = this.closest('.input-group');
+            const input = inputGroup.querySelector('input');
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            if (type === 'text') {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    });
+}
+
+// Expunem funcțiile necesare global
+window.handleGoogleSignIn = handleGoogleSignIn;
+window.showAlert = showAlert;
+
+// Inițializare când documentul este încărcat
+document.addEventListener('DOMContentLoaded', initializeAuth); 
